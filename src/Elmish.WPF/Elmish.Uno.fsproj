@@ -12,13 +12,13 @@
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <DebugType>Embedded</DebugType>
     <EmbedAllSources>True</EmbedAllSources>
-    <Authors>xperiandri, jsacks, cmeeren, TysonMN, jmarner</Authors>
+    <Authors>XperiAndri, dim-37, jsacks, cmeeren, TysonMN, jmarner</Authors>
     <Description>F# bindings for using Elmish in Uno</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/elmish/Elmish.Uno</PackageProjectUrl>
-    <PackageTags>WPF F# fsharp Elmish Elm</PackageTags>
-    <PackageIcon>elmish-wpf-logo-128x128.png</PackageIcon>
-    <Version>4.0.0-beta-56</Version>
+    <PackageProjectUrl>https://github.com/XperiAndri/Elmish.Uno</PackageProjectUrl>
+    <PackageTags>Uno F# fsharp Elmish Elm</PackageTags>
+    <PackageIcon>elmish-uno-logo-128x128.png</PackageIcon>
+    <Version>1.0.0</Version>
     <PackageReleaseNotes>https://github.com/elmish/Elmish.Uno/blob/master/RELEASE_NOTES.md</PackageReleaseNotes>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <!--Turn on warnings for unused values (arguments and let bindings) -->
