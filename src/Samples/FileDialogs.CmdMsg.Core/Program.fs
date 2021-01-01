@@ -1,10 +1,10 @@
-module Elmish.WPF.Samples.FileDialogsCmdMsg.Program
+module Elmish.Uno.Samples.FileDialogs.CmdMsg.Program
 
 open System
 open Serilog
 open Serilog.Extensions.Logging
 open Elmish
-open Elmish.WPF
+open Elmish.Uno
 
 
 module Core =

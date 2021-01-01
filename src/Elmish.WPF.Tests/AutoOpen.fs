@@ -1,5 +1,5 @@
 ﻿[<AutoOpen>]
-module AutoOpen
+module internal Elmish.Uno.Tests.InternalUtils
 
 
 type InvokeTester<'a, 'b>(f: 'a -> 'b) =

@@ -1,12 +1,13 @@
-﻿module Elmish.WPF.Samples.NewWindow.Program
+﻿module Elmish.Uno.Samples.NewWindow.Program
 
 open System
 open System.Windows
+open Elmish
+open Elmish.Uno
 
 open Serilog
 open Serilog.Extensions.Logging
 
-open Elmish.WPF
 
 open AppModule
 

@@ -1,4 +1,4 @@
-﻿namespace Elmish.WPF
+﻿namespace Elmish.Uno
 
 open System.Windows
 
@@ -2787,7 +2787,7 @@ type Binding private () =
   ///   Creates a two-way binding to a <c>SelectedItem</c>-like property where
   ///   the
   ///   <c>ItemsSource</c>-like property is a <see cref="subModelSeq" />
-  ///   binding. Automatically converts the dynamically created Elmish.WPF view
+  ///   binding. Automatically converts the dynamically created Elmish.Uno view
   ///   models to/from their corresponding IDs, so the Elmish user code only has
   ///   to work with the IDs.
   ///
@@ -2865,7 +2865,7 @@ type Binding private () =
   ///   Creates a two-way binding to a <c>SelectedItem</c>-like property where
   ///   the
   ///   <c>ItemsSource</c>-like property is a <see cref="subModelSeq" />
-  ///   binding. Automatically converts the dynamically created Elmish.WPF view
+  ///   binding. Automatically converts the dynamically created Elmish.Uno view
   ///   models to/from their corresponding IDs, so the Elmish user code only has
   ///   to work with the IDs.
   ///
@@ -4034,7 +4034,7 @@ module Extensions =
     ///   Creates a two-way binding to a <c>SelectedItem</c>-like property where
     ///   the
     ///   <c>ItemsSource</c>-like property is a <see cref="subModelSeq" />
-    ///   binding. Automatically converts the dynamically created Elmish.WPF
+    ///   binding. Automatically converts the dynamically created Elmish.Uno
     ///   view models to/from their corresponding IDs, so the Elmish user code
     ///   only has to work with the IDs.
     ///
@@ -4114,7 +4114,7 @@ module Extensions =
     ///   Creates a two-way binding to a <c>SelectedItem</c>-like property where
     ///   the
     ///   <c>ItemsSource</c>-like property is a <see cref="subModelSeq" />
-    ///   binding. Automatically converts the dynamically created Elmish.WPF
+    ///   binding. Automatically converts the dynamically created Elmish.Uno
     ///   view models to/from their corresponding IDs, so the Elmish user code
     ///   only has to work with the IDs.
     ///

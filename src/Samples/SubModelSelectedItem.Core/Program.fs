@@ -1,9 +1,10 @@
-﻿module Elmish.WPF.Samples.SubModelSelectedItem.Program
+﻿module Elmish.Uno.Samples.SubModelSelectedItem.Program
 
 open System
 open Serilog
 open Serilog.Extensions.Logging
-open Elmish.WPF
+open Elmish
+open Elmish.Uno
 
 type Entity =
   { Id: int

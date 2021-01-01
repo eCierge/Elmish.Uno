@@ -1,10 +1,11 @@
-﻿module Elmish.WPF.Samples.EventBindingsAndBehaviors.Program
+﻿module Elmish.Uno.Samples.EventBindingsAndBehaviors.Program
 
+open Elmish
+open Elmish.Uno
 open System.Windows
 open System.Windows.Input
 open Serilog
 open Serilog.Extensions.Logging
-open Elmish.WPF
 
 
 type Position = { X: int; Y: int }

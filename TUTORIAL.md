@@ -1,15 +1,15 @@
-Elmish.WPF Tutorial
+Elmish.Uno Tutorial
 ===================
 
-<img src="https://raw.githubusercontent.com/elmish/Elmish.WPF/master/logo/elmish-wpf-logo-ghreadme.png" width="300" align="right" />
+<img src="https://raw.githubusercontent.com/elmish/Elmish.Uno/master/logo/elmish-uno-logo-ghreadme.png" width="300" align="right" />
 
-The aim of this tutorial is to explain how to use Elmish.WPF, building in complexity from start (what is MVU?) to end (using complex bindings and applying optimizations).
+The aim of this tutorial is to explain how to use Elmish.Uno, building in complexity from start (what is MVU?) to end (using complex bindings and applying optimizations).
 
-This tutorial is not directly related to the many samples in the Elmish.WPF repository, but complements them well. The samples are complete, fully functional apps demonstrating selected aspects of Elmish.WPF. The samples *show*; the tutorial *explains*.
+This tutorial is not directly related to the many samples in the Elmish.Uno repository, but complements them well. The samples are complete, fully functional apps demonstrating selected aspects of Elmish.Uno. The samples *show*; the tutorial *explains*.
 
 This tutorial assumes working F# knowledge. If you’re new to F#, Scott Wlaschin’s blog [F# for fun and profit](https://fsharpforfunandprofit.com/) is a great place to start (and continue) learning the ins and outs of F# and functional programming. His book [Domain Modeling Made Functional](https://pragprog.com/book/swdddf/domain-modeling-made-functional) is also a great resource for learning F# (and in particular how it can be used for domain modeling). You can find many more excellent resources at [fsharp.org](https://fsharp.org).
 
-This tutorial also assumes some knowledge of WPF and MVVM.
+This tutorial also assumes some knowledge of Uno Platform and MVVM.
 
 Suggestions for improvements are welcome. For large changes, please open an issue. For small changes (e.g. typos), simply submit a PR.
 
@@ -20,15 +20,15 @@ Table of contents
   + [Model](#model)
   + [Message](#message)
   + [Update](#update)
-  + [View in standard MVU (not Elmish.WPF)](#view-in-standard-mvu-not-elmishwpf)
-  + [View in Elmish.WPF](#view-in-elmishwpf)
+  + [View in standard MVU (not Elmish.Uno)](#view-in-standard-mvu-not-elmishuno)
+  + [View in Elmish.Uno](#view-in-elmishuno)
   + [Commands (and subscriptions)](#commands-and-subscriptions)
 * [Some MVU tips for beginners](#some-mvu-tips-for-beginners)
   + [Normalize your model; use IDs instead of duplicating entities](#normalize-your-model-use-ids-instead-of-duplicating-entities)
   + [Use commands for anything impure](#use-commands-for-anything-impure)
   + [Child components and scaling](#child-components-and-scaling)
   + [Optimize easily with memoization](#optimize-easily-with-memoization)
-* [Getting started with Elmish.WPF](#getting-started-with-elmishwpf)
+* [Getting started with Elmish.Uno](#getting-started-with-elmishuno)
 * [Additional resources](#additional-resources)
 
 The MVU (Elm/Elmish) architecture
@@ -38,7 +38,7 @@ MVU stands for Model-View-Update. It is a purely functional front-end architectu
 
 ### Model
 
-The “model” part of the MVU name refers to an immutable data structure that contains all the state in your app. By “all the state” we mean all the state that influences any kind of domain/business logic, and all the state that is needed to render the UI. By storing all the state in a single “atom”, data synchronization problems between different parts of the app are a thing of the past. Note that the model is concerned with domain concepts, not UI concepts. Ideally (if not always in practice), you should be able to use the same model to target different UIs using the MVU pattern (a WPF app, a React web app using [Feliz](https://github.com/Zaid-Ajaj/Feliz/), a console app using [Terminal.Gui.Elmish](https://github.com/DieselMeister/Terminal.Gui.Elmish), etc.)
+The “model” part of the MVU name refers to an immutable data structure that contains all the state in your app. By “all the state” we mean all the state that influences any kind of domain/business logic, and all the state that is needed to render the UI. By storing all the state in a single “atom”, data synchronization problems between different parts of the app are a thing of the past. Note that the model is concerned with domain concepts, not UI concepts. Ideally (if not always in practice), you should be able to use the same model to target different UIs using the MVU pattern (a Uno app, a React web app using [Feliz](https://github.com/Zaid-Ajaj/Feliz/), a console app using [Terminal.Gui.Elmish](https://github.com/DieselMeister/Terminal.Gui.Elmish), etc.)
 
 For example, the type definition below may be the whole state for an app containing a single counter that you can increment/decrement by a customizable step size (the classic “hello world” of MVU apps):
 
@@ -91,7 +91,7 @@ let update (msg: Msg) (model: Model) : Model =
   | SetStepSize i -> { model with StepSize = i }
 ```
 
-### View in standard MVU (not Elmish.WPF)
+### View in standard MVU (not Elmish.Uno)
 
 This is where MVU frameworks will differ, since every UI technology is different.
 
@@ -131,13 +131,13 @@ type Dispatch<'msg> = 'msg -> unit
 
 Therefore, you will normally see `dispatch` typed as `Dispatch<'msg>` instead of `'msg -> unit`.
 
-### View in Elmish.WPF
+### View in Elmish.Uno
 
 The `view` example above shows *dynamic views*, which is how “proper” MVU works. Creating views as a simple function of the model is a very powerful technique, is conceptually very simple, and allows for good composability.
 
-In Elmish.WPF, however, the views are defined externally in XAML. The UI is *static* and is not defined or changed by the `view` code; hence, Elmish.WPF is said to use *static views*.
+In Elmish.Uno, however, the views are defined externally in XAML. The UI is *static* and is not defined or changed by the `view` code; hence, Elmish.Uno is said to use *static views*.
 
-You set up bindings in the XAML views as you normally would if using MVVM. Then, in the `view` function, you use Elmish.WPF to declaratively create a “view model” of sorts that contain the data the view will bind to. Therefore the `view` function is normally called `bindings` in Elmish.WPF.
+You set up bindings in the XAML views as you normally would if using MVVM. Then, in the `view` function, you use Elmish.Uno to declaratively create a “view model” of sorts that contain the data the view will bind to. Therefore the `view` function is normally called `bindings` in Elmish.Uno.
 
 For example, the counter app may look like this:
 
@@ -173,13 +173,13 @@ The actual bindings will be explained in detail later, but explained simply, the
 - two get-only properties `Increment` and `Decrement` that are `ICommand`s that can always execute and, when executed, dispatches the `Increment` and `Decrement` messages, respectively
 - a `float` get-set property `StepSize` returning `model.StepSize` and which, when set, dispatches the `SetStepSize` message with the number
 
-Another important difference between normal MVU `view` functions and Elmish.WPF’s `update`  function is that `view` is called every time the model has been updated, whereas `bindings` is only called once, when the “view model” is initialized. After that, it is the functions used in the bindings themselves that are called when the model is updated. Therefore, `bindings` do not accept a `model` or `dispatch` parameter. The `model` is instead passed separately in each binding, and the `dispatch` isn’t visible at all; you simply specify the message to be dispatched, and Elmish.WPF will take care of dispatching the message.
+Another important difference between normal MVU `view` functions and Elmish.Uno’s `update`  function is that `view` is called every time the model has been updated, whereas `bindings` is only called once, when the “view model” is initialized. After that, it is the functions used in the bindings themselves that are called when the model is updated. Therefore, `bindings` do not accept a `model` or `dispatch` parameter. The `model` is instead passed separately in each binding, and the `dispatch` isn’t visible at all; you simply specify the message to be dispatched, and Elmish.Uno will take care of dispatching the message.
 
 In the statically-typed version, the bindings for individual properties work in exactly the same way as above, with a few exceptions. The `model` and `dispatch` parameters are passed in the default `CounterViewModel(args)` constructor through the `args` parameter, but this is immediately passed into the `inherit ViewModelBase<Model, Msg>(args)` line to surface up through the `base.Get()` and `base.Set(v)` helpers in exactly the same way as above. Also there is no `twoWay` with properties, as the getter and the setter of a property must be defined separately.
 
 ### Commands (and subscriptions)
 
-This is yet another part of MVU that is not in the name. Not to be confused with WPF’s `ICommand`, the command in MVU is the only way you do side effects.
+This is yet another part of MVU that is not in the name. Not to be confused with Uno’s `ICommand`, the command in MVU is the only way you do side effects.
 
 Think about it: If the update function must be pure, how can we do side effects like making an HTTP call or reading from disk? Or alternatively, if we decided to make `update` impure (which is possible in F#, but not in Elm) and do some long-running IO there, wouldn’t that block the whole app (since the update loop can only process one message at a time for concurrency reasons)?
 
@@ -345,18 +345,18 @@ let myExpensiveFunMemoized x = memoize myExpensiveFun x
 
 then a new memoized version would be created each for each call, which defeats the purpose of memoizing it in the first place.
 
-Furthermore, the implementation above only memoizes functions with a single input. If you need more parameters, you need to create `memoize2`, `memoize3`, etc. (You could also pass a single tuple argument, but that will never be referentially equal, so you’d need to use structural comparison instead. That might be prohibitively expensive if the input is, say, a large collection of domain objects. Alternatively you might use functionality similar to Elmish.WPF’s `elmEq` helper, which is explained later.)
+Furthermore, the implementation above only memoizes functions with a single input. If you need more parameters, you need to create `memoize2`, `memoize3`, etc. (You could also pass a single tuple argument, but that will never be referentially equal, so you’d need to use structural comparison instead. That might be prohibitively expensive if the input is, say, a large collection of domain objects. Alternatively you might use functionality similar to Elmish.Uno’s `elmEq` helper, which is explained later.)
 
-Getting started with Elmish.WPF
+Getting started with Elmish.Uno
 -------------------------------
 
-The [readme](https://github.com/elmish/Elmish.WPF/blob/master/README.md) has a “getting started” section that will have you up and running quickly with a simple skeleton solution.
+The [readme](https://github.com/elmish/Elmish.Uno/blob/master/README.md) has a “getting started” section that will have you up and running quickly with a simple skeleton solution.
 
 Additional resources
 --------------------
 
-The [Elmish.WPF readme](https://github.com/elmish/Elmish.WPF/blob/master/README.md) contains
+The [Elmish.Uno readme](https://github.com/elmish/Elmish.Uno/blob/master/README.md) contains
   - a “getting started” section that will get you quickly up and running
   - a FAQ with miscellaneous useful information
 
-The [Elmish.WPF reference](https://github.com/elmish/Elmish.WPF/blob/master/REFERENCE.md)
+The [Elmish.Uno reference](https://github.com/elmish/Elmish.Uno/blob/master/REFERENCE.md)

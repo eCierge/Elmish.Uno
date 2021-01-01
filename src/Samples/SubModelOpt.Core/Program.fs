@@ -1,8 +1,9 @@
-﻿module Elmish.WPF.Samples.SubModelOpt.Program
+﻿module Elmish.Uno.Samples.SubModelOpt.Program
 
 open Serilog
 open Serilog.Extensions.Logging
-open Elmish.WPF
+open Elmish
+open Elmish.Uno
 
 
 module Form1 =

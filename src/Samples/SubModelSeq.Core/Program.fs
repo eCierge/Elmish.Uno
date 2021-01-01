@@ -1,9 +1,10 @@
-module Elmish.WPF.Samples.SubModelSeq.Program
+module Elmish.Uno.Samples.SubModelSeq.Program
 
 open System
 open Serilog
 open Serilog.Extensions.Logging
-open Elmish.WPF
+open Elmish
+open Elmish.Uno
 
 
 type InOutMsg<'a, 'b> =

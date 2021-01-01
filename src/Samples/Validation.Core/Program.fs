@@ -1,10 +1,11 @@
-﻿module Elmish.WPF.Samples.Validation.Program
+﻿module Elmish.Uno.Samples.Validation.Program
 
 open System
 open System.Linq
 open Serilog
 open Serilog.Extensions.Logging
-open Elmish.WPF
+open Elmish
+open Elmish.Uno
 
 
 module Result =

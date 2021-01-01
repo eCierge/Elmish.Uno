@@ -1,17 +1,17 @@
-WPF done the Elmish Way
+WinUI/Uno Platfrom done the Elmish Way
 =======================
 
-<img src="https://raw.githubusercontent.com/elmish/Elmish.WPF/master/logo/elmish-wpf-logo-ghreadme.png" width="300" align="right" />
+<img src="https://raw.githubusercontent.com/xperiandri/Elmish.Uno/master/logo/elmish-uno-logo-ghreadme.png" width="300" align="right" />
 
-[![NuGet version](https://img.shields.io/nuget/v/Elmish.WPF.svg)](https://www.nuget.org/packages/Elmish.WPF) [![NuGet downloads](https://img.shields.io/nuget/dt/Elmish.WPF.svg)](https://www.nuget.org/packages/Elmish.WPF) [![Build status](https://github.com/elmish/Elmish.WPF/actions/workflows/continuous_integration.yml/badge.svg)](https://github.com/elmish/Elmish.WPF/actions/workflows/continuous_integration.yml)
+[![NuGet version](https://img.shields.io/nuget/v/Elmish.Uno.svg)](https://www.nuget.org/packages/Elmish.Uno) [![NuGet downloads](https://img.shields.io/nuget/dt/Elmish.Uno.svg)](https://www.nuget.org/packages/Elmish.Uno) [![Build status](https://github.com/xperiandri/Elmish.Uno/actions/workflows/continuous_integration.yml/badge.svg)](https://github.com/xperiandri/Elmish.Uno/actions/workflows/continuous_integration.yml)
 
 **The good parts of MVVM (the data bindings) with the simplicity and robustness of an MVU architecture for the rest of your app. Never write an overly-complex ViewModel class again!**
 
 ### Elevator pitch
 
-Elmish.WPF is a **production-ready** library that allows you to write WPF apps with the robust, simple, well-known, and battle-tested MVU architecture, while still allowing you to use all your XAML knowledge and tooling to create UIs.
+Elmish.Uno is a **production-ready** library that allows you to write Uno Platform apps with the robust, simple, well-known, and battle-tested MVU architecture, while still allowing you to use all your XAML knowledge and tooling to create UIs.
 
-Some benefits of MVU you’ll get with Elmish.WPF include:
+Some benefits of MVU you’ll get with Elmish.Uno include:
 
 * Simple-to-understand, unidirectional data flow
 * Single source of truth for all the state in your app
@@ -26,36 +26,30 @@ Even with static views, your central model/update code can follow an idiomatic E
 
 **Static XAML views is a feature, not a limitation. See the FAQ for several unique benefits to this approach!**
 
-Elmish.WPF uses [Elmish](https://github.com/elmish/elmish), an F# implementation of the MVU message loop.
+Elmish.Uno uses [Elmish](https://github.com/elmish/elmish), an F# implementation of the MVU message loop.
 
 Big thanks to [@MrMattSim](https://github.com/MrMattSim) for the wonderful logo!
-
-### Sponsor
-
-[![JetBrains logo](jetbrains.svg)](https://www.jetbrains.com/?from=Elmish.WPF)
-
-Thanks to JetBrains for sponsoring Elmish.WPF with [OSS licenses](https://www.jetbrains.com/community/opensource/#support)!
 
 Recommended resources
 ---------------------
 
-* The [Elmish.WPF tutorial](https://github.com/elmish/Elmish.WPF/blob/master/TUTORIAL.md) explains how to use Elmish.WPF, starting with general Elmish/MVU concepts and ending with complex optimizations.
-* The [Elmish.WPF binding reference](https://github.com/elmish/Elmish.WPF/blob/master/REFERENCE.md) explains Elmish.WPF's bindings and library functions for modifying bindings.
+* The [Elmish.Uno tutorial](https://github.com/xperiandri/Elmish.Uno/blob/master/TUTORIAL.md) explains how to use Elmish.Uno, starting with general Elmish/MVU concepts and ending with complex optimizations.
+* The [Elmish.Uno binding reference](https://github.com/xperiandri/Elmish.Uno/blob/master/REFERENCE.md) explains Elmish.Uno's bindings and library functions for modifying bindings.
 * The [Elmish docs site](https://elmish.github.io/elmish) also explains the general MVU architecture and principles.
-* The [Elmish.WPF samples](https://github.com/elmish/Elmish.WPF/tree/master/src/Samples) provide many concrete usage examples.
+* The [Elmish.Uno samples](https://github.com/xperiandri/Elmish.Uno/tree/master/src/Samples) provide many concrete usage examples.
 * Blog posts:
-   * [Getting Elmish in .NET with Elmish.WPF](https://medium.com/swlh/getting-elmish-in-net-with-elmish-wpf-cd44e3eddc27) ("getting started" guide by Matt Eland)
-* Elm resources may also provide some guidance, but note that not everything is relevant. A significant difference between “normal” Elm architecture and Elmish.WPF is that in Elmish.WPF, the views are statically defined using XAML, and the “view” function does not render views, but set up bindings. See the [tutorial](https://github.com/elmish/Elmish.WPF/blob/master/TUTORIAL.md) for details.
+   * [Getting Elmish in .NET with Elmish.Uno](https://medium.com/swlh/getting-elmish-in-net-with-elmish-uno-cd44e3eddc27) ("getting started" guide by Matt Eland)
+* Elm resources may also provide some guidance, but note that not everything is relevant. A significant difference between “normal” Elm architecture and Elmish.Uno is that in Elmish.Uno, the views are statically defined using XAML, and the “view” function does not render views, but set up bindings. See the [tutorial](https://github.com/elmish/Elmish.Uno/blob/master/TUTORIAL.md) for details.
   * [Official Elm guide](https://guide.elm-lang.org)
   * Two talks: [Summarising Elm scaling strategy](https://dev.to/elmupdate/summarising-elm-scaling-strategy-1bjn)
   * Reddit: [Resources regarding scaling Elm apps](https://www.reddit.com/r/elm/comments/65s0g4/resources_regarding_scaling_elm_apps/)
   * Reddit: [How to structure Elm with multiple models](https://www.reddit.com/r/elm/comments/5jd2xn/how_to_structure_elm_with_multiple_models/dbuu0m4/)
   * Reddit: [Elm Architecture with a Redux-like store pattern](https://www.reddit.com/r/elm/comments/5xdl9z/elm_architecture_with_a_reduxlike_store_pattern/)
 
-Getting started with Elmish.WPF
+Getting started with Elmish.Uno
 -------------------------------
 
-See the [SingleCounter](https://github.com/elmish/Elmish.WPF/tree/master/src/Samples) sample for a very simple app. The central points are (assuming up-to-date VS2019):
+See the [SingleCounter](https://github.com/elmish/Elmish.Uno/tree/master/src/Samples) sample for a very simple app. The central points are (assuming up-to-date VS2019):
 
 1. Create an F# Class Library. If targeting .NET 5 or .NET Core, the project file should look like this:
 
@@ -63,8 +57,7 @@ See the [SingleCounter](https://github.com/elmish/Elmish.WPF/tree/master/src/Sam
    <Project Sdk="Microsoft.NET.Sdk">
 
      <PropertyGroup>
-       <TargetFramework>net5.0-windows</TargetFramework>  <!-- Or another target framework -->
-       <UseWpf>true</UseWpf>
+       <TargetFramework>net8.0-windows10.0.xxxxx</TargetFramework>  <!-- Or another target framework -->
      </PropertyGroup>
 
      <!-- other stuff -->
@@ -76,7 +69,7 @@ See the [SingleCounter](https://github.com/elmish/Elmish.WPF/tree/master/src/Sam
    <Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
    ```
 
-2. Add NuGet reference to package `Elmish.WPF`.
+2. Add NuGet reference to package `Elmish.Uno`.
 
 3. Define the model that describes your app’s state and a function that initializes it:
 
@@ -109,13 +102,13 @@ See the [SingleCounter](https://github.com/elmish/Elmish.WPF/tree/master/src/Sam
      | SetStepSize x -> { m with StepSize = x }
    ```
 
-6. Define the “view” function using the `Bindings` module. This is the central public API of Elmish.WPF.
+6. Define the “view” function using the `Bindings` module. This is the central public API of Elmish.Uno.
 
-   Normally in Elm/Elmish this function is called `view` and would take a model and a dispatch function (to dispatch new messages to the update loop) and return the UI (e.g. a HTML DOM to be rendered), but in Elmish.WPF this function is in general only run once and simply sets up bindings that XAML-defined views can use. Therefore, let’s call it `bindings` instead of `view`.
+   Normally in Elm/Elmish this function is called `view` and would take a model and a dispatch function (to dispatch new messages to the update loop) and return the UI (e.g. a HTML DOM to be rendered), but in Elmish.Uno this function is in general only run once and simply sets up bindings that XAML-defined views can use. Therefore, let’s call it `bindings` instead of `view`.
 
    ```F#
-   open Elmish.WPF
-
+   open Elmish.Uno
+   
    let bindings () =
      [
        "CounterValue" |> Binding.oneWay (fun m -> m.Count)
@@ -127,13 +120,13 @@ See the [SingleCounter](https://github.com/elmish/Elmish.WPF/tree/master/src/Sam
      ]
    ```
 
-   The strings identify the binding names to be used in the XAML views. The Binding module has many functions to create various types of bindings.
+   The strings identify the binding names to be used in the XAML views. The [Binding module](https://github.com/elmish/Elmish.Uno/blob/master/src/Elmish.Uno/Binding.fs) has many functions to create various types of bindings.
 
 
    Alternatively, use statically-typed view models in order to get better IDE support in the XAML.
 
    ```f#
-   open Elmish.WPF
+   open Elmish.Uno
 
    type CounterViewModel(args) =
      inherit ViewModelBase<Model, Msg>(args)
@@ -149,7 +142,7 @@ See the [SingleCounter](https://github.com/elmish/Elmish.WPF/tree/master/src/Sam
 7. Create a function that accepts the app’s main window (to be created) and configures and starts the Elmish loop for the window with your `init`, `update` and `bindings`:
 
    ```F#
-   open Elmish.WPF
+   open Elmish.Uno
 
    let main window =
      Program.mkSimple init update bindings
@@ -159,7 +152,7 @@ See the [SingleCounter](https://github.com/elmish/Elmish.WPF/tree/master/src/Sam
    Alternatively, use a statically-typed view model at the top level.
 
    ```F#
-   open Elmish.WPF
+   open Elmish.Uno
 
    let main window =
      Program.mkSimpleT init update CounterViewModel
@@ -168,7 +161,7 @@ See the [SingleCounter](https://github.com/elmish/Elmish.WPF/tree/master/src/Sam
 
    In the code above, `Program.runElmishLoop` will set the window’s `DataContext` to the specified bindings and start the Elmish dispatch loop for the window.
 
-8. Create a WPF app project (using the Visual Studio template called `WPF App (.NET)`). This will be your entry point and contain the XAML views. Add a reference to the F# project, and make the following changes in the `csproj` file:
+8. Create a Uno Platform app project (using the Visual Studio template called `Uno App (.NET)`). This will be your entry point and contain the XAML views. Add a reference to the F# project, and make the following changes in the `csproj` file:
 
    * Currently, the core Elmish logs are only output to the console. If you want a console window for displaying Elmish logs, change `<OutputType>WinExe</OutputType>` to `<OutputType>Exe</OutputType>` and add `<DisableWinExeOutputInference>true</DisableWinExeOutputInference>`.
    * If the project file starts with the now legacy `<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">`, change it to `<Project Sdk="Microsoft.NET.Sdk">`
@@ -214,9 +207,9 @@ See the [SingleCounter](https://github.com/elmish/Elmish.WPF/tree/master/src/Sam
 
 Further resources:
 
-* The [Elmish.WPF tutorial](https://github.com/elmish/Elmish.WPF/blob/master/TUTORIAL.md) provides information on general MVU/Elmish concepts and how they apply to Elmish.WPF, as well as the various Elmish.WPF bindings.
-* The [samples](https://github.com/elmish/Elmish.WPF/tree/master/src/Samples) are complete, working mini-apps demonstrating selected aspects of Elmish.WPF.
-* If you'd like to contribute, please read and follow the [Contributor guidelines](https://github.com/elmish/Elmish.WPF/blob/master/.github/CONTRIBUTING.md).
+* The [Elmish.Uno tutorial](https://github.com/elmish/Elmish.Uno/blob/master/TUTORIAL.md) provides information on general MVU/Elmish concepts and how they apply to Elmish.Uno, as well as the various Elmish.Uno bindings.
+* The [samples](https://github.com/elmish/Elmish.Uno/tree/master/src/Samples) are complete, working mini-apps demonstrating selected aspects of Elmish.Uno.
+* If you'd like to contribute, please read and follow the [Contributor guidelines](https://github.com/elmish/Elmish.Uno/blob/master/.github/CONTRIBUTING.md).
 
 FAQ
 ---
@@ -225,9 +218,9 @@ FAQ
 
 Not at all! 🙂
 
-It’s true that static views aren’t as composable as dynamic views. It’s also true that at the time of writing, there are no solid, production-ready dynamic UI libraries for WPF (though there are no lack of half-finished attempts or proof-of-concepts: [Elmish.WPF.Dynamic](https://github.com/cmeeren/Elmish.WPF.Dynamic), [Fabulous.WPF](https://github.com/TimLariviere/Fabulous.WPF), [Skylight](https://github.com/gerardtoconnor/Skylight), [Uil](https://github.com/elmish/Uil)). Heck, it’s even true that Elmish.WPF was originally created with static views due to the difficulty of creating a dynamic UI library, as described in [issue #1](https://github.com/elmish/Elmish.WPF/issues/1).
+It’s true that static views aren’t as composable as dynamic views. It’s also true that at the time of writing, there are no solid, production-ready dynamic UI libraries for Uno Platform (though there are no lack of half-finished attempts or proof-of-concepts: [Elmish.Uno.Dynamic](https://github.com/cmeeren/Elmish.Uno.Dynamic), [Fabulous.WPF](https://github.com/TimLariviere/Fabulous.WPF), [Skylight](https://github.com/gerardtoconnor/Skylight), [Uil](https://github.com/elmish/Uil)). Heck, it’s even true that Elmish.Uno was originally created with static views due to the difficulty of creating a dynamic UI library, as described in [issue #1](https://github.com/elmish/Elmish.Uno/issues/1).
 
-However, Elmish.WPF’s static-view-based solution has several unique benefits:
+However, Elmish.Uno’s static-view-based solution has several unique benefits:
 
 - You can use your existing XAML and MVVM knowledge (that is, the best part of MVVM – the UI bindings – without having to deal with `NavigationService`s, `ViewModelLocator`s, state synchronization, `INotifyPropertyChanged`, etc.)
 - Huge mindshare – there are tons of relevant XAML and MVVM resources on the net which can help with the UI and data binding part if you get stuck
@@ -244,9 +237,9 @@ Not at all. The above example, as well as the samples, keep all non-UI code in a
 An alternative with a clearer separation of UI and core logic can be implemented by splitting the F# project into two projects:
 
 * A core library containing the model definitions and `update` functions.
-  * This library can include a reference to Elmish (e.g. for the `Cmd` module helpers), but not to Elmish.WPF, which depends on WPF and has a UI-centered API (specifying bindings). This will ensure your core logic (such as the `update` function) is free from any UI concerns, and allow you to re-use the core library should you want to port your app to another Elmish-based solution (e.g. Fable.React).
-* An Elmish.WPF project that contains the `bindings` (or `view`) function and the call to `Program.runElmishLoop`.
-  * This project would reference the core library and `Elmish.WPF`.
+  * This library can include a reference to Elmish (e.g. for the `Cmd` module helpers), but not to Elmish.Uno, which depends on Uno and has a UI-centered API (specifying bindings). This will ensure your core logic (such as the `update` function) is free from any UI concerns, and allow you to re-use the core library should you want to port your app to another Elmish-based solution (e.g. Fable.React).
+* An Elmish.Uno project that contains the `bindings` (or `view`) function and the call to `Program.runElmishLoop`.
+  * This project would reference the core library and `Elmish.Uno`.
 
 Another alternative is to turn the sample code on its head and have the F# project be a console app containing your entry point (with a call to `Program.runWindow`) and referencing the C#/XAML project (instead of the other way around, as demonstrated above).
 
@@ -259,9 +252,9 @@ Since the commands (`Cmd<Msg>`) returned by `init` and `update` are lists of fun
 * Create a `CmdMsg` union type with cases for each command you want to execute in the app.
 * Make `init` and `update` return `model * CmdMsg list` instead of `model * Cmd<Msg>`. Since `init` and `update` now return data, they are much easier to test.
 * Create a trivial/too-boring-to-test `cmdMsgToCmd` function that transforms a `CmdMsg` to the corresponding `Cmd`.
-* Finally, create “normal” versions of `init` and `update` that you can use when creating `Program`. Elmish.WPF provides `Program.mkProgramWpfWithCmdMsg` that does this for you (but there’s no magic going on – it’s really easy to do yourself).
+* Finally, create “normal” versions of `init` and `update` that you can use when creating `Program`. Elmish.Uno provides `Program.mkProgramUnoWithCmdMsg` that does this for you (but there’s no magic going on – it’s really easy to do yourself).
 
-The [FileDialogsCmdMsg sample](https://github.com/elmish/Elmish.WPF/tree/master/src/Samples) demonstrates this approach. For more information, see the [Fabulous documentation](https://fsprojects.github.io/Fabulous/Fabulous.XamarinForms/update.html#replacing-commands-with-command-messages-for-better-testability). For reference, here is [the discussion that led to this pattern](https://github.com/fsprojects/Fabulous/pull/320#issuecomment-491522737).
+The [FileDialogsCmdMsg sample](https://github.com/elmish/Elmish.Uno/tree/master/src/Samples) demonstrates this approach. For more information, see the [Fabulous documentation](https://fsprojects.github.io/Fabulous/Fabulous.XamarinForms/update.html#replacing-commands-with-command-messages-for-better-testability). For reference, here is [the discussion that led to this pattern](https://github.com/fsprojects/Fabulous/pull/320#issuecomment-491522737).
 
 #### Can I use design-time view models?
 
@@ -330,36 +323,36 @@ where `T` is the type of the parent object that contains `local:MyControl` (or a
 
 #### Can I open new windows/dialogs?
 
-Sure! Just use `Binding.subModelWin`. It works like `Binding.subModel`, but has a `WindowState` wrapper around the returned model to control whether the window is closed, hidden, or visible. You can use both modal and non-modal windows/dialogs, and everything is a part of the Elmish core loop. Check out the [NewWindow sample](https://github.com/elmish/Elmish.WPF/tree/master/src/Samples).
+Sure! Just use `Binding.subModelWin`. It works like `Binding.subModel`, but has a `WindowState` wrapper around the returned model to control whether the window is closed, hidden, or visible. You can use both modal and non-modal windows/dialogs, and everything is a part of the Elmish core loop. Check out the [NewWindow sample](https://github.com/elmish/Elmish.Uno/tree/master/src/Samples).
 
 Note that if you use `App.xaml` startup, you may want to set `ShutdownMode="OnMainWindowClose"` in `App.xaml` if that’s the desired behavior.
 
 #### Can I bind to events and use behaviors?
 
-Sure! Check out the [EventBindingsAndBehaviors sample](https://github.com/elmish/Elmish.WPF/tree/master/src/Samples). Note that you have to install the NuGet package `Microsoft.Xaml.Behaviors.Wpf`.
+Sure! Check out the [EventBindingsAndBehaviors sample](https://github.com/elmish/Elmish.Uno/tree/master/src/Samples). Note that you have to install the NuGet package `Microsoft.Xaml.Behaviors.WinUI`.
 
 #### How can I control logging?
 
-Elmish.WPF uses `Microsoft.Extensions.Logging`. To see Elmish.WPF output in your favorite logging framework, use `WpfProgram.withLogger` to pass an `ILoggerFactory`:
+Elmish.Uno uses `Microsoft.Extensions.Logging`. To see Elmish.Uno output in your favorite logging framework, use `UnoProgram.withLogger` to pass an `ILoggerFactory`:
 
 ```f#
-WpfProgram.mkSimple init update bindings
-|> WpfProgram.withLogger yourLoggerFactory
-|> WpfProgram.runWindow window
+UnoProgram.mkSimple init update bindings
+|> UnoProgram.withLogger yourLoggerFactory
+|> UnoProgram.runWindow window
 ```
 
 For example, in Serilog, you need to install Serilog.Extensions.Logging and instantiate `SerilogLoggerFactory`. The samples demonstrate this.
 
-Elmish.WPF logs to these categories:
+Elmish.Uno logs to these categories:
 
-* `Elmish.WPF.Update`: Logs exceptions (Error level) and messages/models (Trace/Verbose level) during `update`.
-* `Elmish.WPF.Bindings`: Logs events related to bindings. Some logging is done at the Error level (e.g. developer errors such as duplicated binding names, using non-existent bindings in XAML, etc.), but otherwise it’s generally just Trace/Verbose for when you really want to see everything that’s happening (triggering `PropertyChanged`, WPF getting/setting bindings, etc.)
-* `Elmish.WPF.Performance`: Logs the performance of the functions you pass when creating bindings (`get`, `set`, `map`, `equals`, etc.) at the Trace/Verbose level. Use `WpfProgram.withPerformanceLogThreshold` to set the minimum duration to log.
+* `Elmish.Uno.Update`: Logs exceptions (Error level) and messages/models (Trace/Verbose level) during `update`.
+* `Elmish.Uno.Bindings`: Logs events related to bindings. Some logging is done at the Error level (e.g. developer errors such as duplicated binding names, using non-existent bindings in XAML, etc.), but otherwise it’s generally just Trace/Verbose for when you really want to see everything that’s happening (triggering `PropertyChanged`, Uno Platform getting/setting bindings, etc.)
+* `Elmish.Uno.Performance`: Logs the performance of the functions you pass when creating bindings (`get`, `set`, `map`, `equals`, etc.) at the Trace/Verbose level. Use `UnoProgram.withPerformanceLogThreshold` to set the minimum duration to log.
 
-The specific method of controlling what Elmish.WPF logs depends on your logging framework. For Serilog you can use `.MinimumLevel.Override(...)` to specify the minimum log level per category, like this:
+The specific method of controlling what Elmish.Uno logs depends on your logging framework. For Serilog you can use `.MinimumLevel.Override(...)` to specify the minimum log level per category, like this:
 
 ```f#
 myLoggerConfiguration
-  .MinimumLevel.Override("Elmish.WPF.Bindings", LogEventLevel.Verbose)
+  .MinimumLevel.Override("Elmish.Uno.Bindings", LogEventLevel.Verbose)
   ...
 ```

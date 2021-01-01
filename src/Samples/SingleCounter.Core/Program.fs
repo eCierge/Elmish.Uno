@@ -1,8 +1,9 @@
-﻿module Elmish.WPF.Samples.SingleCounter.Program
+﻿module Elmish.Uno.Samples.SingleCounter.Program
 
 open Serilog
 open Serilog.Extensions.Logging
-open Elmish.WPF
+open Elmish
+open Elmish.Uno
 
 type Model =
   { Count: int

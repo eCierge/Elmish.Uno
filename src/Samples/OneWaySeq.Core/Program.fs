@@ -1,8 +1,9 @@
-﻿module Elmish.WPF.Samples.OneWaySeq.Program
+﻿module Elmish.Uno.Samples.OneWaySeq.Program
 
 open Serilog
 open Serilog.Extensions.Logging
-open Elmish.WPF
+open Elmish
+open Elmish.Uno
 
 
 type Model =

@@ -1,8 +1,9 @@
-﻿module Elmish.WPF.Samples.UiBoundCmdParam.Program
+﻿module Elmish.Uno.Samples.UiBoundCmdParam.Program
 
 open Serilog
 open Serilog.Extensions.Logging
-open Elmish.WPF
+open Elmish
+open Elmish.Uno
 
 
 type Model =

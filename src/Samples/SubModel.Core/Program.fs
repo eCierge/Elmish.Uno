@@ -1,10 +1,10 @@
-module Elmish.WPF.Samples.SubModel.Program
+module Elmish.Uno.Samples.SubModel.Program
 
 open System
 open Serilog
 open Serilog.Extensions.Logging
 open Elmish
-open Elmish.WPF
+open Elmish.Uno
 
 module Counter =
 

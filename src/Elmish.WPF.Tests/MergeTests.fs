@@ -1,4 +1,4 @@
-module MergeTests.M
+module Elmish.Uno.Tests.MergeTests
 
 open System
 open System.Collections.ObjectModel
@@ -7,8 +7,7 @@ open System.Collections.Specialized
 open Xunit
 open Hedgehog
 open Swensen.Unquote
-
-open Elmish.WPF
+open Elmish.Uno
 
 
 let getIdAsId = id
