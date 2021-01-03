@@ -1,5 +1,6 @@
 ﻿module Elmish.Uno.Samples.SubModelOpt.Program
 
+open System
 open Serilog
 open Serilog.Extensions.Logging
 open Elmish
@@ -90,7 +91,7 @@ module App =
         | Some (Form2 m') -> { m with Dialog = Form2.update msg' m' |> Form2 |> Some }
         | _ -> m
 
-  let bindings () : Binding<Model, Msg> list = [
+  let bindings : Binding<Model, Msg> list = [
     "ShowForm1" |> Binding.cmd ShowForm1
 
     "ShowForm2" |> Binding.cmd ShowForm2
@@ -115,21 +116,10 @@ module App =
   ]
 
 
-let form1DesignVm = ViewModel.designInstance Form1.init (Form1.bindings ())
-let form2DesignVm = ViewModel.designInstance Form2.init (Form2.bindings ())
-let mainDesignVm = ViewModel.designInstance (App.init ()) (App.bindings ())
+[<CompiledName("Program")>]
+let program =
+  Program.mkSimpleUno App.init App.update App.bindings
+  |> Program.withLogger (new SerilogLoggerFactory(logger))
 
-
-let main window =
-
-  let logger =
-    LoggerConfiguration()
-      .MinimumLevel.Override("Elmish.WPF.Update", Events.LogEventLevel.Verbose)
-      .MinimumLevel.Override("Elmish.WPF.Bindings", Events.LogEventLevel.Verbose)
-      .MinimumLevel.Override("Elmish.WPF.Performance", Events.LogEventLevel.Verbose)
-      .WriteTo.Console()
-      .CreateLogger()
-
-  WpfProgram.mkSimple App.init App.update App.bindings
-  |> WpfProgram.withLogger (new SerilogLoggerFactory(logger))
-  |> WpfProgram.startElmishLoop window
+[<CompiledName("Config")>]
+let config = { ElmConfig.Default with LogConsole = true; Measure = true }

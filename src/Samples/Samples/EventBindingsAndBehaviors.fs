@@ -2,8 +2,8 @@
 
 open Elmish
 open Elmish.Uno
-open System.Windows
-open System.Windows.Input
+open Windows.UI.Xaml
+open Windows.UI.Core
 open Serilog
 open Serilog.Extensions.Logging
 
@@ -18,7 +18,7 @@ type Model =
     MousePosition: Position }
 
 let visibleButtonText = "Hide text box"
-let hiddenButtonText = "Show text box"
+let collapsedButonText = "Show text box"
 
 let init () =
   { Msg1 = ""
@@ -33,7 +33,7 @@ type Msg =
   | LostFocus1
   | LostFocus2
   | ToggleVisibility
-  | NewMousePosition of Position
+  | NewPointerPosition of Position
 
 let update msg m =
   match msg with
@@ -43,18 +43,18 @@ let update msg m =
   | LostFocus2 -> { m with Msg2 = "Not focused" }
   | ToggleVisibility ->
     if m.Visibility = Visibility.Visible
-    then { m with Visibility = Visibility.Hidden; ButtonText = hiddenButtonText }
+    then { m with Visibility = Visibility.Collapsed; ButtonText = collapsedButonText }
     else { m with Visibility = Visibility.Visible; ButtonText = visibleButtonText }
-  | NewMousePosition p -> { m with MousePosition = p }
+  | NewPointerPosition p -> { m with MousePosition = p }
 
 
 let paramToNewMousePositionMsg (p: obj) =
-  let args = p :?> MouseEventArgs
-  let e = args.OriginalSource :?> UIElement;
-  let point = args.GetPosition e
-  NewMousePosition { X = int point.X; Y = int point.Y }
+  let args = p :?> PointerEventArgs
+  //let e = args.OriginalSource :?> UIElement;
+  let point = args.CurrentPoint.Position
+  NewPointerPosition { X = int point.X; Y = int point.Y }
 
-let bindings () : Binding<Model, Msg> list = [
+let bindings : Binding<Model, Msg> list = [
   "Msg1" |> Binding.oneWay (fun m -> m.Msg1)
   "Msg2" |> Binding.oneWay (fun m -> m.Msg2)
   "GotFocus1" |> Binding.cmd GotFocus1
@@ -70,16 +70,11 @@ let bindings () : Binding<Model, Msg> list = [
 
 let designVm = ViewModel.designInstance (init ()) (bindings ())
 
-let main window =
 
-  let logger =
-    LoggerConfiguration()
-      .MinimumLevel.Override("Elmish.WPF.Update", Events.LogEventLevel.Verbose)
-      .MinimumLevel.Override("Elmish.WPF.Bindings", Events.LogEventLevel.Verbose)
-      .MinimumLevel.Override("Elmish.WPF.Performance", Events.LogEventLevel.Verbose)
-      .WriteTo.Console()
-      .CreateLogger()
+[<CompiledName("Program")>]
+let program =
+    Program.mkSimpleUno init update bindings
+    |> Program.withLogger (new SerilogLoggerFactory(logger))
 
-  WpfProgram.mkSimple init update bindings
-  |> WpfProgram.withLogger (new SerilogLoggerFactory(logger))
-  |> WpfProgram.startElmishLoop window
+[<CompiledName("Config")>]
+let config = { ElmConfig.Default with LogConsole = true; Measure = true }

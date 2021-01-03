@@ -1,4 +1,4 @@
-module Elmish.Uno.Samples.SubModelSeq.Program
+﻿module Elmish.Uno.Samples.SubModelSeq.Program
 
 open System
 open Serilog
@@ -283,7 +283,7 @@ module Bindings =
     outMsgBindings @ inMsgBindings
 
 
-  let rootBindings () : Binding<Model, Msg> list = [
+  let rootBindings : Binding<Model, Msg> list = [
     "Counters"
       |> Binding.subModelSeq (subtreeBindings, (fun (_, { Self = c }) -> c.Data.Id))
       |> Binding.mapModel (fun m -> m.DummyRoot.Children |> Seq.map (fun c -> m, { Self = c; Parent = m.DummyRoot }))
@@ -298,18 +298,11 @@ module Bindings =
     "AddCounter" |> Binding.cmd (AddChild |> LeafMsg |> SubtreeMsg)
   ]
 
-let counterDesignVm = ViewModel.designInstance Counter.init (Counter.bindings ())
-let mainDesignVm = ViewModel.designInstance (App.init ()) (Bindings.rootBindings ())
 
-let main window =
-  let logger =
-    LoggerConfiguration()
-      .MinimumLevel.Override("Elmish.WPF.Update", Events.LogEventLevel.Verbose)
-      .MinimumLevel.Override("Elmish.WPF.Bindings", Events.LogEventLevel.Verbose)
-      .MinimumLevel.Override("Elmish.WPF.Performance", Events.LogEventLevel.Verbose)
-      .WriteTo.Console()
-      .CreateLogger()
+[<CompiledName("Program")>]
+let program =
+  Program.mkSimpleUno App.init App.update Bindings.rootBindings
+  |> Program.withLogger (new SerilogLoggerFactory(logger))
 
-  WpfProgram.mkSimple App.init App.update Bindings.rootBindings
-  |> WpfProgram.withLogger (new SerilogLoggerFactory(logger))
-  |> WpfProgram.startElmishLoop window
+[<CompiledName("Config")>]
+let config = { ElmConfig.Default with LogConsole = true; Measure = true }

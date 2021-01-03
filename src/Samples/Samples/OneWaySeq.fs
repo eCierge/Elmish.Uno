@@ -1,5 +1,6 @@
 ﻿module Elmish.Uno.Samples.OneWaySeq.Program
 
+open System
 open Serilog
 open Serilog.Extensions.Logging
 open Elmish
@@ -23,25 +24,18 @@ let update msg m =
   | AddOneWaySeqNumber -> { m with OneWaySeqNumbers = m.OneWaySeqNumbers.Head + 1 :: m.OneWaySeqNumbers }
   | AddOneWayNumber -> { m with OneWayNumbers = m.OneWayNumbers.Head + 1 :: m.OneWayNumbers }
 
-let bindings () : Binding<Model, Msg> list = [
+let bindings : Binding<Model, Msg> list = [
   "OneWaySeqNumbers" |> Binding.oneWaySeq((fun m -> m.OneWaySeqNumbers), (=), id)
   "OneWayNumbers" |> Binding.oneWay (fun m -> m.OneWayNumbers)
   "AddOneWaySeqNumber" |> Binding.cmd AddOneWaySeqNumber
   "AddOneWayNumber" |> Binding.cmd AddOneWayNumber
 ]
 
-let designVm = ViewModel.designInstance (init ()) (bindings ())
 
-let main window =
+[<CompiledName("Program")>]
+let program =
+  Program.mkSimpleUno init update bindings
+  |> Program.withLogger (new SerilogLoggerFactory(logger))
 
-  let logger =
-    LoggerConfiguration()
-      .MinimumLevel.Override("Elmish.WPF.Update", Events.LogEventLevel.Verbose)
-      .MinimumLevel.Override("Elmish.WPF.Bindings", Events.LogEventLevel.Verbose)
-      .MinimumLevel.Override("Elmish.WPF.Performance", Events.LogEventLevel.Verbose)
-      .WriteTo.Console()
-      .CreateLogger()
-
-  WpfProgram.mkSimple init update bindings
-  |> WpfProgram.withLogger (new SerilogLoggerFactory(logger))
-  |> WpfProgram.startElmishLoop window
+[<CompiledName("Config")>]
+let config = { ElmConfig.Default with LogConsole = true }

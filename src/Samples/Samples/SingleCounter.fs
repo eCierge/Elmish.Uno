@@ -1,5 +1,6 @@
 ﻿module Elmish.Uno.Samples.SingleCounter.Program
 
+open System
 open Serilog
 open Serilog.Extensions.Logging
 open Elmish
@@ -15,20 +16,22 @@ type Msg =
   | SetStepSize of int
   | Reset
 
-let init =
+let initial =
   { Count = 0
     StepSize = 1 }
 
-let canReset = (<>) init
+let init () = initial
+
+let canReset = (<>) initial
 
 let update msg m =
   match msg with
   | Increment -> { m with Count = m.Count + m.StepSize }
   | Decrement -> { m with Count = m.Count - m.StepSize }
   | SetStepSize x -> { m with StepSize = x }
-  | Reset -> init
+  | Reset -> initial
 
-let bindings () : Binding<Model, Msg> list = [
+let bindings : Binding<Model, Msg> list = [
   "CounterValue" |> Binding.oneWay (fun m -> m.Count)
   "Increment" |> Binding.cmd Increment
   "Decrement" |> Binding.cmd Decrement
@@ -38,18 +41,10 @@ let bindings () : Binding<Model, Msg> list = [
   "Reset" |> Binding.cmdIf(Reset, canReset)
 ]
 
-let designVm = ViewModel.designInstance init (bindings ())
+[<CompiledName("Program")>]
+let program =
+  Program.mkSimpleUno init update bindings
+  |> Program.withLogger (new SerilogLoggerFactory(logger))
 
-let main window =
-
-  let logger =
-    LoggerConfiguration()
-      .MinimumLevel.Override("Elmish.WPF.Update", Events.LogEventLevel.Verbose)
-      .MinimumLevel.Override("Elmish.WPF.Bindings", Events.LogEventLevel.Verbose)
-      .MinimumLevel.Override("Elmish.WPF.Performance", Events.LogEventLevel.Verbose)
-      .WriteTo.Console()
-      .CreateLogger()
-
-  WpfProgram.mkSimple (fun () -> init) update bindings
-  |> WpfProgram.withLogger (new SerilogLoggerFactory(logger))
-  |> WpfProgram.startElmishLoop window
+[<CompiledName("Config")>]
+let config = { ElmConfig.Default with LogConsole = true; Measure = true }

@@ -1,4 +1,4 @@
-module Elmish.Uno.Samples.SubModel.Program
+﻿module Elmish.Uno.Samples.SubModel.Program
 
 open System
 open Serilog
@@ -131,23 +131,20 @@ module App =
     | ClockCounter2Msg msg ->
         { m with ClockCounter2 = CounterWithClock.update msg m.ClockCounter2 }
 
-  let bindings () : Binding<Model, Msg> list = [
-    "ClockCounter1"
-      |> Binding.SubModel.required CounterWithClock.bindings
-      |> Binding.mapModel (fun m -> m.ClockCounter1)
-      |> Binding.mapMsg ClockCounter1Msg
+  let bindings : Binding<Model, Msg> list = [
+    "ClockCounter1" |> Binding.subModel(
+      (fun m -> m.ClockCounter1),
+      snd,
+      ClockCounter1Msg,
+      CounterWithClock.bindings)
 
-    "ClockCounter2"
-      |> Binding.SubModel.required CounterWithClock.bindings
-      |> Binding.mapModel (fun m -> m.ClockCounter2)
-      |> Binding.mapMsg ClockCounter2Msg
+    "ClockCounter2" |> Binding.subModel(
+      (fun m -> m.ClockCounter2),
+      snd,
+      ClockCounter2Msg,
+      CounterWithClock.bindings)
   ]
 
-
-let counterDesignVm = ViewModel.designInstance Counter.init (Counter.bindings ())
-let clockDesignVm = ViewModel.designInstance (Clock.init ()) (Clock.bindings ())
-let counterWithClockDesignVm = ViewModel.designInstance (CounterWithClock.init ()) (CounterWithClock.bindings ())
-let mainDesignVm = ViewModel.designInstance (App.init ()) (App.bindings ())
 
 
 let subscriptions (model: App.Model) : Sub<App.Msg> =
@@ -168,17 +165,11 @@ let subscriptions (model: App.Model) : Sub<App.Msg> =
     [ nameof timerTickSub ], timerTickSub
   ]
 
-let main window =
+[<CompiledName("Program")>]
+let program =
+  Program.mkSimpleUno App.init App.update App.bindings
+  |> Program.withSubscription subscriptions
+  |> Program.withLogger (new SerilogLoggerFactory(logger))
 
-  let logger =
-    LoggerConfiguration()
-      .MinimumLevel.Override("Elmish.WPF.Update", Events.LogEventLevel.Verbose)
-      .MinimumLevel.Override("Elmish.WPF.Bindings", Events.LogEventLevel.Verbose)
-      .MinimumLevel.Override("Elmish.WPF.Performance", Events.LogEventLevel.Verbose)
-      .WriteTo.Console()
-      .CreateLogger()
-
-  WpfProgram.mkSimple App.init App.update App.bindings
-  |> WpfProgram.withSubscription subscriptions
-  |> WpfProgram.withLogger (new SerilogLoggerFactory(logger))
-  |> WpfProgram.startElmishLoop window
+[<CompiledName("Config")>]
+let config = { ElmConfig.Default with LogConsole = true; Measure = true }

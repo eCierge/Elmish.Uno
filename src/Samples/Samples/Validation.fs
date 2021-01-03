@@ -76,32 +76,28 @@ let errorOnEven m =
   else
     []
 
-let bindings () : Binding<Model, Msg> list = [
+let bindings : Binding<Model, Msg> list = [
   "UpdateCount"
     |> Binding.oneWay(fun m -> m.UpdateCount)
     |> Binding.addValidation errorOnEven
-  "Value"
-    |> Binding.twoWay((fun m -> m.Value), NewValue)
-    |> Binding.addValidation(fun m ->  m.Value |> validateInt42 |> Result.Error.toList)
-  "Password"
-    |> Binding.twoWay((fun m -> m.Password), NewPassword)
-    |> Binding.addValidation(fun m -> m.Password |> validatePassword)
+  "Value" |> Binding.twoWayValidate(
+    (fun m -> m.Value),
+    NewValue,
+    (fun m -> validateInt42 m.Value))
+  "Password" |> Binding.twoWayValidate(
+    (fun m -> m.Password),
+    NewPassword,
+    (fun m -> validatePassword m.Password))
   "Submit" |> Binding.cmdIf(
     (fun _ -> Submit),
     (fun m -> (match validateInt42 m.Value with Ok _ -> true | Error _ -> false) && (validatePassword m.Password |> List.isEmpty)))
 ]
 
-let designVm = ViewModel.designInstance (init ()) (bindings ())
 
-let main window =
-  let logger =
-    LoggerConfiguration()
-      .MinimumLevel.Override("Elmish.WPF.Update", Events.LogEventLevel.Verbose)
-      .MinimumLevel.Override("Elmish.WPF.Bindings", Events.LogEventLevel.Verbose)
-      .MinimumLevel.Override("Elmish.WPF.Performance", Events.LogEventLevel.Verbose)
-      .WriteTo.Console()
-      .CreateLogger()
+[<CompiledName("Program")>]
+let program =
+  Program.mkSimpleUno init update bindings
+  |> Program.withLogger (new SerilogLoggerFactory(logger))
 
-  WpfProgram.mkSimple init update bindings
-  |> WpfProgram.withLogger (new SerilogLoggerFactory(logger))
-  |> WpfProgram.startElmishLoop window
+[<CompiledName("Config")>]
+let config = { ElmConfig.Default with LogConsole = true; Measure = true }

@@ -1,5 +1,7 @@
 ﻿namespace Elmish.Uno
 
+// fsharplint:disable MemberNames
+
 open System.Windows
 
 open Elmish
@@ -1835,14 +1837,6 @@ type Binding private () =
   /// </summary>
   /// <param name="exec">Returns the message to dispatch.</param>
   /// <param name="canExec">Indicates whether the command can execute.</param>
-  /// <param name="uiBoundCmdParam">
-  ///   If <c>true</c>, <c>CanExecuteChanged</c> will trigger every time WPF's
-  ///   <c>CommandManager</c>
-  ///   detects UI changes that could potentially influence the command's
-  ///   ability to execute. This will likely lead to many more triggers than
-  ///   necessary, but is needed if you have bound the <c>CommandParameter</c>
-  ///   to another UI property.
-  /// </param>
   /// <param name="wrapDispatch">
   ///   Wraps the dispatch function with additional behavior, such as
   ///   throttling, debouncing, or limiting.
@@ -1905,14 +1899,6 @@ type Binding private () =
   ///   and can execute if <paramref name="exec" /> returns <c>ValueSome</c>.
   /// </summary>
   /// <param name="exec">Returns the message to dispatch.</param>
-  /// <param name="uiBoundCmdParam">
-  ///   If <c>true</c>, <c>CanExecuteChanged</c> will trigger every time WPF's
-  ///   <c>CommandManager</c>
-  ///   detects UI changes that could potentially influence the command's
-  ///   ability to execute. This will likely lead to many more triggers than
-  ///   necessary, but is needed if you have bound the <c>CommandParameter</c>
-  ///   to another UI property.
-  /// </param>
   /// <param name="wrapDispatch">
   ///   Wraps the dispatch function with additional behavior, such as
   ///   throttling, debouncing, or limiting.
@@ -1974,14 +1960,6 @@ type Binding private () =
   ///   and can execute if <paramref name="exec" /> returns <c>Some</c>.
   /// </summary>
   /// <param name="exec">Returns the message to dispatch.</param>
-  /// <param name="uiBoundCmdParam">
-  ///   If <c>true</c>, <c>CanExecuteChanged</c> will trigger every time WPF's
-  ///   <c>CommandManager</c>
-  ///   detects UI changes that could potentially influence the command's
-  ///   ability to execute. This will likely lead to many more triggers than
-  ///   necessary, but is needed if you have bound the <c>CommandParameter</c>
-  ///   to another UI property.
-  /// </param>
   /// <param name="wrapDispatch">
   ///   Wraps the dispatch function with additional behavior, such as
   ///   throttling, debouncing, or limiting.
@@ -3786,14 +3764,6 @@ module Extensions =
     ///   and can execute if <paramref name="exec" /> returns <c>ValueSome</c>.
     /// </summary>
     /// <param name="exec">Returns the message to dispatch.</param>
-    /// <param name="uiBoundCmdParam">
-    ///   If <c>true</c>, <c>CanExecuteChanged</c> will trigger every time WPF's
-    ///   <c>CommandManager</c>
-    ///   detects UI changes that could potentially influence the command's
-    ///   ability to execute. This will likely lead to many more triggers than
-    ///   necessary, but is needed if you have bound the <c>CommandParameter</c>
-    ///   to another UI property.
-    /// </param>
     /// <param name="wrapDispatch">
     ///   Wraps the dispatch function with additional behavior, such as
     ///   throttling, debouncing, or limiting.
@@ -3855,14 +3825,6 @@ module Extensions =
     ///   and can execute if <paramref name="exec" /> returns <c>Some</c>.
     /// </summary>
     /// <param name="exec">Returns the message to dispatch.</param>
-    /// <param name="uiBoundCmdParam">
-    ///   If <c>true</c>, <c>CanExecuteChanged</c> will trigger every time WPF's
-    ///   <c>CommandManager</c>
-    ///   detects UI changes that could potentially influence the command's
-    ///   ability to execute. This will likely lead to many more triggers than
-    ///   necessary, but is needed if you have bound the <c>CommandParameter</c>
-    ///   to another UI property.
-    /// </param>
     /// <param name="wrapDispatch">
     ///   Wraps the dispatch function with additional behavior, such as
     ///   throttling, debouncing, or limiting.
@@ -3933,14 +3895,6 @@ module Extensions =
     ///   functions for inputs and commands.
     /// </summary>
     /// <param name="exec">Returns the message to dispatch.</param>
-    /// <param name="uiBoundCmdParam">
-    ///   If <c>true</c>, <c>CanExecuteChanged</c> will trigger every time WPF's
-    ///   <c>CommandManager</c>
-    ///   detects UI changes that could potentially influence the command's
-    ///   ability to execute. This will likely lead to many more triggers than
-    ///   necessary, but is needed if you have bound the <c>CommandParameter</c>
-    ///   to another UI property.
-    /// </param>
     /// <param name="wrapDispatch">
     ///   Wraps the dispatch function with additional behavior, such as
     ///   throttling, debouncing, or limiting.
@@ -4007,14 +3961,6 @@ module Extensions =
     /// </summary>
     /// <param name="exec">Returns the message to dispatch.</param>
     /// <param name="canExec">Indicates whether the command can execute.</param>
-    /// <param name="uiBoundCmdParam">
-    ///   If <c>true</c>, <c>CanExecuteChanged</c> will trigger every time WPF's
-    ///   <c>CommandManager</c>
-    ///   detects UI changes that could potentially influence the command's
-    ///   ability to execute. This will likely lead to many more triggers than
-    ///   necessary, but is needed if you have bound the <c>CommandParameter</c>
-    ///   to another UI property.
-    /// </param>
     /// <param name="wrapDispatch">
     ///   Wraps the dispatch function with additional behavior, such as
     ///   throttling, debouncing, or limiting.
