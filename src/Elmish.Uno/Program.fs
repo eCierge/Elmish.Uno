@@ -1,4 +1,4 @@
-﻿namespace Elmish.WPF
+﻿namespace Elmish.Uno
 
 open System.Windows
 open Microsoft.Extensions.Logging
@@ -6,7 +6,7 @@ open Microsoft.Extensions.Logging.Abstractions
 open Elmish
 
 
-type WpfProgram<'model, 'msg, 'viewModel> =
+type UnoProgram<'model, 'msg, 'viewModel> =
   internal {
     ElmishProgram: Program<unit, 'model, 'msg, unit>
     CreateViewModel: ViewModelArgs<'model,'msg> -> 'viewModel
@@ -17,13 +17,13 @@ type WpfProgram<'model, 'msg, 'viewModel> =
     PerformanceLogThreshold: int
   }
 
-type WpfProgram<'model, 'msg> = WpfProgram<'model, 'msg, obj>
+type UnoProgram<'model, 'msg> = UnoProgram<'model, 'msg, obj>
 
 
 [<RequireQualifiedAccess>]
-module WpfProgram =
+module UnoProgram =
 
-  let private mapVm fOut fIn (p: WpfProgram<'model, 'msg, 'viewModel0>) : WpfProgram<'model, 'msg, 'viewModel1> =
+  let private mapVm fOut fIn (p: UnoProgram<'model, 'msg, 'viewModel0>) : UnoProgram<'model, 'msg, 'viewModel1> =
     { ElmishProgram = p.ElmishProgram
       CreateViewModel = p.CreateViewModel >> fOut
       UpdateViewModel = (fun (vm, m) -> p.UpdateViewModel(fIn vm, m))
@@ -49,7 +49,7 @@ module WpfProgram =
       PerformanceLogThreshold = 1 }
 
 
-  /// Creates a WpfProgram that does not use commands.
+  /// Creates a UnoProgram that does not use commands.
   let mkSimple
       (init: unit -> 'model)
       (update: 'msg  -> 'model -> 'model)
@@ -58,7 +58,7 @@ module WpfProgram =
     |> createWithBindings bindings
 
 
-  /// Creates a WpfProgram that uses commands
+  /// Creates a UnoProgram that uses commands
   let mkProgram
       (init: unit -> 'model * Cmd<'msg>)
       (update: 'msg  -> 'model -> 'model * Cmd<'msg>)
@@ -66,7 +66,7 @@ module WpfProgram =
     Program.mkProgram init update (fun _ _ -> ())
     |> createWithBindings bindings
 
-  /// Creates a WpfProgram that does not use commands.
+  /// Creates a UnoProgram that does not use commands.
   let mkSimpleT
       (init: unit -> 'model)
       (update: 'msg  -> 'model -> 'model)
@@ -75,7 +75,7 @@ module WpfProgram =
     |> createWithVm createVm
 
 
-  /// Creates a WpfProgram that uses commands
+  /// Creates a UnoProgram that uses commands
   let mkProgramT
       (init: unit -> 'model * Cmd<'msg>)
       (update: 'msg  -> 'model -> 'model * Cmd<'msg>)
@@ -101,7 +101,7 @@ module WpfProgram =
   /// let elmishThread =
   ///   Thread(
   ///     ThreadStart(fun () ->
-  ///       WpfProgram.startElmishLoop window program
+  ///       UnoProgram.startElmishLoop window program
   ///       Dispatcher.Run()))
   /// elmishThread.Name <- "ElmishDispatchThread"
   /// elmishThread.Run()
@@ -117,12 +117,12 @@ module WpfProgram =
   /// <returns></returns>
   let startElmishLoop
       (element: FrameworkElement)
-      (program: WpfProgram<'model, 'msg, 'viewModel>) =
+      (program: UnoProgram<'model, 'msg, 'viewModel>) =
     let mutable viewModel = None
 
-    let updateLogger = program.LoggerFactory.CreateLogger("Elmish.WPF.Update")
-    let bindingsLogger = program.LoggerFactory.CreateLogger("Elmish.WPF.Bindings")
-    let performanceLogger = program.LoggerFactory.CreateLogger("Elmish.WPF.Performance")
+    let updateLogger = program.LoggerFactory.CreateLogger("Elmish.Uno.Update")
+    let bindingsLogger = program.LoggerFactory.CreateLogger("Elmish.Uno.Bindings")
+    let performanceLogger = program.LoggerFactory.CreateLogger("Elmish.Uno.Performance")
 
     let measure callName f = BindingVmHelpers.Helpers2.measure performanceLogger LogLevel.Debug program.PerformanceLogThreshold "" "main" callName f
 
@@ -170,7 +170,7 @@ module WpfProgram =
           continuationOnUIThread()
         | Threaded_PendingUIDispatch uiWaiter
         | Threaded_UIDispatch uiWaiter ->
-          uiWaiter.SetException(exn("Error in core Elmish.WPF threading code. Invalid state reached!"))
+          uiWaiter.SetException(exn("Error in core Elmish.Uno threading code. Invalid state reached!"))
       else // message is not from the UI thread
         elmishDispatcher.InvokeAsync(fun () -> dispatch msg) |> ignore // handle as a command message
 
@@ -338,7 +338,7 @@ module WpfProgram =
   /// message case with all data ("%A" formatting).
   ///
   /// Note that exceptions passed to onError are also logged to the logger
-  /// specified using WpfProgram.withLogger.
+  /// specified using UnoProgram.withLogger.
   let withElmishErrorHandler onError program =
     { program with ErrorHandler = onError }
 

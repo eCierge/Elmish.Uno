@@ -52,7 +52,7 @@
     <Compile Include="ViewModels.fs" />
     <Compile Include="Binding.fs" />
     <Compile Include="ViewModelModule.fs" />
-    <Compile Include="WpfProgram.fs" />
+    <Compile Include="Program.fs" />
   </ItemGroup>
 
   <ItemGroup>
