@@ -24,10 +24,14 @@ module Form1 =
     | SetText s -> { m with Text = s }
     | Submit -> m  // handled by parent
 
+  [<CompiledName("Bindings")>]
   let bindings () : Binding<Model, Msg> list = [
     "Text" |> Binding.twoWay ((fun m -> m.Text), SetText)
     "Submit" |> Binding.cmd Submit
   ]
+
+  [<CompiledName("DesignModel")>]
+  let designModel = init
 
 
 module Form2 =
@@ -51,12 +55,15 @@ module Form2 =
     | SetText2 s -> { m with Text2 = s }
     | Submit -> m  // handled by parent
 
+  [<CompiledName("Bindings")>]
   let bindings () : Binding<Model, Msg> list = [
     "Text1" |> Binding.twoWay ((fun m -> m.Text1), SetText1)
     "Text2" |> Binding.twoWay ((fun m -> m.Text2), SetText2)
     "Submit" |> Binding.cmd Submit
   ]
 
+  [<CompiledName("DesignModel")>]
+  let designModel = init
 
 module App =
 
@@ -67,8 +74,10 @@ module App =
   type Model =
     { Dialog: Dialog option }
 
-  let init () =
+  let initial =
     { Dialog = None }
+
+  let init () = initial
 
   type Msg =
     | ShowForm1
@@ -115,6 +124,9 @@ module App =
       |> Binding.mapMsg Form2Msg
   ]
 
+
+[<CompiledName("DesignModel")>]
+let designModel = App.initial
 
 [<CompiledName("Program")>]
 let program =

@@ -50,10 +50,12 @@ type Model =
     Value: string
     Password: string }
 
-let init () =
+let initial =
   { UpdateCount = 0
     Value = ""
     Password = "" }
+
+let init () = initial
 
 type Msg =
   | NewValue of string
@@ -93,6 +95,8 @@ let bindings : Binding<Model, Msg> list = [
     (fun m -> (match validateInt42 m.Value with Ok _ -> true | Error _ -> false) && (validatePassword m.Password |> List.isEmpty)))
 ]
 
+[<CompiledName("DesignModel")>]
+let designModel = initial
 
 [<CompiledName("Program")>]
 let program =

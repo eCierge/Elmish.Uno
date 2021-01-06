@@ -1,4 +1,4 @@
-module Elmish.Uno.Samples.FileDialogs.CmdMsg.Program
+module Elmish.Uno.Samples.FileDialogsCmdMsg.Program
 
 open System
 open Serilog
@@ -21,11 +21,12 @@ module Core =
     | Load
 
 
-  let init () =
+  let initial =
     { CurrentTime = DateTimeOffset.Now
       Text = ""
-      StatusMsg = "" },
-    []
+      StatusMsg = "" }
+
+  let init () = initial, []
 
   type Msg =
     | SetTime of DateTimeOffset
@@ -139,6 +140,9 @@ let subscriptions (_model: Model) : Sub<Msg> =
   [
     [ nameof timerTickSub ], timerTickSub
   ]
+
+[<CompiledName("DesignModel")>]
+let designModel = initial
 
 [<CompiledName("Program")>]
 let program =

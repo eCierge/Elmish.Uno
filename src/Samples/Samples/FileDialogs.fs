@@ -17,11 +17,12 @@ type Model =
     StatusMsg: string }
 
 
-let init () =
+let initial =
   { CurrentTime = DateTimeOffset.Now
     Text = ""
-    StatusMsg = "" },
-  []
+    StatusMsg = "" }
+
+let init () = initial, []
 
 type Msg =
   | SetTime of DateTimeOffset
@@ -118,15 +119,8 @@ let subscriptions (model: Model) : Sub<Msg> =
     [ nameof timerTickSub ], timerTickSub
   ]
 
-let main window =
-
-  let logger =
-    LoggerConfiguration()
-      .MinimumLevel.Override("Elmish.WPF.Update", Events.LogEventLevel.Verbose)
-      .MinimumLevel.Override("Elmish.WPF.Bindings", Events.LogEventLevel.Verbose)
-      .MinimumLevel.Override("Elmish.WPF.Performance", Events.LogEventLevel.Verbose)
-      .WriteTo.Console()
-      .CreateLogger()
+[<CompiledName("DesignModel")>]
+let designModel = initial
 
 [<CompiledName("Program")>]
 let program =

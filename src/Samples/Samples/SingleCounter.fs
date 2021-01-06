@@ -41,6 +41,9 @@ let bindings : Binding<Model, Msg> list = [
   "Reset" |> Binding.cmdIf(Reset, canReset)
 ]
 
+[<CompiledName("DesignModel")>]
+let designModel = initial
+
 [<CompiledName("Program")>]
 let program =
   Program.mkSimpleUno init update bindings

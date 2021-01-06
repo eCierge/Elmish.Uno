@@ -7,7 +7,6 @@ open Windows.UI.Core
 open Serilog
 open Serilog.Extensions.Logging
 
-
 type Position = { X: int; Y: int }
 
 type Model =
@@ -20,12 +19,14 @@ type Model =
 let visibleButtonText = "Hide text box"
 let collapsedButonText = "Show text box"
 
-let init () =
+let initial =
   { Msg1 = ""
     Msg2 = ""
     ButtonText = visibleButtonText
     Visibility = Visibility.Visible
     MousePosition = { X = 0; Y = 0 } }
+
+let init () = initial
 
 type Msg =
   | GotFocus1
@@ -68,8 +69,8 @@ let bindings : Binding<Model, Msg> list = [
   "MousePosition" |> Binding.oneWay (fun m -> sprintf "%dx%d" m.MousePosition.X m.MousePosition.Y)
 ]
 
-let designVm = ViewModel.designInstance (init ()) (bindings ())
-
+[<CompiledName("DesignModel")>]
+let designModel = initial
 
 [<CompiledName("Program")>]
 let program =
