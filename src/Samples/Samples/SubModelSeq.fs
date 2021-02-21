@@ -156,7 +156,7 @@ module App =
 
   let createNewIdentifiableCounter () =
     { Id = Guid.NewGuid ()
-      Value = Counter.init () }
+      Value = Counter.init 0 }
 
   let createNewLeaf () =
     createNewIdentifiableCounter ()

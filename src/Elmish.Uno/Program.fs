@@ -51,7 +51,7 @@ module UnoProgram =
 
   /// Creates a UnoProgram that does not use commands.
   let mkSimple
-      (init: unit -> 'model)
+      (init: 'arg -> 'model)
       (update: 'msg  -> 'model -> 'model)
       (bindings: unit -> Binding<'model, 'msg> list) =
     Program.mkSimple init update (fun _ _ -> ())
@@ -60,7 +60,7 @@ module UnoProgram =
 
   /// Creates a UnoProgram that uses commands
   let mkProgram
-      (init: unit -> 'model * Cmd<'msg>)
+      (init: 'arg -> 'model * Cmd<'msg>)
       (update: 'msg  -> 'model -> 'model * Cmd<'msg>)
       (bindings: unit -> Binding<'model, 'msg> list) =
     Program.mkProgram init update (fun _ _ -> ())
@@ -68,7 +68,7 @@ module UnoProgram =
 
   /// Creates a UnoProgram that does not use commands.
   let mkSimpleT
-      (init: unit -> 'model)
+      (init: 'arg -> 'model)
       (update: 'msg  -> 'model -> 'model)
       (createVm: ViewModelArgs<'model, 'msg> -> 'viewModel) =
     Program.mkSimple init update (fun _ _ -> ())
@@ -77,7 +77,7 @@ module UnoProgram =
 
   /// Creates a UnoProgram that uses commands
   let mkProgramT
-      (init: unit -> 'model * Cmd<'msg>)
+      (init: 'arg -> 'model * Cmd<'msg>)
       (update: 'msg  -> 'model -> 'model * Cmd<'msg>)
       (createVm: ViewModelArgs<'model, 'msg> -> 'viewModel) =
     Program.mkProgram init update (fun _ _ -> ())
