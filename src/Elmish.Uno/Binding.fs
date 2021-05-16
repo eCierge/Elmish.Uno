@@ -1186,7 +1186,7 @@ type Binding private () =
       (get: 'model -> 'a,
        set: 'a -> 'model -> 'msg,
        validate: 'model -> Result<'ignored, string>,
-       wrapDispatch: Dispatch<'msg> -> Dispatch<'msg>)
+       ?wrapDispatch: Dispatch<'msg> -> Dispatch<'msg>)
       : string -> Binding<'model, 'msg> =
     Binding.twoWayValidate (get, set, validate)
     >> Binding.alterMsgStream wrapDispatch

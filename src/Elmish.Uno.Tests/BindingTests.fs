@@ -579,7 +579,7 @@ module twoWayValidate =
         let validate x = if x < 0 then [ err ] else []
         let d = Binding.twoWayValidate(fail, fail2, validate) |> getValidationData
 
-        test <@ d.Validate x |> unbox = validate x @>
+        test <@ d.Validate x |> unbox = ((validate x) |> Seq.toArray) @>
       }
 
 
@@ -619,9 +619,9 @@ module twoWayValidate =
         let! err = GenX.auto<string>
 
         let validate x = if x < 0 then [ err ] else []
-        let d = Binding.twoWayValidate(fail, fail2, validate) |> getValidationData
+        let d = Binding.twoWayValidate(fail, fail2, validate) |> getTwoWayValidateData
 
-        test <@ d.Validate x |> unbox = validate x @>
+        test <@ d.Validate x |> unbox = ((validate x) |> Seq.toArray) @>
       }
 
 
@@ -653,6 +653,8 @@ module twoWayValidate =
     //    test <@ d.Set (box p) m |> unbox = set p m @>
     //  }
 
+        let set (p: string) (m: int) = p + string m
+        let d = Binding.twoWayValidate(fail, set, (fail: _ -> Result<_,_>)) |> getTwoWayValidateData
 
     [<Fact>]
     let ``final validate returns value from original validate`` () =
@@ -663,7 +665,7 @@ module twoWayValidate =
         let validate x = if x < 0 then [] else [ err ]
         let d = Binding.twoWayValidate(fail, fail2, validate) |> getValidationData
 
-        test <@ d.Validate x |> unbox = validate x @>
+        test <@ d.Validate x |> unbox = ((validate x) |> Seq.toArray) @>
       }
 
 
@@ -705,7 +707,7 @@ module twoWayValidate =
         let validate x = if x < 0 then [ err ] else []
         let d = Binding.twoWayValidate(fail, (fail: string -> int), validate) |> getValidationData
 
-        test <@ d.Validate x |> unbox = validate x @>
+        test <@ d.Validate x |> unbox = ((validate x) |> Seq.toArray) @>
       }
 
 
@@ -747,7 +749,7 @@ module twoWayValidate =
         let validate x = if x < 0 then [ err ] else []
         let d = Binding.twoWayValidate(fail, (fail: string -> int), validate) |> getValidationData
 
-        test <@ d.Validate x |> unbox = validate x @>
+        test <@ d.Validate x |> unbox = ((validate x) |> Seq.toArray) @>
       }
 
 
@@ -789,7 +791,7 @@ module twoWayValidate =
         let validate x = if x < 0 then [] else [ err ]
         let d = Binding.twoWayValidate(fail, (fail: string -> int), validate) |> getValidationData
 
-        test <@ d.Validate x |> unbox = validate x @>
+        test <@ d.Validate x |> unbox = ((validate x) |> Seq.toArray) @>
       }
 
 
@@ -858,7 +860,7 @@ module twoWayOptValidate =
         let validate x = if x < 0 then [ err ] else []
         let d = Binding.twoWayOptValidate((fail: _ -> _ voption), fail2, validate) |> getValidationData
 
-        test <@ d.Validate x |> unbox = validate x @>
+        test <@ d.Validate x |> unbox = ((validate x) |> Seq.toArray) @>
       }
 
 
@@ -902,6 +904,8 @@ module twoWayOptValidate =
     //    test <@ d.Set (box p) m |> unbox = set (ValueSome p) m @>
     //  }
 
+        let set (p: string voption) (m: int) = p |> ValueOption.map ((+) (string m))
+        let d = Binding.twoWayOptValidate(fail, set, (fail: _ -> _ option)) |> getTwoWayValidateData
 
     //[<Fact>]
     //let ``when final set receives null, original get receives ValueNone`` () =
@@ -924,7 +928,7 @@ module twoWayOptValidate =
         let validate x = if x < 0 then [ err ] else []
         let d = Binding.twoWayOptValidate((fail: _ -> _ voption), fail2, validate) |> getValidationData
 
-        test <@ d.Validate x |> unbox = validate x @>
+        test <@ d.Validate x |> unbox = ((validate x) |> Seq.toArray) @>
       }
 
 
@@ -980,6 +984,8 @@ module twoWayOptValidate =
     //    test <@ d.Set null m |> unbox = set ValueNone m @>
     //  }
 
+        let set (p: string voption) (m: int) = p |> ValueOption.map ((+) (string m))
+        let d = Binding.twoWayOptValidate(fail, set, (fail: _ -> Result<_,_>)) |> getTwoWayValidateData
 
     [<Fact>]
     let ``final validate returns value from original validate`` () =
@@ -990,7 +996,7 @@ module twoWayOptValidate =
         let validate x = if x < 0 then [] else [ err ]
         let d = Binding.twoWayOptValidate((fail: _ -> _ voption), fail2, validate) |> getValidationData
 
-        test <@ d.Validate x |> unbox = validate x @>
+        test <@ d.Validate x |> unbox = ((validate x) |> Seq.toArray) @>
       }
 
 
@@ -1056,7 +1062,7 @@ module twoWayOptValidate =
         let validate x = if x < 0 then [ err ] else []
         let d = Binding.twoWayOptValidate((fail: _ -> _ option), fail2, validate) |> getValidationData
 
-        test <@ d.Validate x |> unbox = validate x @>
+        test <@ d.Validate x |> unbox = ((validate x) |> Seq.toArray) @>
       }
 
 
@@ -1122,7 +1128,7 @@ module twoWayOptValidate =
         let validate x = if x < 0 then [ err ] else []
         let d = Binding.twoWayOptValidate((fail: _ -> _ option), fail2, validate) |> getValidationData
 
-        test <@ d.Validate x |> unbox = validate x @>
+        test <@ d.Validate x |> unbox = ((validate x) |> Seq.toArray) @>
       }
 
 
@@ -1188,7 +1194,7 @@ module twoWayOptValidate =
         let validate x = if x < 0 then [] else [ err ]
         let d = Binding.twoWayOptValidate((fail: _ -> _ option), fail2, validate) |> getValidationData
 
-        test <@ d.Validate x |> unbox = validate x @>
+        test <@ d.Validate x |> unbox = ((validate x) |> Seq.toArray) @>
       }
 
 
@@ -1254,7 +1260,7 @@ module twoWayOptValidate =
         let validate x = if x < 0 then [ err ] else []
         let d = Binding.twoWayOptValidate((fail: _ -> _ voption), (fail: _ -> int), validate) |> getValidationData
 
-        test <@ d.Validate x |> unbox = validate x @>
+        test <@ d.Validate x |> unbox = ((validate x) |> Seq.toArray) @>
       }
 
 
@@ -1320,7 +1326,7 @@ module twoWayOptValidate =
         let validate x = if x < 0 then [ err ] else []
         let d = Binding.twoWayOptValidate((fail: _ -> _ voption), (fail: _ -> int), validate) |> getValidationData
 
-        test <@ d.Validate x |> unbox = validate x @>
+        test <@ d.Validate x |> unbox = ((validate x) |> Seq.toArray) @>
       }
 
 
@@ -1386,7 +1392,7 @@ module twoWayOptValidate =
         let validate x = if x < 0 then [] else [ err ]
         let d = Binding.twoWayOptValidate((fail: _ -> _ voption), (fail: _ -> int), validate) |> getValidationData
 
-        test <@ d.Validate x |> unbox = validate x @>
+        test <@ d.Validate x |> unbox = ((validate x) |> Seq.toArray) @>
       }
 
 
@@ -1452,7 +1458,7 @@ module twoWayOptValidate =
         let validate x = if x < 0 then [ err ] else []
         let d = Binding.twoWayOptValidate((fail: _ -> _ option), (fail: _ -> int), validate) |> getValidationData
 
-        test <@ d.Validate x |> unbox = validate x @>
+        test <@ d.Validate x |> unbox = ((validate x) |> Seq.toArray) @>
       }
 
 
@@ -1518,7 +1524,7 @@ module twoWayOptValidate =
         let validate x = if x < 0 then [ err ] else []
         let d = Binding.twoWayOptValidate((fail: _ -> _ option), (fail: _ -> int), validate) |> getValidationData
 
-        test <@ d.Validate x |> unbox = validate x @>
+        test <@ d.Validate x |> unbox = ((validate x) |> Seq.toArray) @>
       }
 
 
@@ -1556,8 +1562,8 @@ module twoWayOptValidate =
     //    let! m = GenX.auto<int>
     //    let! p = GenX.auto<string>
 
-    //    let set (p: string option) = p |> Option.map (fun x -> x + x)
-    //    let d = Binding.twoWayOptValidate(fail, set, (fail: _ -> Result<_,_>)) |> getValidationData
+        let set (p: string option) = p |> Option.map (fun x -> x + x)
+        let d = Binding.twoWayOptValidate(fail, set, (fail: _ -> Result<_,_>)) |> getTwoWayValidateData
 
     //    test <@ d.Set (box p) m |> unbox = set (Some p) @>
     //  }
@@ -1584,7 +1590,7 @@ module twoWayOptValidate =
         let validate x = if x < 0 then [] else [ err ]
         let d = Binding.twoWayOptValidate((fail: _ -> _ option), (fail: _ -> int), validate) |> getValidationData
 
-        test <@ d.Validate x |> unbox = validate x @>
+        test <@ d.Validate x |> unbox = ((validate x) |> Seq.toArray) @>
       }
 
 

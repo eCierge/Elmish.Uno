@@ -772,7 +772,7 @@ module TwoWayValidate =
       let set _ _ = ()
       let validate _ = ValueNone
 
-      let binding = twoWayValidate name get set validate
+      let binding = twoWayValidate name get set validate id (=)
       let vm = TestVm(m1, binding)
 
       test <@ vm.Get name = get m1 @>
@@ -794,7 +794,7 @@ module TwoWayValidate =
       let set _ _ = ()
       let validate _ = ValueNone
 
-      let binding = twoWayValidate name get set validate
+      let binding = twoWayValidate name get set validate id (=)
       let vm = TestVm(m1, binding)
 
       vm.UpdateModel m2
@@ -814,7 +814,7 @@ module TwoWayValidate =
       let set (p: string) (m: int) = string m + p
       let validate _ = ValueNone
 
-      let binding = twoWayValidate name get set validate
+      let binding = twoWayValidate name get set validate id (=)
       let vm = TestVm(m, binding)
 
       vm.Set name p
@@ -832,9 +832,9 @@ module TwoWayValidate =
 
       let get _ = ()
       let set _ _ = ()
-      let validate m = if m < 0 then ValueSome (string m) else ValueNone
+      let validate m = if m < 0 then ValueSome (string m |> box) else ValueNone
 
-      let binding = twoWayValidate name get set validate
+      let binding = twoWayValidate name get set validate id (=)
       let vm = TestVm(m1, binding)
 
       vm.UpdateModel m2
@@ -874,7 +874,7 @@ module TwoWayValidate =
       let set _ _ = ()
       let validate _ = ValueNone
 
-      let binding = twoWayValidate name get set validate
+      let binding = twoWayValidate name get set validate id (=)
       let vm = TestVm(m1, binding)
       let vm' = vm :> INotifyDataErrorInfo
 
@@ -897,9 +897,9 @@ module TwoWayValidate =
 
       let get _ = ()
       let set _ _ = ()
-      let validate m = ValueSome (string<int> m)
+      let validate m = ValueSome (string<int> m |> box)
 
-      let binding = twoWayValidate name get set validate
+      let binding = twoWayValidate name get set validate id (=)
       let vm = TestVm(m1, binding)
       let vm' = vm :> INotifyDataErrorInfo
 
