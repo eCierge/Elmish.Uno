@@ -58,6 +58,7 @@
 
   <ItemGroup>
     <PackageReference Include="Elmish" Version="[4.0.1, 4.99]" />
+    <PackageReference Include="FSharp.Collections.Immutable" Version="2.0.0-*" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="[6.0.1, 99]" />
   </ItemGroup>
 

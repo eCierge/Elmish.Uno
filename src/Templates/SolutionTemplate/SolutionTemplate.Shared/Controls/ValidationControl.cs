@@ -1,20 +1,12 @@
-using System;
+﻿using System;
+using System.Collections;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel;
-using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
+
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Data;
-using Windows.UI.Xaml.Documents;
-using Windows.UI.Xaml.Input;
-using Windows.UI.Xaml.Media;
-using System.Collections.ObjectModel;
-using Microsoft.UI.Xaml.Controls;
-
-
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
 
 namespace SolutionTemplate.Controls
 {
@@ -32,7 +24,7 @@ namespace SolutionTemplate.Controls
 
         /// <summary>
         /// Gets or sets the PropertyName property. This dependency property
-        /// indicates ....
+        /// indicates which property of a DataContext object to monitor for errors.
         /// </summary>
         public string PropertyName
         {
@@ -40,51 +32,64 @@ namespace SolutionTemplate.Controls
             set => SetValue(PropertyNameProperty, value);
         }
 
-        /// <summary>
-        /// Provides derived classes an opportunity to handle changes to the PropertyName property.
-        /// </summary>
+#pragma warning disable CA1801 // Review unused parameters
+#pragma warning disable RCS1163 // Unused parameter.
         private void OnPropertyNameChanged(string oldPropertyName, string newPropertyName)
          => ResetErrors(newPropertyName);
+#pragma warning restore RCS1163 // Unused parameter.
+#pragma warning restore CA1801 // Review unused parameters
 
-        #endregion
+
+        #endregion PropertyName
 
         #region Errors
 
         public static readonly DependencyProperty ErrorsProperty =
-            DependencyProperty.Register(
-              "Errors",
-              typeof(ICollection<object>),
-              typeof(ValidationControl),
-              new PropertyMetadata(null));
+            DependencyProperty.Register(nameof(Errors), typeof(object), typeof(ValidationControl),
+                new PropertyMetadata(null, (d, e) => ((ValidationControl)d).OnErrorsChanged(e.OldValue, e.NewValue)));
 
-        public ICollection<object> Errors
+        private void OnErrorsChanged(object oldValue, object newValue)
         {
-            get => (ICollection<object>)GetValue(ErrorsProperty);
+            if (oldValue is INotifyCollectionChanged oldObservableCollection)
+                oldObservableCollection.CollectionChanged -= OnErrorsCollectionChanged;
+            if (newValue is INotifyCollectionChanged newObservableCollection)
+                newObservableCollection.CollectionChanged += OnErrorsCollectionChanged;
+        }
+
+        /// <summary>
+        /// Gets the Errors property. This dependency property contains errors list displayed.
+        /// </summary>
+        /// <remarks>
+        /// For internal use only!
+        /// </remarks>
+        public object Errors
+        {
+            get => GetValue(ErrorsProperty);
             private set => SetValue(ErrorsProperty, value);
         }
 
-        #endregion
+        #endregion Errors
 
-        #region ErrorTemplate
+        #region ErrorItemTemplate
 
         /// <summary>
-        /// IsCreative Dependency Property
+        /// ErrorItemTemplate Dependency Property
         /// </summary>
-        public static readonly DependencyProperty ErrorTemplateProperty =
-            DependencyProperty.Register(nameof(ErrorTemplate), typeof(DataTemplate), typeof(ValidationControl),
+        public static readonly DependencyProperty ErrorItemTemplateProperty =
+            DependencyProperty.Register(nameof(ErrorItemTemplate), typeof(DataTemplate), typeof(ValidationControl),
                 new PropertyMetadata(null));
 
         /// <summary>
-        /// Gets or sets the IsCreative property. This dependency property
-        /// indicates ....
+        /// Gets or sets the ErrorItemTemplate property. This dependency property
+        /// contains a DataTemplate to display error item content.
         /// </summary>
-        public DataTemplate ErrorTemplate
+        public DataTemplate ErrorItemTemplate
         {
-            get => (DataTemplate)GetValue(ErrorTemplateProperty);
-            set => SetValue(ErrorTemplateProperty, value);
+            get => (DataTemplate)GetValue(ErrorItemTemplateProperty);
+            set => SetValue(ErrorItemTemplateProperty, value);
         }
 
-        #endregion
+        #endregion ErrorItemTemplate
 
         #region ErrorContentStyle
 
@@ -98,7 +103,7 @@ namespace SolutionTemplate.Controls
 
         /// <summary>
         /// Gets or sets the ErrorContentStyle property. This dependency property
-        /// indicates ....
+        /// contains a Style to apply to content if errors are present.
         /// </summary>
         public Style ErrorContentStyle
         {
@@ -106,13 +111,17 @@ namespace SolutionTemplate.Controls
             set => SetValue(ErrorContentStyleProperty, value);
         }
 
-        /// <summary>
-        /// Provides derived classes an opportunity to handle changes to the ErrorContentStyle property.
-        /// </summary>
-        protected void OnErrorContentStyleChanged(Style oldErrorContentStyle, Style newErrorContentStyle)
-         => TrySetStyle();
+#pragma warning disable CA1801 // Review unused parameters
+#pragma warning disable RCS1163 // Unused parameter.
+        private void OnErrorContentStyleChanged(Style oldErrorContentStyle, Style newErrorContentStyle)
+        {
+            UnapplyErrorContentStyle();
+            TrySetStyle(newErrorContentStyle);
+        }
+#pragma warning restore RCS1163 // Unused parameter.
+#pragma warning restore CA1801 // Review unused parameters
 
-        #endregion
+        #endregion ErrorContentStyle
 
         public ValidationControl()
         {
@@ -122,23 +131,29 @@ namespace SolutionTemplate.Controls
 
         private Style lastErrorStyle;
 
-        private void TrySetStyle()
+        private void TrySetStyle(Style style)
         {
-            if (Errors?.Any() ?? false)
+            var errors = this.Errors as IEnumerable;
+            if (errors?.GetEnumerator().MoveNext() ?? false)
             {
-                if (lastErrorStyle != null)
+                if (style != null && lastErrorStyle == null)
                 {
-                    this.Resources.Remove(ErrorContentStyle.TargetType);
-                    lastErrorStyle = null;
+                    lastErrorStyle = style;
+                    this.Resources[lastErrorStyle.TargetType] = lastErrorStyle;
                 }
             }
             else
             {
-                if (ErrorContentStyle != null)
-                {
-                    lastErrorStyle = ErrorContentStyle;
-                    this.Resources[lastErrorStyle.TargetType] = lastErrorStyle;
-                }
+                UnapplyErrorContentStyle();
+            }
+        }
+
+        private void UnapplyErrorContentStyle()
+        {
+            if (lastErrorStyle != null)
+            {
+                this.Resources.Remove(lastErrorStyle.TargetType);
+                lastErrorStyle = null;
             }
         }
 
@@ -158,48 +173,55 @@ namespace SolutionTemplate.Controls
             }
         }
 
-        private void ResetErrors(string value)
+        private static readonly Type observableCollectionType = typeof(ObservableCollection<>);
+        private readonly Lazy<ObservableCollection<object>> errorsProxy = new Lazy<ObservableCollection<object>>();
+        private ObservableCollection<object> ErrorsProxy => errorsProxy.Value;
+
+        private void OnErrorsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e) => TrySetStyle(ErrorContentStyle);
+
+        private void ResetErrors(string propertyName)
         {
             if (currentINotifyDataErrorInfo != null)
             {
-                var errors = currentINotifyDataErrorInfo.GetErrors(value);
-                if (errors is ObservableCollection<object> collection)
+                var errors = currentINotifyDataErrorInfo.GetErrors(propertyName);
+                if (Errors == errors) return;
+
+                if (errors?.GetType().GetGenericTypeDefinition() == observableCollectionType)
                 {
-                    if (Errors != errors)
-                        Errors = collection;
+                    Errors = errors;
                 }
                 else
                 {
                     var errorsList = errors?.Cast<object>().ToList();
-                    if (Errors is ObservableCollection<object> ourCollection)
+                    if (errorsList == null && errorsProxy.IsValueCreated && Errors == ErrorsProxy)
                     {
-                        if (errorsList != null)
+
+                        for (int i = ErrorsProxy.Count - 1; i >= 0; i--)
                         {
-                            for (int i = ourCollection.Count - 1; i <= 0; i--)
-                                if (!errorsList.Contains(ourCollection[i]))
-                                {
-                                    ourCollection.RemoveAt(i);
-                                }
-                            for (int i = 0; i < errorsList.Count; i++)
-                                if (!ourCollection.Contains(errorsList[i]))
-                                {
-                                    ourCollection.Add(errorsList[i]);
-                                }
+                            ErrorsProxy.RemoveAt(i);
                         }
-                        else
-                            for (int i = ourCollection.Count - 1; i <= 0; i--)
+                    }
+                    else if (errorsList != null)
+                    {
+                        Errors = ErrorsProxy;
+                        for (int i = ErrorsProxy.Count - 1; i >= 0; i--)
+                            if (!errorsList.Contains(ErrorsProxy[i]))
                             {
-                                ourCollection.RemoveAt(i);
+                                ErrorsProxy.RemoveAt(i);
+                            }
+                        for (int i = 0; i < errorsList.Count; i++)
+                            if (!ErrorsProxy.Contains(errorsList[i]))
+                            {
+                                ErrorsProxy.Add(errorsList[i]);
                             }
                     }
-                    else
-                        Errors = (errorsList == null) ? null : new ObservableCollection<object>(errorsList);
                 }
             }
-            TrySetStyle();
         }
 
-        private void OnErrorsChanged(object obj, DataErrorsChangedEventArgs args) => ResetErrors(PropertyName);
+        private void OnErrorsChanged(object obj, DataErrorsChangedEventArgs args)
+        {
+            if (args.PropertyName == PropertyName) ResetErrors(PropertyName);
+        }
     }
-
 }
