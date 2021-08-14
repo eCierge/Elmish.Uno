@@ -28,7 +28,9 @@ type public Program () =
         async {
             do! Async.Sleep time
             do dispatch (Local <| RemoveNotification notification)
-        } |> Async.StartChild |> Async.RunSynchronously |> ignore
+        // WASM only understands Task class as asynchronous operation,
+        // hence using pure F# Async causes UI thread deadlock
+        } |> Async.StartAsTask |> ignore
 
     member p.Initial = Model.Initial
 
