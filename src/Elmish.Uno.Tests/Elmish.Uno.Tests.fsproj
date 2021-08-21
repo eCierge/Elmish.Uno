@@ -1,11 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
-  <PropertyGroup Condition="'$(Configuration)' != 'Debug'">
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-  </PropertyGroup>
+  <Import Project="..\Solution.Build.props" />
 
   <PropertyGroup>
     <TargetFrameworks>net5.0</TargetFrameworks>
+    <RootNamespace>$(RootNamespace).Tests</RootNamespace>
+    <AssemblyName>$(AssemblyBaseName).Tests</AssemblyName>
     <IsPackable>false</IsPackable>
     <OutputType>Library</OutputType>
     <GenerateProgramFile>false</GenerateProgramFile>
@@ -33,8 +32,8 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.2.0" />
     <!--<PackageReference Include="System.ValueTuple" Version="4.5.0" />-->
     <PackageReference Include="Unquote" Version="6.1.0" />
-    <PackageReference Include="xunit.core" Version="2.4.1" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.5">
+    <PackageReference Include="xunit.core" Version="2.4.*" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.*">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
@@ -45,7 +44,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Update="FSharp.Core" Version="5.0.*" />
+    <PackageReference Update="FSharp.Core" Version="$(FSharpCoreVersion)" />
   </ItemGroup>
 
 </Project>

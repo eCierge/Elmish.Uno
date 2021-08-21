@@ -1,13 +1,13 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\Samples.Build.props" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">iPhoneSimulator</Platform>
     <ProjectGuid>{39D21008-549B-42ED-8640-3B9AAEFB2921}</ProjectGuid>
     <ProjectTypeGuids>{A3F8F2AB-B479-4A4A-A458-A89E7DC349F1};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <OutputType>Exe</OutputType>
-    <RootNamespace>Elmish.Uno.Samples</RootNamespace>
-    <AssemblyName>Samples.macOS</AssemblyName>
+    <AssemblyName>$(AssemblyBaseName)</AssemblyName>
     <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
     <TargetFrameworkIdentifier>Xamarin.Mac</TargetFrameworkIdentifier>
     <MonoMacResourcePrefix>Resources</MonoMacResourcePrefix>
@@ -62,7 +62,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Elmish" Version="[3.0.3, 4)" />
-    <PackageReference Include="FSharp.Core" Version="5.0.*" />
+    <PackageReference Include="FSharp.Core" Version="$(FSharpCoreVersion)" />
     <PackageReference Include="Uno.Microsoft.Toolkit" Version="7.0.*" />
     <PackageReference Include="Uno.Microsoft.Toolkit.Uwp" Version="7.0.*" />
     <PackageReference Include="Uno.Microsoft.Toolkit.Uwp.UI" Version="7.0.*" />

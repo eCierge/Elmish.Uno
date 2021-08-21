@@ -1,24 +1,25 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+  <Import Project="..\Samples.Build.props" />
   <PropertyGroup>
     <OutputType Condition="'$(Configuration)'=='Release'">WinExe</OutputType>
     <OutputType Condition="'$(Configuration)'=='Debug'">Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <UseWPF>true</UseWPF>
-    <RootNamespace>Elmish.Uno.Samples</RootNamespace>
+    <AssemblyName>$(AssemblyBaseName).Host</AssemblyName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)'=='Release'">
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Elmish" Version="[3.0.3, 4)" />
-    <PackageReference Include="FSharp.Core" Version="5.0.*" />
-    <PackageReference Include="Uno.Microsoft.Toolkit" Version="7.0.*" />
-    <PackageReference Include="Uno.Microsoft.Toolkit.Uwp" Version="7.0.*" />
-    <PackageReference Include="Uno.Microsoft.Toolkit.Uwp.UI" Version="7.0.*" />
-    <PackageReference Include="Uno.Microsoft.Xaml.Behaviors.Uwp.Managed" Version="2.0.2-uno.*" />
-    <PackageReference Include="Uno.UI.Skia.Wpf" Version="3.7.*" />
-    <PackageReference Include="Uno.UI.RemoteControl" Version="3.7.*" Condition="'$(Configuration)'=='Debug'" />
+    <PackageReference Include="Elmish" Version="$(ElmishVersion)" />
+    <PackageReference Include="FSharp.Core" Version="$(FSharpCoreVersion)" />
+    <PackageReference Include="Uno.Microsoft.Toolkit" Version="$(ToolkitVersion)" />
+    <PackageReference Include="Uno.Microsoft.Toolkit.Uwp" Version="$(ToolkitVersion)" />
+    <PackageReference Include="Uno.Microsoft.Toolkit.Uwp.UI" Version="$(ToolkitVersion)" />
+    <PackageReference Include="Uno.Microsoft.Xaml.Behaviors.Uwp.Managed" Version="$(UnoBehaviorsVersion)" />
+    <PackageReference Include="Uno.UI.Skia.Wpf" Version="$(UnoUIVersion)" />
+    <PackageReference Include="Uno.UI.RemoteControl" Version="$(UnoUIVersion)" Condition="'$(Configuration)'=='Debug'" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Assets\Fonts\uno-fluentui-assets.ttf" />

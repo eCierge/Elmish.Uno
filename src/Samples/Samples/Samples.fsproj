@@ -1,7 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="..\Samples.Build.props" />
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <AssemblyName>$(AssemblyBaseName).Programs</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
@@ -24,14 +26,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Elmish" Version="[3.0.3, 4)" />
-    <PackageReference Include="FSharp.Control.FusionTasks" Version="2.0.2" />
-    <PackageReference Include="Uno.Core" Version="2.3.0" />
-    <PackageReference Include="Uno.UI" Version="3.7.*" />
+    <PackageReference Include="Elmish" Version="$(ElmishVersion)" />
+    <PackageReference Include="FSharp.Control.FusionTasks" Version="2.4.*" />
+    <PackageReference Include="Uno.Core" Version="$(UnoCoreVersion)" />
+    <PackageReference Include="Uno.UI" Version="$(UnoUIVersion)" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Update="FSharp.Core" Version="5.0.*" />
+    <PackageReference Update="FSharp.Core" Version="$(FSharpCoreVersion)" />
   </ItemGroup>
 
 </Project>

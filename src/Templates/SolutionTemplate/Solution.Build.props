@@ -2,10 +2,10 @@
   <PropertyGroup>
     <AssemblyBaseName>SolutionTemplate</AssemblyBaseName>
     <RootNamespace>SolutionTemplate</RootNamespace>
-    <Company>Elmish.Uno</Company>
+    <Company>XperiAndri</Company>
     <Product>SolutionTemplate</Product>
     <Authors>Elmish.Unp</Authors>
-    <Copyright>Copyright © Elmish.Uno</Copyright>
+    <Copyright>Copyright © XperiAndri</Copyright>
     <MicrosoftExtensionsVersion>5.0.*</MicrosoftExtensionsVersion>
     <ToolkitVersion>7.0.*</ToolkitVersion>
     <UnoUIVersion>[3.9.*,4.0.0)</UnoUIVersion>
