@@ -34,7 +34,7 @@ jobs:
 
     - name: Build with dotnet
       run: |
-        msbuild 'src\\Elmish.Uno.sln' /t:Rebuild /p:Configuration=Release /p:Platform='Any CPU'
+        msbuild 'src\\Elmish.Uno.sln' /t:Rebuild /p:Configuration=Release /p:Platform='Any CPU' -maxcpucount
         $nuspec = get-content 'Elmish.Uno.nuspec' | %{ $_ -replace '\$versionSuffix\$',""}
         set-content 'Elmish.Uno.nuspec' -value $nuspec
         nuget pack 'Elmish.Uno.nuspec' -Properties Configuration=Release
