@@ -43,7 +43,7 @@ jobs:
       run: |
         $nuspec = get-content 'src\\Templates\\Templates.nuspec' | %{ $_ -replace '\$versionSuffix\$',""}
         set-content 'src\\Templates\\Templates.nuspec' -value $nuspec
-        nuget pack 'src\\Templates\\Templates.nuspec' -Properties Configuration=Release
+        nuget pack 'src\\Templates\\Templates.nuspec' -Properties Configuration=Release -NoDefaultExcludes
 
     - name: Publish to MyGet
       run: |
