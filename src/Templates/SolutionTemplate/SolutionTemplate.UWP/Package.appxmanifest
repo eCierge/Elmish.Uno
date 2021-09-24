@@ -7,11 +7,11 @@
   IgnorableNamespaces="uap mp">
 
   <Identity
-    Name="7727d8ad-8883-427d-a77a-7c8639ace4af"
-    Publisher="CN=otwel"
+    Name="7727D8AD-8883-427D-A77A-7C8639ACE4AF"
+    Publisher="CN=XperiAndri"
     Version="1.0.0.0" />
 
-  <mp:PhoneIdentity PhoneProductId="438b0cf0-79e5-47b9-a367-9a295e3c3f48" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
+  <mp:PhoneIdentity PhoneProductId="438B0CF0-79E5-47B9-A367-9A295E3C3F48" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
   <Properties>
     <DisplayName>SolutionTemplate</DisplayName>

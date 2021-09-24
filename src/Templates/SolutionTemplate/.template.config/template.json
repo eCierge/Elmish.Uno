@@ -11,5 +11,64 @@
     "type": "project"
   },
   "sourceName": "SolutionTemplate",
-  "preferNameDirectory": true
+  "preferNameDirectory": true,
+  "guids": [
+    "7727D8AD-8883-427D-A77A-7C8639ACE4AF",
+    "438B0CF0-79E5-47B9-A367-9A295E3C3F48",
+    "7CE16AD1-FE6B-405F-B83C-43A05695399C",
+    "C306819D-C046-4130-B9EF-68546B2CFBA4",
+    "4E726E84-2EA2-49D0-9B55-2D30FD5A892C",
+    "6279C845-92F8-4333-AB99-3D213163593C"
+  ],
+  "symbols": {
+    "windowsPublisherName": {
+      "type": "parameter",
+      "datatype": "text",
+      "replaces": "O=XperiAndri",
+      "description": "Provides the value to use for the Windows head publisher",
+      "defaultValue": "O=MyCompany"
+    },
+    "WebAssembly": {
+      "type": "parameter",
+      "dataType": "bool",
+      "defaultValue": "true",
+      "description": "Enables the WebAssembly platform support project"
+    },
+    "iOS": {
+      "type": "parameter",
+      "dataType": "bool",
+      "defaultValue": "true",
+      "description": "Enables the iOS platform support project"
+    },
+    "Android": {
+      "type": "parameter",
+      "dataType": "bool",
+      "defaultValue": "true",
+      "description": "Enables the Android platform support project"
+    },
+    "macOS": {
+      "type": "parameter",
+      "dataType": "bool",
+      "defaultValue": "true",
+      "description": "Enables the macOS platform support project"
+    },
+    "skia-wpf": {
+      "type": "parameter",
+      "dataType": "bool",
+      "defaultValue": "true",
+      "description": "Enables the Skia/WPF platform support project"
+    },
+    "skia-gtk": {
+      "type": "parameter",
+      "dataType": "bool",
+      "defaultValue": "true",
+      "description": "Enables the Skia/GTK platform support project"
+    },
+    "skia-tizen": {
+      "type": "parameter",
+      "dataType": "bool",
+      "defaultValue": "true",
+      "description": "Enables the Skia/Tizen platform support project"
+    }
+  }
 }
