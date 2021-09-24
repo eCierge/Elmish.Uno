@@ -70,8 +70,11 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="$(MicrosoftExtensionsVersion)" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="$(MicrosoftExtensionsVersion)" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="$(MicrosoftExtensionsVersion)" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="$(MicrosoftExtensionsVersion)" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="$(MicrosoftExtensionsVersion)" />
     <PackageReference Include="Uno.Microsoft.Toolkit" Version="$(ToolkitVersion)" />
     <PackageReference Include="Uno.Microsoft.Toolkit.Uwp" Version="$(ToolkitVersion)" />
     <PackageReference Include="Uno.Microsoft.Toolkit.Uwp.UI" Version="$(ToolkitVersion)" />

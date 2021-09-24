@@ -1,0 +1,34 @@
+{
+  "solution": {
+    "path": "SolutionTemplate.sln",
+    "projects": [
+    #//#if (Android)
+      "SolutionTemplate.Droid\\SolutionTemplate.Droid.csproj",
+    #//#endif
+
+      "SolutionTemplate.Shared\\SolutionTemplate.Shared.shproj",
+
+    #//#if (skia-gtk)
+      "SolutionTemplate.Skia.Gtk\\SolutionTemplate.Skia.Gtk.csproj",
+    #//#endif
+
+    #//#if (skia-linux-fb)
+      "SolutionTemplate.Skia.Linux.FrameBuffer\\SolutionTemplate.Skia.Linux.FrameBuffer.csproj",
+    #//#endif
+
+    #//#if (WebAssembly)
+      "SolutionTemplate.Wasm\\SolutionTemplate.Wasm.csproj",
+    #//#endif
+
+    #//#if (iOS)
+      "SolutionTemplate.iOS\\SolutionTemplate.iOS.csproj",
+    #//#endif
+
+    #//#if (macOS)
+      "SolutionTemplate.macOS\\SolutionTemplate.macOS.csproj",
+    #//#endif
+
+      "SolutionTemplate\\SolutionTemplate.fsproj"
+    ]
+  }
+}

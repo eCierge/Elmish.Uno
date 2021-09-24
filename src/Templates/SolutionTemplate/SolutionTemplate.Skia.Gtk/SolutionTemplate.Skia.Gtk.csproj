@@ -9,6 +9,7 @@
     <TargetFramework>net5.0</TargetFramework>
     <AssemblyName>$(AssemblyBaseName)</AssemblyName>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <Configurations>Release;Debug</Configurations>
   </PropertyGroup>
   <ItemGroup Condition="exists('..\SolutionTemplate.UWP')">
     <EmbeddedResource Include="..\SolutionTemplate.UWP\Package.appxmanifest" LogicalName="Package.appxmanifest" />
