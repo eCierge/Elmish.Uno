@@ -16,7 +16,7 @@
     </PackageReference>
     <PackageReference Include="Elmish" Version="$(ElmishVersion)" />
     <PackageReference Include="FSharp.Core" Version="$(FSharpCoreVersion)" />
-    <PackageReference Include="Microsoft.UI.Xaml" Version="2.6.*" />
+    <PackageReference Include="Microsoft.UI.Xaml" Version="2.7.*" />
     <PackageReference Include="Microsoft.Xaml.Behaviors.Uwp.Managed" Version="2.0.*" />
     <PackageReference Include="Microsoft.Toolkit" Version="$(ToolkitVersion)" />
     <PackageReference Include="Microsoft.Toolkit.Uwp" Version="$(ToolkitVersion)" />
