@@ -8,6 +8,7 @@
   xmlns:samples="using:Elmish.Uno.Samples"
   xmlns:win="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
   xmlns:xamarin="http://uno.ui/xamarin"
+  xmlns:utoolkit="using:Uno.UI.Toolkit"
   d:DataContext="{d:DesignInstance Type=samples:DesignData,
                                    IsDesignTimeCreatable=True}"
   Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
@@ -46,6 +47,7 @@
     </DataTemplate>
   </Page.Resources>
   <Grid
+    utoolkit:VisibleBoundsPadding.PaddingMask="All"
     MinWidth="300"
     Margin="0,25,0,0"
     HorizontalAlignment="Center"

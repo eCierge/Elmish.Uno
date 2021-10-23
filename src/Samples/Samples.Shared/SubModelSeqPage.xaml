@@ -7,10 +7,13 @@
   xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
   xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
   xmlns:samples="using:Elmish.Uno.Samples"
+  xmlns:utoolkit="using:Uno.UI.Toolkit"
   Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
   mc:Ignorable="d">
 
-  <Grid d:DataContext="{Binding SubModelSeq}" Padding="0,10">
+  <Grid d:DataContext="{Binding SubModelSeq}"
+        utoolkit:VisibleBoundsPadding.PaddingMask="All"
+        Padding="0,10">
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto" />
       <RowDefinition Height="*" />

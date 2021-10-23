@@ -6,10 +6,12 @@
   xmlns:local="using:Elmish.Uno.Samples.SubModelOpt"
   xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
   xmlns:samples="using:Elmish.Uno.Samples"
+  xmlns:utoolkit="using:Uno.UI.Toolkit"
   Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
   mc:Ignorable="d">
 
   <Grid d:DataContext="{Binding SubModelOpt}"
+        utoolkit:VisibleBoundsPadding.PaddingMask="All"
     HorizontalAlignment="Stretch"
     VerticalAlignment="Stretch">
     <StackPanel Margin="0,15,0,0">

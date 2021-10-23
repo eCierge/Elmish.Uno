@@ -17,12 +17,20 @@
       <RowDefinition Height="*" />
     </Grid.RowDefinitions>
 
-    <Button
-      x:Name="BackButton"
-      utoolkit:VisibleBoundsPadding.PaddingMask="All"
-      Click="OnBackButtonClick"
-      Style="{StaticResource NavigationBackButtonNormalStyle}"
-      Visibility="{x:Bind RootFrame.CanGoBack, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+    <Grid utoolkit:VisibleBoundsPadding.PaddingMask="All"
+          Visibility="{x:Bind Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay, Path=RootFrame.CanGoBack}" >
+      <TextBlock
+        Style="{StaticResource TitleTextBlockStyle}"
+        HorizontalAlignment="Center"
+        VerticalAlignment="Center"
+        d:Text="Page name"
+        Text="{x:Bind PageTypeName}" />
+      <Button
+        x:Name="BackButton"
+        Click="OnBackButtonClick"
+        HorizontalAlignment="Left"
+        Style="{StaticResource NavigationBackButtonNormalStyle}" />
+    </Grid>
 
     <Frame
       x:Name="RootFrame"
