@@ -6,7 +6,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <LangVersion>9.0</LangVersion>
-    <TargetFrameworkVersion>v10.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v12.0</TargetFrameworkVersion>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{7CE16AD1-FE6B-405F-B83C-43A05695399C}</ProjectGuid>
@@ -82,9 +82,11 @@
     <PackageReference Include="Uno.UI.RemoteControl" Version="$(UnoUIVersion)" Condition="'$(Configuration)'=='Debug'" />
     <PackageReference Include="Uno.UI" Version="$(UnoUIVersion)" />
     <PackageReference Include="Uno.UniversalImageLoader" Version="1.9.*" />
-    <PackageReference Include="Xamarin.AndroidX.Activity" Version="1.3.*" />
-    <PackageReference Include="Xamarin.AndroidX.AppCompat" Version="1.3.*" />
-    <PackageReference Include="Xamarin.AndroidX.Legacy.Support.V4" Version="1.0.0.*" />
+    <PackageReference Include="Xamarin.AndroidX.Activity" Version="1.4.*" />
+    <PackageReference Include="Xamarin.AndroidX.AppCompat" Version="1.4.*" />
+    <PackageReference Include="Xamarin.AndroidX.Core" Version="1.7.*" />
+    <PackageReference Include="Xamarin.AndroidX.Fragment" Version="1.4.*" />
+    <PackageReference Include="Xamarin.AndroidX.Legacy.Support.V4" Version="1.0.*" />
     <PackageReference Include="Xamarin.AndroidX.RecyclerView" Version="1.2.*" />
   </ItemGroup>
   <ItemGroup>

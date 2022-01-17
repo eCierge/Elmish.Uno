@@ -5,8 +5,8 @@
   <PropertyGroup>
     <OutputType Condition="'$(Configuration)'=='Release'">WinExe</OutputType>
     <OutputType Condition="'$(Configuration)'=='Debug'">Exe</OutputType>
-    <LangVersion>9.0</LangVersion>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
+    <LangVersion>$(CSharpLangVersion)</LangVersion>
     <AssemblyName>$(AssemblyBaseName)</AssemblyName>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Configurations>Release;Debug</Configurations>
@@ -24,7 +24,6 @@
     <UpToDateCheckInput Include="..\SolutionTemplate.Shared\**\*.xaml" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="$(MicrosoftExtensionsVersion)" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="$(MicrosoftExtensionsVersion)" />
     <PackageReference Include="Uno.Microsoft.Toolkit" Version="$(ToolkitVersion)" />

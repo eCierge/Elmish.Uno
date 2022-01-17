@@ -17,48 +17,48 @@
       <group targetFramework="MonoAndroid">
         <dependency id="Elmish" version="3.1.0" />
         <dependency id="FSharp.Core" version="5.0.1" />
-        <dependency id="FSharp.Collections.Immutable" version="2.0.0" />
+        <dependency id="FSharp.Collections.Immutable" version="2.0.0-ci-0" />
         <dependency id="NETStandard.Library" version="2.0.3" />
       </group>
       <group targetFramework="net5.0">
         <dependency id="Elmish" version="3.1.0" />
         <dependency id="FSharp.Core" version="5.0.1" />
-        <dependency id="FSharp.Collections.Immutable" version="2.0.0" />
+        <dependency id="FSharp.Collections.Immutable" version="2.0.0-ci-0" />
         <dependency id="NETStandard.Library" version="2.0.3" />
       </group>
       <group targetFramework="netcoreapp3.1">
         <dependency id="Elmish" version="3.1.0" />
         <dependency id="FSharp.Core" version="5.0.1" />
-        <dependency id="FSharp.Collections.Immutable" version="2.0.0" />
+        <dependency id="FSharp.Collections.Immutable" version="2.0.0-ci-0" />
         <dependency id="NETStandard.Library" version="2.0.3" />
       </group>
       <group targetFramework=".NETStandard2.0">
         <dependency id="Elmish" version="3.1.0" />
         <dependency id="FSharp.Core" version="5.0.1" />
-        <dependency id="FSharp.Collections.Immutable" version="2.0.0" />
+        <dependency id="FSharp.Collections.Immutable" version="2.0.0-ci-0" />
         <dependency id="NETStandard.Library" version="2.0.3" />
       </group>
       <group targetFramework="tizen4">
         <dependency id="Elmish" version="3.1.0" />
         <dependency id="FSharp.Core" version="5.0.1" />
-        <dependency id="FSharp.Collections.Immutable" version="2.0.0" />
+        <dependency id="FSharp.Collections.Immutable" version="2.0.0-ci-0" />
         <dependency id="NETStandard.Library" version="2.0.3" />
       </group>
       <group targetFramework="UAP10.0.17134">
         <dependency id="Elmish" version="3.1.0" />
         <dependency id="FSharp.Core" version="5.0.1" />
-        <dependency id="FSharp.Collections.Immutable" version="2.0.0" />
+        <dependency id="FSharp.Collections.Immutable" version="2.0.0-ci-0" />
       </group>
       <group targetFramework="xamarinios">
         <dependency id="Elmish" version="3.1.0" />
         <dependency id="FSharp.Core" version="5.0.1" />
-        <dependency id="FSharp.Collections.Immutable" version="2.0.0" />
+        <dependency id="FSharp.Collections.Immutable" version="2.0.0-ci-0" />
         <dependency id="NETStandard.Library" version="2.0.3" />
       </group>
       <group targetFramework="xamarinmac">
         <dependency id="Elmish" version="3.1.0" />
         <dependency id="FSharp.Core" version="5.0.1" />
-        <dependency id="FSharp.Collections.Immutable" version="2.0.0" />
+        <dependency id="FSharp.Collections.Immutable" version="2.0.0-ci-0" />
         <dependency id="NETStandard.Library" version="2.0.3" />
       </group>
     </dependencies>

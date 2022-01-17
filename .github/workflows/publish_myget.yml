@@ -8,25 +8,25 @@ on:
 jobs:
   build:
 
-    runs-on: windows-latest
+    runs-on: windows-2022
 
     steps:
     - uses: actions/checkout@v2
 
-    - name: Install .NET SDK 5.0.x
+    - name: Install .NET SDK 6.0.x
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: 5.0.x
+        dotnet-version: 6.0.x
 
     - name: Install MSBuild.exe
-      uses: warrenbuckley/Setup-MSBuild@v1
+      uses: microsoft/setup-msbuild@v1.1
       env:
         ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
 
-    - name: Install NuGet 5.x
+    - name: Install NuGet 6.x
       uses: nuget/setup-nuget@v1
       with:
-        nuget-version: '5.x'
+        nuget-version: '6.x'
 
     - name: Restore NuGet Packages
       run: |

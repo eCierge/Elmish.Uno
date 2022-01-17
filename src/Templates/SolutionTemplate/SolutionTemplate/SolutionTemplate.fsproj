@@ -25,10 +25,10 @@
     <PackageReference Include="Elmish" Version="3.1.0" />
     <PackageReference Include="Elmish.Uno" Version="1.0.0-ci-*" />
     <PackageReference Include="FSharp.Collections.Immutable" Version="2.0.0-ci-*" />
-    <PackageReference Include="FSharp.Control.FusionTasks" Version="2.4.*" />
+    <PackageReference Include="FSharp.Control.FusionTasks" Version="2.5.*" />
     <PackageReference Include="FSharp.Control.Reactive" Version="5.0.2" />
     <PackageReference Include="FSharpPlus" Version="1.2.*" />
-    <PackageReference Include="FSharpx.Extras" Version="3.0.0" />
+    <PackageReference Include="FSharpx.Extras" Version="3.*" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="$(MicrosoftExtensionsVersion)" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="$(MicrosoftExtensionsVersion)" />
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="$(MicrosoftExtensionsVersion)" />
@@ -40,4 +40,5 @@
   <ItemGroup>
     <PackageReference Update="FSharp.Core" Version="$(FSharpCoreVersion)" />
   </ItemGroup>
+
 </Project>
