@@ -8,7 +8,6 @@
     <TargetFramework>net6.0</TargetFramework>
     <LangVersion>$(CSharpLangVersion)</LangVersion>
     <AssemblyName>$(AssemblyBaseName)</AssemblyName>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Configurations>Release;Debug</Configurations>
   </PropertyGroup>
   <ItemGroup Condition="exists('..\SolutionTemplate.UWP')">

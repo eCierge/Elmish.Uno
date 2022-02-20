@@ -1,4 +1,7 @@
-﻿namespace SolutionTemplate.ElmishProgram
+﻿namespace SolutionTemplate.Elmish
+
+open System.Runtime.CompilerServices
+open Elmish
 
 [<AutoOpen>]
 module State =
@@ -14,7 +17,6 @@ module State =
 module Dispatching =
 
     open System
-    open Elmish
     open FSharp.Control.Reactive
 
     let asDispatchWrapper<'msg>
@@ -28,3 +30,22 @@ module Dispatching =
     let throttle<'msg> =
         Observable.throttle (TimeSpan.FromMilliseconds 500.)
         |> asDispatchWrapper<'msg>
+
+[<AbstractClass; Extension>]
+type ProgramExtensions =
+
+    [<Extension>]
+    static member WithSetState (program, setState) =
+        Program.withSetState setState program
+
+    [<Extension>]
+    static member WithSubscription (program, subscribe) =
+        Program.withSubscription subscribe program
+
+    //[<Extension>]
+    //static member WithSetState (program, setState : Action<'model, Dispatch<'msg>>) =
+    //    Program.withSetState (setState |> FuncConvert.FromAction) program
+
+    //[<Extension>]
+    //static member WithSubscription (program, subscribe : Func<'model, Cmd<'msg>>) =
+    //    Program.withSubscription (subscribe |> FuncConvert.FromFunc) program

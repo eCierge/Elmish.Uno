@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - develop
+      - NET_6
 
 jobs:
   build:
@@ -18,28 +19,33 @@ jobs:
       with:
         dotnet-version: 6.0.x
 
-    - name: Install MSBuild.exe
+    - name: Install MSBuild
       uses: microsoft/setup-msbuild@v1.1
-      env:
-        ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
+      with:
+        #vs-version: '[17.0,)'
+        vs-prerelease: true
+        msbuild-architecture: x64
 
     - name: Install NuGet 6.x
       uses: nuget/setup-nuget@v1
       with:
         nuget-version: '6.x'
 
-    - name: Restore NuGet Packages
+    - name: Restore NuGet packages
       run: |
         nuget restore 'src\\Elmish.Uno.sln' -ConfigFile 'NuGet.Config'
 
-    - name: Build with dotnet
+    - name: Build with MSBuild
       run: |
         msbuild 'src\\Elmish.Uno.sln' /t:Rebuild /p:Configuration=Release /p:Platform='Any CPU' -maxcpucount
+
+    - name: Pack Elmish.Uno with NuGet
+      run: |
         $nuspec = get-content 'Elmish.Uno.nuspec' | %{ $_ -replace '\$versionSuffix\$',"-ci-${Env:GITHUB_RUN_ID}"}
         set-content 'Elmish.Uno.nuspec' -value $nuspec
         nuget pack 'Elmish.Uno.nuspec' -Properties Configuration=Release
 
-    - name: Pack Templates
+    - name: Pack Templates with NuGet
       run: |
         $nuspec = get-content 'src\\Templates\\Templates.nuspec' | %{ $_ -replace '\$versionSuffix\$',"-ci-${Env:GITHUB_RUN_ID}"}
         set-content 'src\\Templates\\Templates.nuspec' -value $nuspec
@@ -47,4 +53,7 @@ jobs:
 
     - name: Publish to MyGet
       run: |
-        dotnet nuget push -s 'https://www.myget.org/F/elmish_uno/api/v3/index.json' -k ${{secrets.MyGet_Key}} *.nupkg
+        $source='https://www.myget.org/F/elmish_uno/api/v3/index.json'
+        $key='${{secrets.MyGet_Key}}'
+        dotnet nuget push -s $source -k $key *.nupkg
+

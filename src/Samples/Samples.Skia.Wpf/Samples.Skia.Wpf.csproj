@@ -4,6 +4,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>$(CSharpLangVersion)</LangVersion>
+    <NoWarn>NU1701;NU1702;DF0033</NoWarn>
     <AssemblyName>$(AssemblyBaseName)</AssemblyName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)'=='Release'">

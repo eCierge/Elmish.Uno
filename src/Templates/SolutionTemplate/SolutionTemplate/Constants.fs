@@ -5,6 +5,9 @@ open Xamarin.Essentials
 #if !PRODUCTION
 module Constants =
 
+    let [<Literal>] AppScheme = "SolutionTemplate"
+    let [<Literal>] AppHost = "auth"
+
 #if LOCALAPI
     let GraphQLEndPoint =
         if DeviceInfo.Platform = DevicePlatform.Android

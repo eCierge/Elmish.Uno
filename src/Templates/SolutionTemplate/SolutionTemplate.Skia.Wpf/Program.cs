@@ -1,4 +1,3 @@
-﻿
-namespace SolutionTemplate.Skia.Gtk
+﻿namespace SolutionTemplate.Skia.Gtk
 {
 }

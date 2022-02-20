@@ -1,14 +1,16 @@
-﻿namespace SolutionTemplate
+﻿namespace SolutionTemplate;
+
+#pragma warning disable IDE0052 // Remove unread private members
+#pragma warning disable RCS1163 // Unused parameter.
+
+public partial class App
 {
-    public partial class App
+    private static App app;
+
+    private static int Main(string[] args)
     {
-        private static App app;
+        global::Windows.UI.Xaml.Application.Start(_ => app = new App());
 
-        private static int Main(string[] args)
-        {
-            Windows.UI.Xaml.Application.Start(_ => app = new App());
-
-            return 0;
-        }
+        return 0;
     }
 }

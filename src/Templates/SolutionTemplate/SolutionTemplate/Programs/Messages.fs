@@ -2,6 +2,7 @@
 
 open Elmish
 
+open SolutionTemplate
 open SolutionTemplate.Models
 
 type ProgramMessage<'globalMsg, 'localMsg> =
@@ -26,4 +27,6 @@ module Cmd =
         |> Cmd.ofMsg
 
 type RootMsg =
+    | LogOut
     | Notify of Notification
+    | Navigate of Pages

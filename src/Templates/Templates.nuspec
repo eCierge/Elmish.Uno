@@ -1,9 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2013/01/nuspec.xsd">
   <metadata minClientVersion="5.0">
-    <id>Elmish.Uno.ProjectTemplates.Dotnet</id>
+    <id>Elmish.Uno.ProjectTemplates.Dotnet6</id>
     <version>1.0.0$versionSuffix$</version>
-    <title>Elmish.Uno.Templates</title>
+    <title>Elmish.Uno.Templates on .NET 6 MAUI</title>
     <readme>docs\README.md</readme>
     <authors>XperiAndri,dim-37</authors>
     <owners>XperiAndri,dim-37</owners>

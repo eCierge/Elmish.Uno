@@ -2,8 +2,8 @@
   "solution": {
     "path": "SolutionTemplate.sln",
     "projects": [
-    #//#if (Android)
-      "SolutionTemplate.Droid\\SolutionTemplate.Droid.csproj",
+    #//#if (Mobile)
+      "SolutionTemplate.Mobile\\SolutionTemplate.Mobile.csproj",
     #//#endif
       "SolutionTemplate.Shared\\SolutionTemplate.Shared.shproj",
     #//#if (skia-gtk)
@@ -14,12 +14,6 @@
     #//#endif
     #//#if (WebAssembly)
       "SolutionTemplate.Wasm\\SolutionTemplate.Wasm.csproj",
-    #//#endif
-    #//#if (iOS)
-      "SolutionTemplate.iOS\\SolutionTemplate.iOS.csproj",
-    #//#endif
-    #//#if (macOS)
-      "SolutionTemplate.macOS\\SolutionTemplate.macOS.csproj",
     #//#endif
       "SolutionTemplate\\SolutionTemplate.fsproj"
     ]

@@ -6,7 +6,6 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>$(CSharpLangVersion)</LangVersion>
     <AssemblyName>$(AssemblyBaseName)</AssemblyName>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <NoWarn>NU1701;NU1702;DF0033</NoWarn>

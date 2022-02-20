@@ -1,9 +1,7 @@
-﻿namespace SolutionTemplate.Pages
+﻿namespace SolutionTemplate
 
-[<AutoOpen>]
-module Pages =
-
-    let [<Literal>] Main = "Main"
+type Pages =
+    | Main
 
 open System
 

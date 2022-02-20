@@ -1,17 +1,16 @@
-﻿using System.Windows;
+﻿namespace SolutionTemplate.WPF.Host;
 
-namespace SolutionTemplate.WPF.Host
+using System.Windows;
+
+/// <summary>
+/// Interaction logic for MainWindow.xaml
+/// </summary>
+public partial class MainWindow : Window
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
-    public partial class MainWindow : Window
+    public MainWindow()
     {
-        public MainWindow()
-        {
-            InitializeComponent();
+        InitializeComponent();
 
-            root.Content = new global::Uno.UI.Skia.Platform.WpfHost(Dispatcher, () => new SolutionTemplate.App());
-        }
+        root.Content = new global::Uno.UI.Skia.Platform.WpfHost(Dispatcher, () => new SolutionTemplate.App());
     }
 }

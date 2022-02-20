@@ -1,12 +1,12 @@
 ﻿namespace SolutionTemplate.Programs.Notifications
 
 
+open System
 open Elmish
 open Elmish.Uno
-open SolutionTemplate.Pages
+open SolutionTemplate
 open SolutionTemplate.Models
 open SolutionTemplate.Programs.Messages
-open System
 
 type Model =
     { Notifications: Notification list }
@@ -74,7 +74,7 @@ type public Program () =
             let n = Notification.Error $"Failed to load {error.SourcePageType.FullName}" (error.Exception.ToString ())
             m, AddNotification n |> Local |> Cmd.ofMsg
 
-    member p.Bindings(): Binding<Model, Msg> list =
+    static member Bindings () : Binding<Model, Msg> list =
         [ "NavigationFailedCommand"
           |> Binding.cmdParam (fun o _ -> NavigationFailed (o :?> NavigationError))
           "RemoveNotificationCommand"
