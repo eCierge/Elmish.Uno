@@ -1,8 +1,8 @@
 # To learn more about .editorconfig see https://aka.ms/editorconfigdocs
+root = true
 ###############################
 # Core EditorConfig Options   #
 ###############################
-root = true
 # All files
 [*]
 end_of_line              = crlf
@@ -14,7 +14,7 @@ trim_trailing_whitespace = true
 indent_size          = 4
 charset              = utf-8-bom
 # Project files
-[*.{csproj,fsproj,vbproj,shproj,projitems,plist,nuspec}]
+[*.{csproj,fsproj,vbproj,shproj,projitems,props,nuspec,config,xaml,xml,plist}]
 indent_size          = 2
 charset              = utf-8-bom
 ###############################
@@ -37,8 +37,11 @@ dotnet_style_parentheses_in_relational_binary_operators          = always_for_cl
 dotnet_style_parentheses_in_other_binary_operators               = always_for_clarity : suggestion
 dotnet_style_parentheses_in_other_operators                      = never_if_unnecessary : suggestion
 # Modifier preferences
-dotnet_style_require_accessibility_modifiers                     = always : warning
 dotnet_style_readonly_field                                      = true : warning
+dotnet_style_require_accessibility_modifiers                     = always : warning
+roslynator_accessibility_modifiers                               = explicit
+roslynator_enum_has_flag_style                                   = method
+roslynator_object_creation_type_style                            = implicit
 # Expression-level preferences
 dotnet_style_object_initializer                                  = true : warning
 dotnet_style_collection_initializer                              = true : warning
@@ -815,7 +818,7 @@ dotnet_diagnostic.CA5383.severity = warning
 # CA5384: Do Not Use Digital Signature Algorithm (DSA)
 dotnet_diagnostic.CA5384.severity = warning
 
-# CA5385: Use Rivest–Shamir–Adleman (RSA) Algorithm With Sufficient Key Size
+# CA5385: Use Rivest-Shamir-Adleman (RSA) Algorithm With Sufficient Key Size
 dotnet_diagnostic.CA5385.severity = warning
 
 # CA5386: Avoid hardcoding SecurityProtocolType value
@@ -874,3 +877,24 @@ dotnet_diagnostic.CA5403.severity = warning
 
 # CA9999: Analyzer version mismatch
 dotnet_diagnostic.CA9999.severity = warning
+
+###############################
+# Code Analysis Exceptions    #
+###############################
+[**/{Main.cs,Program.cs,*Activity.cs,*Page.cs,*.xaml.cs,Controls/**.cs}]
+# CA1010: Collections should implement generic interface
+dotnet_diagnostic.CA1010.severity = none
+# CA1012: Abstract type 'ShellBase' should not have public constructors
+dotnet_diagnostic.CA1012.severity = none
+# CA1501: Avoid excessive inheritance
+dotnet_diagnostic.CA1501.severity = none
+# IDE0001: Simplify Names
+dotnet_diagnostic.IDE0001.severity = suggestion
+# IDE0021: Use expression body for constructors
+dotnet_diagnostic.IDE0021.severity = suggestion
+
+[{App.xaml.cs,Shell.xaml.cs,Program.cs}]
+# CA1724: The type name App conflicts in whole or in part with the namespace name. Change either name to eliminate the conflict.
+dotnet_diagnostic.CA1724.severity = none
+# CA1801: Parameter args of method Main is never used. Remove the parameter or use it in the method body.
+dotnet_diagnostic.CA1801.severity = none

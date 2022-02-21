@@ -173,7 +173,7 @@ namespace SolutionTemplate.Controls
             }
         }
 
-        private static readonly Type observableCollectionType = typeof(ObservableCollection<>);
+        private static readonly Type ObservableCollectionType = typeof(ObservableCollection<>);
         private readonly Lazy<ObservableCollection<object>> errorsProxy = new Lazy<ObservableCollection<object>>();
         private ObservableCollection<object> ErrorsProxy => errorsProxy.Value;
 
@@ -186,7 +186,7 @@ namespace SolutionTemplate.Controls
                 var errors = currentINotifyDataErrorInfo.GetErrors(propertyName);
                 if (Errors == errors) return;
 
-                if (errors?.GetType().GetGenericTypeDefinition() == observableCollectionType)
+                if (errors?.GetType().GetGenericTypeDefinition() == ObservableCollectionType)
                 {
                     Errors = errors;
                 }

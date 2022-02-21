@@ -1,4 +1,7 @@
-﻿using Microsoft.Xaml.Interactivity;
+﻿#pragma warning disable CA1001 // Types that own disposable fields should be disposable
+
+using Microsoft.Xaml.Interactivity;
+
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 

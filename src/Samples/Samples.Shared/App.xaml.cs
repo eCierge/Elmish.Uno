@@ -1,21 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
+﻿using System.Diagnostics.Contracts;
+
 using Microsoft.Extensions.Logging;
 
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
 using Windows.UI.Xaml;
-using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Controls.Primitives;
-using Windows.UI.Xaml.Data;
-using Windows.UI.Xaml.Input;
-using Windows.UI.Xaml.Media;
-using Windows.UI.Xaml.Navigation;
 
 namespace Elmish.Uno.Samples
 {
@@ -50,9 +39,10 @@ namespace Elmish.Uno.Samples
         /// Invoked when the application is launched normally by the end user.  Other entry points
         /// will be used such as when the application is launched to open a specific file.
         /// </summary>
-        /// <param name="e">Details about the launch request and process.</param>
-        protected override void OnLaunched(LaunchActivatedEventArgs e)
+        /// <param name="args">Details about the launch request and process.</param>
+        protected override void OnLaunched(LaunchActivatedEventArgs args)
         {
+            Contract.Assume(args != null);
 #if DEBUG
             if (System.Diagnostics.Debugger.IsAttached)
             {
@@ -76,7 +66,8 @@ namespace Elmish.Uno.Samples
                 // Create a Frame to act as the navigation context and navigate to the first page
                 shell = new Shell();
 
-                if (e.PreviousExecutionState == ApplicationExecutionState.Terminated)
+#pragma warning disable Uno0001 // Uno type or member is not implemented
+                if (args.PreviousExecutionState == ApplicationExecutionState.Terminated)
                 {
                     //TODO: Load state from previously suspended application
                 }
@@ -86,7 +77,7 @@ namespace Elmish.Uno.Samples
             }
 
 #if !(NET5_0 && WINDOWS)
-            if (e.PrelaunchActivated == false)
+            if (args.PrelaunchActivated == false)
 #endif
             {
                 if (shell.RootFrame.Content == null)
@@ -94,11 +85,12 @@ namespace Elmish.Uno.Samples
                     // When the navigation stack isn't restored navigate to the first page,
                     // configuring the new page by passing required information as a navigation
                     // parameter
-                    shell.Navigate(typeof(MainPage), e.Arguments);
+                    shell.Navigate(typeof(MainPage), args.Arguments);
                 }
                 // Ensure the current window is active
                 window.Activate();
             }
+#pragma warning restore Uno0001 // Uno type or member is not implemented
         }
 
 
@@ -111,9 +103,11 @@ namespace Elmish.Uno.Samples
         /// <param name="e">Details about the suspend request.</param>
         private void OnSuspending(object sender, SuspendingEventArgs e)
         {
+#pragma warning disable Uno0001 // Uno type or member is not implemented
             var deferral = e.SuspendingOperation.GetDeferral();
             //TODO: Save application state and stop any background activity
             deferral.Complete();
+#pragma warning restore Uno0001 // Uno type or member is not implemented
         }
 
 

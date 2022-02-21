@@ -1,25 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-using SingleCounterProgram = Elmish.Uno.Samples.SingleCounter.Program;
+﻿#pragma warning disable CA1812 // Avoid uninstantiated internal classes
+#pragma warning disable CA1822 // Member does not access instance data and can be marked as static
+using EventBindingsAndBehaviorsProgram = Elmish.Uno.Samples.EventBindingsAndBehaviors.Program;
+using FileDialogsCmdMsgProgram = Elmish.Uno.Samples.FileDialogsCmdMsg.Program;
+using FileDialogsProgram = Elmish.Uno.Samples.FileDialogs.Program;
+using NewWindow1Program = Elmish.Uno.Samples.NewWindow.Program.Win1;
+using NewWindow2Program = Elmish.Uno.Samples.NewWindow.Program.Win2;
+using NewWindowProgram = Elmish.Uno.Samples.NewWindow.Program;
 using OneWaySeqProgram = Elmish.Uno.Samples.OneWaySeq.Program;
-using SubModelProgram = Elmish.Uno.Samples.SubModel.Program;
+using SingleCounterProgram = Elmish.Uno.Samples.SingleCounter.Program;
 using SubModelClockProgram = Elmish.Uno.Samples.SubModel.Program.Clock;
 using SubModelCounterWithClockProgram = Elmish.Uno.Samples.SubModel.Program.CounterWithClock;
-using SubModelOptProgram = Elmish.Uno.Samples.SubModelOpt.Program;
 using SubModelOptForm1Program = Elmish.Uno.Samples.SubModelOpt.Program.Form1;
 using SubModelOptForm2Program = Elmish.Uno.Samples.SubModelOpt.Program.Form2;
+using SubModelOptProgram = Elmish.Uno.Samples.SubModelOpt.Program;
+using SubModelProgram = Elmish.Uno.Samples.SubModel.Program;
 using SubModelSelectedItemProgram = Elmish.Uno.Samples.SubModelSelectedItem.Program;
 using SubModelSeqProgram = Elmish.Uno.Samples.SubModelSeq.Program;
 using UiBoundCmdParamProgram = Elmish.Uno.Samples.UiBoundCmdParam.Program;
 using ValidationProgram = Elmish.Uno.Samples.Validation.Program;
-using FileDialogsProgram = Elmish.Uno.Samples.FileDialogs.Program;
-using FileDialogsCmdMsgProgram = Elmish.Uno.Samples.FileDialogsCmdMsg.Program;
-using EventBindingsAndBehaviorsProgram = Elmish.Uno.Samples.EventBindingsAndBehaviors.Program;
-using NewWindowProgram = Elmish.Uno.Samples.NewWindow.Program;
-using NewWindow1Program = Elmish.Uno.Samples.NewWindow.Program.Win1;
-using NewWindow2Program = Elmish.Uno.Samples.NewWindow.Program.Win2;
 
 namespace Elmish.Uno.Samples
 {

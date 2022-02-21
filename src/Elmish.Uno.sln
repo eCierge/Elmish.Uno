@@ -32,6 +32,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NuGet", "NuGet", "{49DD7592-B03D-4EEE-B1BF-522488992C80}"
 	ProjectSection(SolutionItems) = preProject
 		..\Elmish.Uno.nuspec = ..\Elmish.Uno.nuspec
+		Templates\Templates.nuspec = Templates\Templates.nuspec
 	EndProjectSection
 EndProject
 Global

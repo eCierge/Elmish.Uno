@@ -1,4 +1,4 @@
-﻿module SolutionTemplate.Host
+﻿module SolutionTemplate.UnoHost
 
 open System
 open System.Collections.Generic

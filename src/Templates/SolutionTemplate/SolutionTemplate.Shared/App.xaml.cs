@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+
+using global::Elmish.Uno.Navigation;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -9,14 +10,9 @@ using Microsoft.Extensions.Logging;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
 using Windows.UI.Xaml;
-using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Controls.Primitives;
-using Windows.UI.Xaml.Data;
-using Windows.UI.Xaml.Input;
-using Windows.UI.Xaml.Media;
-using Windows.UI.Xaml.Navigation;
 
 using AppProgram = SolutionTemplate.Programs.App.Program;
+using ViewModel = global::Elmish.Uno.ViewModel;
 
 //-:cnd:noEmit
 namespace SolutionTemplate
@@ -50,7 +46,7 @@ namespace SolutionTemplate
             InitializeLogging();
             this.InitializeComponent();
 
-            var hostBuilder = Host.CreateDefaultBuilder().ConfigureServices(ConfigureServices);
+            var hostBuilder = UnoHost.CreateDefaultBuilder().ConfigureServices(ConfigureServices);
             serviceProvider = hostBuilder.Build().Services;
             scope = serviceProvider.CreateScope();
 
@@ -61,12 +57,12 @@ namespace SolutionTemplate
 
         private void ConfigureServices(HostBuilderContext ctx, IServiceCollection services) =>
             services
-            .AddSingleton<Elmish.Uno.Navigation.INavigationService>(provider =>
-                new Elmish.Uno.Navigation.NavigationService(
+            .AddSingleton<INavigationService>(provider =>
+                new NavigationService(
                     shell.Value.RootFrame,
                     new Dictionary<string, Type>()
                     {
-                        [Pages.Pages.Main] = typeof(MainPage)
+                        [nameof(Pages.Pages.Main)] = typeof(MainPage)
                     }))
             ;
 
@@ -76,7 +72,7 @@ namespace SolutionTemplate
             scope.Dispose();
             scope = serviceProvider.CreateScope();
             var viewModel = ServiceProvider.GetRequiredService<AppProgram>();
-            Elmish.Uno.ViewModel.StartLoop(Host.ElmConfig, shell.Value, Elmish.ProgramModule.run, viewModel.Program);
+            global::Elmish.Uno.ViewModel.StartLoop(UnoHost.ElmConfig, shell.Value, global::Elmish.ProgramModule.run, viewModel.Program);
         }
 #pragma warning restore IDE0051 // Remove unused private members
 
@@ -111,7 +107,7 @@ namespace SolutionTemplate
             if (rootFrame.Content == null)
             {
                 var viewModel = ServiceProvider.GetRequiredService<AppProgram>();
-                Elmish.Uno.ViewModel.StartLoop(Host.ElmConfig, shell, Elmish.ProgramModule.run, viewModel.Program);
+                ViewModel.StartLoop(UnoHost.ElmConfig, shell, global::Elmish.ProgramModule.run, viewModel.Program);
 
 #pragma warning disable CA1062 // Validate arguments of public methods
                 if (e.PreviousExecutionState == ApplicationExecutionState.Terminated)

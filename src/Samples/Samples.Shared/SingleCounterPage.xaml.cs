@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
+using System.Globalization;
+
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
-using Elmish.Uno;
+
 using ElmishProgram = Elmish.Uno.Samples.SingleCounter.Program;
 
 namespace Elmish.Uno.Samples.SingleCounter
@@ -16,8 +19,10 @@ namespace Elmish.Uno.Samples.SingleCounter
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
+            Contract.Assume(e != null);
+
             var parameters = e.Parameter as IReadOnlyDictionary<string, object>;
-            var count = Convert.ToInt32(parameters?["count"]);
+            var count = Convert.ToInt32(parameters?["count"], CultureInfo.InvariantCulture);
             ViewModel.StartLoop(ElmishProgram.Config, this, Elmish.ProgramModule.runWith, ElmishProgram.Program, count);
         }
     }

@@ -1,19 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
 
-using Windows.Foundation;
-using Windows.Foundation.Collections;
 using Windows.System;
 using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Controls.Primitives;
-using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
-using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 
 namespace Elmish.Uno.Samples
@@ -28,6 +19,7 @@ namespace Elmish.Uno.Samples
 
             SystemNavigationManager.GetForCurrentView().BackRequested += OnSystemNavigationManagerBackRequested;
 
+#pragma warning disable Uno0001 // Uno type or member is not implemented
             KeyboardAccelerator GoBack = new KeyboardAccelerator()
             {
                 Key = VirtualKey.GoBack
@@ -55,6 +47,7 @@ namespace Elmish.Uno.Samples
             AltRight.Invoked += ForwardInvoked;
             this.KeyboardAccelerators.Add(GoForward);
             this.KeyboardAccelerators.Add(AltRight);
+#pragma warning restore Uno0001 // Uno type or member is not implemented
         }
 
         /// <summary>
@@ -62,10 +55,10 @@ namespace Elmish.Uno.Samples
         /// </summary>
         /// <param name="sender">The Frame which failed navigation</param>
         /// <param name="e">Details about the navigation failure</param>
-        void OnNavigationFailed(object sender, NavigationFailedEventArgs e)
-        {
-            throw new Exception($"Failed to load {e.SourcePageType.FullName}: {e.Exception}");
-        }
+        private void OnNavigationFailed(object sender, NavigationFailedEventArgs e)
+#pragma warning disable CA2201 // Do not raise reserved exception types
+         => throw new Exception($"Failed to load {e.SourcePageType.FullName}: {e.Exception}");
+#pragma warning restore CA2201 // Do not raise reserved exception types
 
         private bool OnBackRequested()
         {
@@ -96,6 +89,7 @@ namespace Elmish.Uno.Samples
 
         private void OnBackButtonClick(object sender, RoutedEventArgs e) => OnBackRequested();
 
+#pragma warning disable Uno0001 // Uno type or member is not implemented
         private void BackInvoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs e)
         {
             OnBackRequested();
@@ -107,6 +101,7 @@ namespace Elmish.Uno.Samples
             OnForwardRequested();
             e.Handled = true;
         }
+#pragma warning restore Uno0001 // Uno type or member is not implemented
 
 
         public bool Navigate(Type sourcePageType) => this.RootFrame.Navigate(sourcePageType, null);
