@@ -3,7 +3,7 @@
   <Import Project="..\Solution.Build.props" />
   <Import Project="..\Analyzers.Build.props" />
   <PropertyGroup>
-    <LangVersion>9.0</LangVersion>
+    <LangVersion>$(CSharpLangVersion)</LangVersion>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">iPhoneSimulator</Platform>
     <ProjectGuid>{C306819D-C046-4130-B9EF-68546B2CFBA4}</ProjectGuid>

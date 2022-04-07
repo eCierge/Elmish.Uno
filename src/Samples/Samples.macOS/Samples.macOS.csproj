@@ -2,6 +2,7 @@
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="..\Samples.Build.props" />
   <PropertyGroup>
+    <LangVersion>$(CSharpLangVersion)</LangVersion>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">iPhoneSimulator</Platform>
     <ProjectGuid>{39D21008-549B-42ED-8640-3B9AAEFB2921}</ProjectGuid>

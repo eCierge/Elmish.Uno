@@ -3,9 +3,9 @@
   <Import Project="..\Solution.Build.props" />
   <Import Project="..\Analyzers.Build.props" />
   <PropertyGroup>
-    <LangVersion>9.0</LangVersion>
     <OutputType>Exe</OutputType>
     <TargetFramework>tizen50</TargetFramework>
+    <LangVersion>$(CSharpLangVersion)</LangVersion>
     <OutputType>Exe</OutputType>
     <DefineConstants>$(DefineConstants);__TIZEN__;</DefineConstants>
     <AssemblyName>$(AssemblyBaseName)</AssemblyName>

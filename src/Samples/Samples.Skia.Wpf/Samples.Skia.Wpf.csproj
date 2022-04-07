@@ -3,6 +3,7 @@
   <Import Project="..\Samples.Build.props" />
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <LangVersion>$(CSharpLangVersion)</LangVersion>
     <AssemblyName>$(AssemblyBaseName)</AssemblyName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)'=='Release'">

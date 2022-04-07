@@ -5,6 +5,7 @@
     <OutputType Condition="'$(Configuration)'=='Release'">WinExe</OutputType>
     <OutputType Condition="'$(Configuration)'=='Debug'">Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
+    <LangVersion>$(CSharpLangVersion)</LangVersion>
     <UseWPF>true</UseWPF>
     <AssemblyName>$(AssemblyBaseName).Host</AssemblyName>
   </PropertyGroup>

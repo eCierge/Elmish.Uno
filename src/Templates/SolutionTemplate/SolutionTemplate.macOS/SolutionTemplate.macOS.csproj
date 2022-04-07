@@ -2,11 +2,11 @@
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="..\Solution.Build.props" />
   <PropertyGroup>
+    <LangVersion>$(CSharpLangVersion)</LangVersion>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">iPhoneSimulator</Platform>
     <ProjectGuid>{4E726E84-2EA2-49D0-9B55-2D30FD5A892C}</ProjectGuid>
     <ProjectTypeGuids>{A3F8F2AB-B479-4A4A-A458-A89E7DC349F1};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
-    <LangVersion>9.0</LangVersion>
     <TargetFrameworkIdentifier>Xamarin.Mac</TargetFrameworkIdentifier>
     <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
     <OutputType>Exe</OutputType>

@@ -3,6 +3,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <LangVersion>$(FSharpLangVersion)</LangVersion>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <AssemblyName>$(AssemblyBaseName).Programs</AssemblyName>
   </PropertyGroup>
@@ -37,6 +38,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Update="FSharp.Core" Version="6.0.*" />
+    <PackageReference Update="FSharp.Core" Version="$(FSharpCoreVersion)" />
   </ItemGroup>
 </Project>

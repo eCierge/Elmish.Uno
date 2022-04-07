@@ -4,7 +4,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net5.0</TargetFramework>
-    <LangVersion>9.0</LangVersion>
+    <LangVersion>$(CSharpLangVersion)</LangVersion>
     <NoWarn>NU1701</NoWarn>
     <AssemblyName>$(AssemblyBaseName)</AssemblyName>
   </PropertyGroup>

@@ -6,6 +6,9 @@
     <Product>SolutionTemplate</Product>
     <Authors>Elmish.Unp</Authors>
     <Copyright>Copyright © XperiAndri</Copyright>
+    <CSharpLangVersion>10.0</CSharpLangVersion>
+    <FSharpLangVersion>6.0</FSharpLangVersion>
+    <FSharpCoreVersion>6.0.*</FSharpCoreVersion>
     <MicrosoftExtensionsVersion>5.0.*</MicrosoftExtensionsVersion>
     <ToolkitVersion>7.0.*</ToolkitVersion>
     <UnoUIVersion>[3.10.*,4.0.0)</UnoUIVersion>

@@ -5,6 +5,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net5.0</TargetFramework>
+    <LangVersion>$(CSharpLangVersion)</LangVersion>
     <!-- .editorcofig bases suppressions do not work in WASM for some unknown reasons -->
     <NoWarn>NU1701;DF0033</NoWarn>
     <AssemblyName>$(AssemblyBaseName)</AssemblyName>
