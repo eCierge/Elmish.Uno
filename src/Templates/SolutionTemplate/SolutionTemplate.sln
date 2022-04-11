@@ -26,22 +26,14 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{158D2B29-24BF-4A3C-BCEF-DF7246773F74}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
-		Analyzers.Build.props = Analyzers.Build.props
+		Directory.Build.targets = Directory.Build.targets
 		global.json = global.json
 		nuget.config = nuget.config
+		Packages.props = Packages.props
 		Solution.Build.props = Solution.Build.props
 	EndProjectSection
 EndProject
 Global
-	GlobalSection(SharedMSBuildProjectFiles) = preSolution
-		SolutionTemplate.Shared\SolutionTemplate.Shared.projitems*{00127bde-81bc-4006-8b12-0c9d6304ba68}*SharedItemsImports = 5
-		SolutionTemplate.Shared\SolutionTemplate.Shared.projitems*{1fa66609-7dea-4521-83e4-dd9452e40133}*SharedItemsImports = 5
-		SolutionTemplate.Shared\SolutionTemplate.Shared.projitems*{564f5936-8647-4633-88d1-553d4b0c5a85}*SharedItemsImports = 5
-		SolutionTemplate.Shared\SolutionTemplate.Shared.projitems*{6279c845-92f8-4333-ab99-3d213163593c}*SharedItemsImports = 13
-		SolutionTemplate.Shared\SolutionTemplate.Shared.projitems*{7727d8ad-8883-427d-a77a-7c8639ace4af}*SharedItemsImports = 4
-		SolutionTemplate.Shared\SolutionTemplate.Shared.projitems*{e0107ec1-1d03-4f08-b03d-1899314767c1}*SharedItemsImports = 5
-		SolutionTemplate.Shared\SolutionTemplate.Shared.projitems*{eff939aa-2044-4573-aabb-c97e6b3953e7}*SharedItemsImports = 5
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Ad-Hoc|Any CPU = Ad-Hoc|Any CPU
 		Ad-Hoc|ARM = Ad-Hoc|ARM
@@ -561,5 +553,14 @@ Global
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C5BFB839-3AC6-4ACE-9780-69EB91FE5154}
+	EndGlobalSection
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		SolutionTemplate.Shared\SolutionTemplate.Shared.projitems*{00127bde-81bc-4006-8b12-0c9d6304ba68}*SharedItemsImports = 5
+		SolutionTemplate.Shared\SolutionTemplate.Shared.projitems*{1fa66609-7dea-4521-83e4-dd9452e40133}*SharedItemsImports = 5
+		SolutionTemplate.Shared\SolutionTemplate.Shared.projitems*{564f5936-8647-4633-88d1-553d4b0c5a85}*SharedItemsImports = 5
+		SolutionTemplate.Shared\SolutionTemplate.Shared.projitems*{6279c845-92f8-4333-ab99-3d213163593c}*SharedItemsImports = 13
+		SolutionTemplate.Shared\SolutionTemplate.Shared.projitems*{7727d8ad-8883-427d-a77a-7c8639ace4af}*SharedItemsImports = 4
+		SolutionTemplate.Shared\SolutionTemplate.Shared.projitems*{e0107ec1-1d03-4f08-b03d-1899314767c1}*SharedItemsImports = 5
+		SolutionTemplate.Shared\SolutionTemplate.Shared.projitems*{eff939aa-2044-4573-aabb-c97e6b3953e7}*SharedItemsImports = 5
 	EndGlobalSection
 EndGlobal

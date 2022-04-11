@@ -4,16 +4,10 @@
     <RootNamespace>SolutionTemplate</RootNamespace>
     <Company>XperiAndri</Company>
     <Product>SolutionTemplate</Product>
-    <Authors>Elmish.Unp</Authors>
+    <Authors>Elmish.Uno</Authors>
     <Copyright>Copyright © XperiAndri</Copyright>
     <CSharpLangVersion>10.0</CSharpLangVersion>
     <FSharpLangVersion>6.0</FSharpLangVersion>
-    <FSharpCoreVersion>6.0.*</FSharpCoreVersion>
-    <MicrosoftExtensionsVersion>6.0.*</MicrosoftExtensionsVersion>
-    <ToolkitVersion>7.1.*</ToolkitVersion>
-    <UnoUIVersion>4.2.0-dev.*</UnoUIVersion>
-    <UnoCoreVersion>4.0.*</UnoCoreVersion>
-    <UnoBehaviorsVersion>2.3.*</UnoBehaviorsVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)'=='Release'">
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>

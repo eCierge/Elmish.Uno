@@ -23,23 +23,23 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Elmish" Version="3.1.0" />
-    <PackageReference Include="Elmish.Uno" Version="1.0.0-ci-*" />
-    <PackageReference Include="FSharp.Collections.Immutable" Version="2.0.0-ci-*" />
-    <PackageReference Include="FSharp.Control.FusionTasks" Version="2.5.*" />
-    <PackageReference Include="FSharp.Control.Reactive" Version="5.0.2" />
-    <PackageReference Include="FSharpPlus" Version="1.2.*" />
-    <PackageReference Include="FSharpx.Extras" Version="3.*" />
-    <PackageReference Include="Microsoft.Extensions.Http" Version="$(MicrosoftExtensionsVersion)" />
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="$(MicrosoftExtensionsVersion)" />
-    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="$(MicrosoftExtensionsVersion)" />
-    <PackageReference Include="System.Collections.Immutable" Version="6.0.0" />
-    <PackageReference Include="Uno.Core" Version="$(UnoCoreVersion)" />
-    <PackageReference Include="Xamarin.Essentials" Version="1.7.*" />
+    <PackageReference Include="Elmish" />
+    <PackageReference Include="Elmish.Uno" />
+    <PackageReference Include="FSharp.Collections.Immutable" />
+    <PackageReference Include="FSharp.Control.FusionTasks" />
+    <PackageReference Include="FSharp.Control.Reactive" />
+    <PackageReference Include="FSharpPlus" />
+    <PackageReference Include="FSharpx.Extras" />
+    <PackageReference Include="Microsoft.Extensions.Http" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" />
+    <PackageReference Include="System.Collections.Immutable" />
+    <PackageReference Include="Uno.Core" />
+    <PackageReference Include="Xamarin.Essentials" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Update="FSharp.Core" Version="$(FSharpCoreVersion)" />
+    <PackageReference Update="FSharp.Core" />
   </ItemGroup>
 
 </Project>

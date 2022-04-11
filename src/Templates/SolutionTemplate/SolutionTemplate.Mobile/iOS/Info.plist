@@ -2,14 +2,6 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
   <dict>
-    <key>CFBundleName</key>
-    <string>SolutionTemplate</string>
-    <key>CFBundleIdentifier</key>
-    <string>com.companyname.SolutionTemplate</string>
-    <key>CFBundleShortVersionString</key>
-    <string>1.0</string>
-    <key>CFBundleVersion</key>
-    <string>1.0</string>
     <key>LSRequiresIPhoneOS</key>
     <true/>
     <key>UIDeviceFamily</key>
@@ -37,16 +29,14 @@
       <string>UIInterfaceOrientationLandscapeLeft</string>
       <string>UIInterfaceOrientationLandscapeRight</string>
     </array>
+    <key>XSAppIconAssets</key>
+    <string>Media.xcassets/AppIcons.appiconset</string>
     <key>UIAppFonts</key>
     <array>
       <string>Fonts/uno-fluentui-assets.ttf</string>
     </array>
     <key>UIViewControllerBasedStatusBarAppearance</key>
     <false/>
-    <key>UILaunchImageMinimumOSVersion</key>
-    <string>9.0</string>
-    <key>UILaunchImageOrientation</key>
-    <string>Portrait</string>
     <key>UILaunchImageSize</key>
     <string>{320, 568}</string>
     <key>UIApplicationSupportsIndirectInputEvents</key>
