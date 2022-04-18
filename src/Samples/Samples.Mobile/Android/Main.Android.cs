@@ -1,37 +1,34 @@
-﻿using System;
+﻿namespace Elmish.Uno.Samples.Droid;
+
+using System;
 
 using Android.Runtime;
 
 using Com.Nostra13.Universalimageloader.Core;
 
-using Windows.UI.Xaml.Media;
+using global::Windows.UI.Xaml.Media;
 
-namespace SuperCharge.Client.Droid
+[global::Android.App.Application(
+    Label = "@string/ApplicationName",
+    Icon = "@mipmap/icon",
+    LargeHeap = true,
+    HardwareAccelerated = true,
+    Theme = "@style/AppTheme"
+)]
+public class Application : Windows.UI.Xaml.NativeApplication
 {
-    [global::Android.App.Application(
-        Label = "@string/ApplicationName",
-        Icon = "@mipmap/icon",
-        LargeHeap = true,
-        HardwareAccelerated = true,
-        Theme = "@style/AppTheme"
-    )]
-    public class Application : Windows.UI.Xaml.NativeApplication
+    public Application(IntPtr javaReference, JniHandleOwnership transfer)
+        : base(() => new App(), javaReference, transfer)
+        => ConfigureUniversalImageLoader();
+
+    private static void ConfigureUniversalImageLoader()
     {
-        public Application(IntPtr javaReference, JniHandleOwnership transfer)
-            : base(() => new App(), javaReference, transfer)
-        {
-            ConfigureUniversalImageLoader();
-        }
+        // Create global configuration and initialize ImageLoader with this config
+        using var builder = new ImageLoaderConfiguration.Builder(Context);
+        ImageLoaderConfiguration config = builder.Build();
 
-        private static void ConfigureUniversalImageLoader()
-        {
-            // Create global configuration and initialize ImageLoader with this config
-            using var builder = new ImageLoaderConfiguration.Builder(Context);
-            ImageLoaderConfiguration config = builder.Build();
+        ImageLoader.Instance.Init(config);
 
-            ImageLoader.Instance.Init(config);
-
-            ImageSource.DefaultImageLoader = ImageLoader.Instance.LoadImageAsync;
-        }
+        ImageSource.DefaultImageLoader = ImageLoader.Instance.LoadImageAsync;
     }
 }

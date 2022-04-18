@@ -7,7 +7,5 @@
     <Product>Elmish.Uno</Product>
     <Authors>XperiAndri, Dim-37</Authors>
     <Copyright>Copyright © XperiAndri</Copyright>
-    <ElmishVersion>[3.0.3, 4)</ElmishVersion>
-    <FSharpCoreVersion>6.0.*</FSharpCoreVersion>
   </PropertyGroup>
 </Project>

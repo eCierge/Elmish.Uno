@@ -13,14 +13,13 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Elmish" Version="$(ElmishVersion)" />
-    <PackageReference Include="FSharp.Core" Version="$(FSharpCoreVersion)" />
-    <PackageReference Include="Uno.Microsoft.Toolkit" Version="$(ToolkitVersion)" />
-    <PackageReference Include="Uno.Microsoft.Toolkit.Uwp" Version="$(ToolkitVersion)" />
-    <PackageReference Include="Uno.Microsoft.Toolkit.Uwp.UI" Version="$(ToolkitVersion)" />
-    <PackageReference Include="Uno.Microsoft.Xaml.Behaviors.Uwp.Managed" Version="$(UnoBehaviorsVersion)" />
-    <PackageReference Include="Uno.UI.Skia.Wpf" Version="$(UnoUIVersion)" />
-    <PackageReference Include="Uno.UI.RemoteControl" Version="$(UnoUIVersion)" Condition="'$(Configuration)'=='Debug'" />
+    <PackageReference Include="Elmish" />
+    <PackageReference Include="Uno.Microsoft.Toolkit" />
+    <PackageReference Include="Uno.Microsoft.Toolkit.Uwp" />
+    <PackageReference Include="Uno.Microsoft.Toolkit.Uwp.UI" />
+    <PackageReference Include="Uno.Microsoft.Xaml.Behaviors.Uwp.Managed" />
+    <PackageReference Include="Uno.UI.Skia.Wpf" />
+    <PackageReference Include="Uno.UI.RemoteControl" Condition="'$(Configuration)'=='Debug'" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Assets\Fonts\uno-fluentui-assets.ttf" />

@@ -43,20 +43,19 @@
     <None Include="wwwroot\web.config" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Elmish" Version="$(ElmishVersion)" />
-    <PackageReference Include="FSharp.Core" Version="$(FSharpCoreVersion)" />
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="$(MicrosoftExtensionsVersion)" />
-    <PackageReference Include="Microsoft.Windows.Compatibility" Version="6.0.0" />
-    <PackageReference Include="Uno.Extensions.Logging.WebAssembly.Console" Version="1.1.*" />
-    <PackageReference Include="Uno.Microsoft.Toolkit" Version="$(ToolkitVersion)" />
-    <PackageReference Include="Uno.Microsoft.Toolkit.Uwp" Version="$(ToolkitVersion)" />
-    <PackageReference Include="Uno.Microsoft.Toolkit.Uwp.UI" Version="$(ToolkitVersion)" />
-    <PackageReference Include="Uno.Microsoft.Xaml.Behaviors.Uwp.Managed" Version="$(UnoBehaviorsVersion)" />
-    <PackageReference Include="Uno.UI.WebAssembly" Version="$(UnoUIVersion)" />
-    <PackageReference Include="Uno.UI.RemoteControl" Version="$(UnoUIVersion)" Condition="'$(Configuration)'=='Debug'" />
-    <PackageReference Include="Uno.UI.Adapter.Microsoft.Extensions.Logging" Version="$(UnoUIVersion)" />
-    <PackageReference Include="Uno.Wasm.Bootstrap" Version="3.1.*" />
-    <PackageReference Include="Uno.Wasm.Bootstrap.DevServer" Version="3.1.*" />
+    <PackageReference Include="Elmish" />
+    <PackageReference Include="Microsoft.Extensions.Logging" />
+    <PackageReference Include="Microsoft.Windows.Compatibility" />
+    <PackageReference Include="Uno.Extensions.Logging.WebAssembly.Console" />
+    <PackageReference Include="Uno.Microsoft.Toolkit" />
+    <PackageReference Include="Uno.Microsoft.Toolkit.Uwp" />
+    <PackageReference Include="Uno.Microsoft.Toolkit.Uwp.UI" />
+    <PackageReference Include="Uno.Microsoft.Xaml.Behaviors.Uwp.Managed" />
+    <PackageReference Include="Uno.UI.WebAssembly" />
+    <PackageReference Include="Uno.UI.RemoteControl" Condition="'$(Configuration)'=='Debug'" />
+    <PackageReference Include="Uno.UI.Adapter.Microsoft.Extensions.Logging" />
+    <PackageReference Include="Uno.Wasm.Bootstrap" />
+    <PackageReference Include="Uno.Wasm.Bootstrap.DevServer" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Elmish.Uno.Mobile\Elmish.Uno.Mobile.fsproj" />

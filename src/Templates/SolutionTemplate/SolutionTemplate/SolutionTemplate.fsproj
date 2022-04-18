@@ -38,8 +38,4 @@
     <PackageReference Include="Xamarin.Essentials" />
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Update="FSharp.Core" />
-  </ItemGroup>
-
 </Project>

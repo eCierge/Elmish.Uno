@@ -26,14 +26,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Elmish" Version="$(ElmishVersion)" />
-    <PackageReference Include="FSharp.Control.FusionTasks" Version="2.4.*" />
-    <PackageReference Include="Uno.Core" Version="$(UnoCoreVersion)" />
-    <PackageReference Include="Uno.UI" Version="$(UnoUIVersion)" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Update="FSharp.Core" Version="$(FSharpCoreVersion)" />
+    <PackageReference Include="Elmish" />
+    <PackageReference Include="FSharp.Control.FusionTasks" />
+    <PackageReference Include="Uno.Core" />
+    <PackageReference Include="Uno.UI" />
   </ItemGroup>
 
 </Project>

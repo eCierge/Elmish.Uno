@@ -6,7 +6,10 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{51DF5F61-CE23-4BB5-A1D6-8421974B760B}"
 	ProjectSection(SolutionItems) = preProject
 		..\.editorconfig = ..\.editorconfig
+		Directory.Build.targets = Directory.Build.targets
 		..\global.json = ..\global.json
+		..\NuGet.Config = ..\NuGet.Config
+		Packages.props = Packages.props
 		..\README.md = ..\README.md
 		..\RELEASE_NOTES.md = ..\RELEASE_NOTES.md
 		Solution.Build.props = Solution.Build.props
@@ -48,15 +51,6 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Samples.Mobile", "Samples\Samples.Mobile\Samples.Mobile.csproj", "{EB3F954F-6FB3-44B5-A866-BF27620122A5}"
 EndProject
 Global
-	GlobalSection(SharedMSBuildProjectFiles) = preSolution
-		Samples\Samples.Shared\Samples.Shared.projitems*{15ec273e-75f5-48e0-aeeb-84ed5a5f0dc4}*SharedItemsImports = 5
-		Samples\Samples.Shared\Samples.Shared.projitems*{34369f3f-ee29-46dd-872c-dbd8ca47df7b}*SharedItemsImports = 5
-		Samples\Samples.Shared\Samples.Shared.projitems*{601a443e-5e39-41aa-8ce8-a999ae72c135}*SharedItemsImports = 5
-		Samples\Samples.Shared\Samples.Shared.projitems*{6279c845-92f8-4333-ab99-3d213163593c}*SharedItemsImports = 13
-		Samples\Samples.Shared\Samples.Shared.projitems*{87559180-df2a-4509-9026-0c2dd7cb02ff}*SharedItemsImports = 5
-		Samples\Samples.Shared\Samples.Shared.projitems*{e025d4a5-f4d9-44cf-80df-b81a9ee5db0e}*SharedItemsImports = 4
-		Samples\Samples.Shared\Samples.Shared.projitems*{eb3f954f-6fb3-44b5-a866-bf27620122a5}*SharedItemsImports = 5
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Ad-Hoc|Any CPU = Ad-Hoc|Any CPU
 		Ad-Hoc|ARM = Ad-Hoc|ARM
@@ -797,5 +791,14 @@ Global
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {3125D461-08F4-4071-AAE5-1038EF84A360}
+	EndGlobalSection
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		Samples\Samples.Shared\Samples.Shared.projitems*{15ec273e-75f5-48e0-aeeb-84ed5a5f0dc4}*SharedItemsImports = 5
+		Samples\Samples.Shared\Samples.Shared.projitems*{34369f3f-ee29-46dd-872c-dbd8ca47df7b}*SharedItemsImports = 5
+		Samples\Samples.Shared\Samples.Shared.projitems*{601a443e-5e39-41aa-8ce8-a999ae72c135}*SharedItemsImports = 5
+		Samples\Samples.Shared\Samples.Shared.projitems*{6279c845-92f8-4333-ab99-3d213163593c}*SharedItemsImports = 13
+		Samples\Samples.Shared\Samples.Shared.projitems*{87559180-df2a-4509-9026-0c2dd7cb02ff}*SharedItemsImports = 5
+		Samples\Samples.Shared\Samples.Shared.projitems*{e025d4a5-f4d9-44cf-80df-b81a9ee5db0e}*SharedItemsImports = 4
+		Samples\Samples.Shared\Samples.Shared.projitems*{eb3f954f-6fb3-44b5-a866-bf27620122a5}*SharedItemsImports = 5
 	EndGlobalSection
 EndGlobal
