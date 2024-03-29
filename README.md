@@ -143,7 +143,7 @@ See the [SingleCounter](https://github.com/elmish/Elmish.Uno/tree/master/src/Sam
 
    ```F#
    open Elmish.Uno
-
+   
    let main window =
      Program.mkSimple init update bindings
      |> Program.runElmishLoop window
@@ -161,7 +161,7 @@ See the [SingleCounter](https://github.com/elmish/Elmish.Uno/tree/master/src/Sam
 
    In the code above, `Program.runElmishLoop` will set the window’s `DataContext` to the specified bindings and start the Elmish dispatch loop for the window.
 
-8. Create a Uno Platform app project (using the Visual Studio template called `Uno App (.NET)`). This will be your entry point and contain the XAML views. Add a reference to the F# project, and make the following changes in the `csproj` file:
+8. Create an Uno Platform app project (using the Visual Studio template called `Uno App (.NET)`). This will be your entry point and contain the XAML views. Add a reference to the F# project, and make the following changes in the `csproj` file:
 
    * Currently, the core Elmish logs are only output to the console. If you want a console window for displaying Elmish logs, change `<OutputType>WinExe</OutputType>` to `<OutputType>Exe</OutputType>` and add `<DisableWinExeOutputInference>true</DisableWinExeOutputInference>`.
    * If the project file starts with the now legacy `<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">`, change it to `<Project Sdk="Microsoft.NET.Sdk">`
