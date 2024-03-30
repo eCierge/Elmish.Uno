@@ -11,7 +11,7 @@ open Xunit
 open Hedgehog
 open Swensen.Unquote
 
-open Elmish.WPF
+open Elmish.Uno
 
 
 

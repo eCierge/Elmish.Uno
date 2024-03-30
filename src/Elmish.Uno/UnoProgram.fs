@@ -1,8 +1,9 @@
 ﻿namespace Elmish.Uno
 
-open System.Windows
 open Microsoft.Extensions.Logging
 open Microsoft.Extensions.Logging.Abstractions
+open Microsoft.UI.Dispatching
+open Microsoft.UI.Xaml
 open Elmish
 
 
@@ -95,7 +96,7 @@ module UnoProgram =
   /// you control app/window instantiation, runWindowWithConfig might be a better option.
   ///
   /// If you execute this from a thread other than the thread owning element.Dispatcher (UI Thread),
-  /// Elmish.WPF will use that background thread to run updates rather than the main UI thread.</summary>
+  /// Elmish.Uno will use that background thread to run updates rather than the main UI thread.</summary>
   /// <remarks>Example multithreaded use:
   /// <code><![CDATA[
   /// let elmishThread =
@@ -117,7 +118,9 @@ module UnoProgram =
   /// <returns></returns>
   let startElmishLoop
       (element: FrameworkElement)
-      (program: UnoProgram<'model, 'msg, 'viewModel>) =
+      (program: UnoProgram<'model, 'msg, 'viewModel>)
+      arg
+      =
     let mutable viewModel = None
 
     let updateLogger = program.LoggerFactory.CreateLogger("Elmish.Uno.Update")
@@ -141,16 +144,16 @@ module UnoProgram =
      *)
     let mutable dispatch = Unchecked.defaultof<Dispatch<'msg>>
 
-    let elmishDispatcher = Threading.Dispatcher.CurrentDispatcher
+    let elmishDispatcher = Window.Current.DispatcherQueue
     let mutable threader =
-      if element.Dispatcher = elmishDispatcher then
+      if element.DispatcherQueue = elmishDispatcher then
         SingleThreaded
       else
         Threaded_NoUIDispatch
 
-    // Dispatch that comes in from a view model message (setter or WPF ICommand). These may come from UI thread, so must be streated specially
+    // Dispatch that comes in from a view model message (setter or Uno ICommand). These may come from UI thread, so must be streated specially
     let dispatchFromViewModel msg =
-      if element.Dispatcher = Threading.Dispatcher.CurrentDispatcher then // if the message is from the UI thread
+      if element.DispatcherQueue = Window.Current.DispatcherQueue then // if the message is from the UI thread
         match threader with
         | SingleThreaded -> dispatch msg // Dispatch directly if `elmishDispatcher` is the same as the UI thread
         | Threaded_NoUIDispatch -> // If `elmishDispatcher` is different, invoke dispatch on it then wait around for it to finish executing, then execute the continuation on the current (UI) thread
@@ -163,7 +166,7 @@ module UnoProgram =
             dispatch msg
             threader <- Threaded_NoUIDispatch
 
-          elmishDispatcher.InvokeAsync(synchronizedUiDispatch) |> ignore
+          elmishDispatcher.TryEnqueue(synchronizedUiDispatch) |> ignore
           // Wait on `elmishDispatcher` to get to this invocation and collect result
           let continuationOnUIThread = uiWaiter.Task.Result
           // Result is the `program.UpdateViewModel` call, so execute here on the UI thread
@@ -172,7 +175,7 @@ module UnoProgram =
         | Threaded_UIDispatch uiWaiter ->
           uiWaiter.SetException(exn("Error in core Elmish.Uno threading code. Invalid state reached!"))
       else // message is not from the UI thread
-        elmishDispatcher.InvokeAsync(fun () -> dispatch msg) |> ignore // handle as a command message
+        elmishDispatcher.TryEnqueue(fun () -> dispatch msg) |> ignore // handle as a command message
 
     // Core Elmish calls this from `dispatch`, which means this is always called from `elmishDispatcher`
     // (which is UI thread in single-threaded case)
@@ -181,8 +184,8 @@ module UnoProgram =
     let setUiState model _syncDispatch =
       let i = ct
       ct <- ct + 1
-      let scheduleJobThreadPriority = Threading.DispatcherPriority.Send
-      let executeJobThreadPriority = Threading.DispatcherPriority.Background
+      let scheduleJobThreadPriority = DispatcherQueuePriority.High
+      let executeJobThreadPriority = DispatcherQueuePriority.Low
 
       match viewModel with
       | None -> // no view model yet, so create one
@@ -195,7 +198,7 @@ module UnoProgram =
                   log = bindingsLogger
                   logPerformance = performanceLogger } }
           let vm = program.CreateViewModel args
-          element.Dispatcher.Invoke(fun () -> element.DataContext <- vm)
+          element.DispatcherQueue.TryEnqueue(fun () -> element.DataContext <- vm) |> ignore
           viewModel <- Some vm
       | Some vm -> // view model exists, so update
           match threader with
@@ -210,7 +213,7 @@ module UnoProgram =
               program.UpdateViewModel (vm, model)
               updateLogger.LogDebug("Update done from main thread {i}", i)
 
-            element.Dispatcher.InvokeAsync(unscheduleJob, scheduleJobThreadPriority) |> ignore // Unschedule update (already done)
+            element.DispatcherQueue.TryEnqueue(scheduleJobThreadPriority, unscheduleJob) |> ignore // Unschedule update (already done)
             uiWaiter.SetResult(executeJobImmediately) // execute `UpdateViewModel` on UI thread
           | Threaded_PendingUIDispatch _ // We are in a non-UI dispatch that updated the model before the UI got its update in, but after the user interacted
           | Threaded_NoUIDispatch -> // We are in a non-UI dispatch with no pending user interactions known
@@ -229,10 +232,10 @@ module UnoProgram =
               | ValueNone ->
                 updateLogger.LogDebug("Job was empty - No update done {i}", i)
 
-            element.Dispatcher.InvokeAsync(scheduleJob, scheduleJobThreadPriority) |> ignore // Schedule update
-            element.Dispatcher.InvokeAsync(executeJob, executeJobThreadPriority) |> ignore // Execute Update
+            element.DispatcherQueue.TryEnqueue(scheduleJobThreadPriority, scheduleJob) |> ignore // Schedule update
+            element.DispatcherQueue.TryEnqueue(executeJobThreadPriority, executeJob) |> ignore // Execute Update
           | SingleThreaded -> // If we aren't using different threads, always process normally
-            element.Dispatcher.Invoke(fun () -> program.UpdateViewModel (vm, model))
+            element.DispatcherQueue.TryEnqueue(fun () -> program.UpdateViewModel (vm, model)) |> ignore
 
     let cmdDispatch (innerDispatch: Dispatch<'msg>) : Dispatch<'msg> =
       let innerDispatch = measure "dispatch" innerDispatch
@@ -242,7 +245,7 @@ module UnoProgram =
        * This avoids race conditions like those that can occur when shutting down.
        * https://github.com/elmish/Elmish.WPF/issues/353
        *)
-      fun msg -> elmishDispatcher.InvokeAsync(fun () -> dispatch msg) |> ignore
+      fun msg -> elmishDispatcher.TryEnqueue(fun () -> dispatch msg) |> ignore
 
     let logMsgAndModel (msg: 'msg) (model: 'model) _ =
       updateLogger.LogTrace("New message: {Message}\nUpdated state:\n{Model}", msg, model)
@@ -255,22 +258,14 @@ module UnoProgram =
     |> if updateLogger.IsEnabled LogLevel.Trace then Program.withTrace logMsgAndModel else id
     |> Program.withErrorHandler errorHandler
     |> Program.withSetState setUiState
-    |> Program.runWithDispatch cmdDispatch ()
+    |> Program.runWithDispatch cmdDispatch arg
 
 
-  /// Instantiates Application and sets its MainWindow if it is not already
-  /// running.
-  let private initializeApplication window =
-    if isNull Application.Current then
-      Application () |> ignore
-      Application.Current.MainWindow <- window
-
-
-  /// Starts the Elmish and WPF dispatch loops. Will instantiate Application and set its
+  /// Starts the Elmish and Uno dispatch loops. Will instantiate Application and set its
   /// MainWindow if it is not already running, and then run the specified window. This is a
   /// blocking function. If you are using App.xaml as an implicit entry point, see
   /// startElmishLoop.
-  let runWindow window program =
+  let runWindow (window : Window) program =
     (*
      * This is the correct order for these four statements.
      * 1. Initialize Application.Current and set its MainWindow in case the
@@ -280,11 +275,8 @@ module UnoProgram =
      * 3. Show the window now that the DataContext is set.
      * 4. Run the current application, which must be last because it is blocking.
      *)
-    initializeApplication window
-    startElmishLoop window program
-    window.Show ()
-    Application.Current.Run window
-
+    startElmishLoop (window.Content :?> FrameworkElement) program ()
+    window.Activate()
 
   /// Same as mkProgram, except that init and update don't return Cmd<'msg>
   /// directly, but instead return a CmdMsg discriminated union that is converted

@@ -1,5 +1,5 @@
 ﻿[<AutoOpen>]
-module internal Elmish.WPF.Merge
+module internal Elmish.Uno.Merge
 
 open System.Collections.Generic
 open System.Collections.ObjectModel

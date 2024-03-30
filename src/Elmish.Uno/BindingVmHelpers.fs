@@ -1,8 +1,9 @@
-module internal Elmish.WPF.BindingVmHelpers
+module internal Elmish.Uno.BindingVmHelpers
 
 open System
-open System.Windows
+open System.Windows.Input
 open Microsoft.Extensions.Logging
+open Microsoft.UI.Xaml
 
 open Elmish
 
@@ -42,32 +43,17 @@ module Helpers2 =
     let win = getWindow (getCurrentModel ()) dispatch
     winRef.SetTarget win
     (*
-     * A different thread might own this Window, so must use its Dispatcher.
+     * A different thread might own this Window, so must use its DispatcherQueue.
      * Invoking asynchronously since ShowDialog is a blocking call. Otherwise,
      * invoking ShowDialog synchronously blocks the Elmish dispatch loop.
      *)
-    win.Dispatcher.InvokeAsync(fun () ->
-      win.DataContext <- dataContext
-      win.Closing.Add(fun ev ->
-        ev.Cancel <- preventClose.Value
+    win.DispatcherQueue.TryEnqueue(fun () ->
+      (win.Content :?> Microsoft.UI.Xaml.FrameworkElement).DataContext <- dataContext
+      win.Closed.Add(fun ev ->
+        ev.Handled <- preventClose.Value
         getCurrentModel () |> onCloseRequested |> ValueOption.iter dispatch
       )
-      if isDialog then
-        win.ShowDialog () |> ignore
-      else
-        (*
-         * Calling Show achieves the same end result as setting Visibility
-         * property of the Window object to Visible. However, there is a
-         * difference between the two from a timing perspective.
-         *
-         * Calling Show is a synchronous operation that returns only after
-         * the Loaded event on the child window has been raised.
-         *
-         * Setting Visibility, however, is an asynchronous operation that
-         * returns immediately
-         * https://docs.microsoft.com/en-us/dotnet/api/system.windows.window.show
-         *)
-        win.Visibility <- initialVisibility
+      win.Activate()
     ) |> ignore
 
   let measure (logPerformance: ILogger) (logLevel: LogLevel) (performanceLogThresholdMs: int) (name: string) (nameChain: string) (callName: string) f =
@@ -123,12 +109,12 @@ type SubModelWinBinding<'model, 'msg, 'bindingModel, 'bindingMsg, 'vm> = {
   GetCurrentModel: unit -> 'model
 }
 
-type SubModelSeqUnkeyedBinding<'model, 'msg, 'bindingModel, 'bindingMsg, 'vm, 'vmCollection> = {
-  SubModelSeqUnkeyedData: SubModelSeqUnkeyedData<'model, 'msg, 'bindingModel, 'bindingMsg, 'vm, 'vmCollection>
-  Dispatch: 'msg -> unit
-  Vms: CollectionTarget<'vm, 'vmCollection>
-  GetCurrentModel: unit -> 'model
-}
+type SubModelSeqUnkeyedBinding<'model, 'msg, 'bindingModel, 'bindingMsg, 'vm, 'vmCollection> =
+  { SubModelSeqUnkeyedData: SubModelSeqUnkeyedData<'model, 'msg, 'bindingModel, 'bindingMsg, 'vm, 'vmCollection>
+    Dispatch: 'msg -> unit
+    Vms: CollectionTarget<'vm, 'vmCollection>
+    GetCurrentModel: unit -> 'model
+  }
 
 type SubModelSeqKeyedBinding<'model, 'msg, 'bindingModel, 'bindingMsg, 'vm, 'vmCollection, 'id when 'id : equality> =
   { SubModelSeqKeyedData: SubModelSeqKeyedData<'model, 'msg, 'bindingModel, 'bindingMsg, 'vm, 'vmCollection, 'id>
@@ -466,7 +452,7 @@ type Initialize<'t>
               let winRef = WeakReference<_>(null)
               let preventClose = ref true
               log.LogTrace("[{BindingNameChain}] Creating visible window", chain)
-              Helpers2.showNewWindow winRef d.GetWindow d.IsModal d.OnCloseRequested preventClose vm Visibility.Visible getCurrentModel dispatch
+              Helpers2.showNewWindow winRef d.GetWindow d.OnCloseRequested preventClose vm getCurrentModel dispatch
               let mutable vmWinState = WindowState.Visible vm
               { SubModelWinData = d
                 Dispatch = dispatch
@@ -614,11 +600,11 @@ type Update<'t>
                 b.WinRef.SetTarget null
                 (*
                  * The Window might be in the process of closing,
-                 * so instead of immediately executing Window.Close via Dispatcher.Invoke,
-                 * queue a call to Window.Close via Dispatcher.InvokeAsync.
+                 * so instead of immediately executing Window.Close via DispatcherQueue.TryEnqueue,
+                 * queue a call to Window.Close via DispatcherQueue.TryEnqueue.
                  * https://github.com/elmish/Elmish.WPF/issues/330
                  *)
-                w.Dispatcher.InvokeAsync(w.Close) |> ignore
+                w.DispatcherQueue.TryEnqueue(fun () -> w.Close()) |> ignore
             b.WinRef.SetTarget null
 
           let hide () =
@@ -639,7 +625,7 @@ type Update<'t>
 
           let showNew vm =
             b.PreventClose.Value <- true
-            Helpers2.showNewWindow b.WinRef d.GetWindow d.IsModal d.OnCloseRequested b.PreventClose vm
+            Helpers2.showNewWindow b.WinRef d.GetWindow d.OnCloseRequested b.PreventClose vm
 
           let newVm model =
             let toMsg = fun msg -> d.ToMsg (b.GetCurrentModel ()) msg
@@ -678,7 +664,7 @@ type Update<'t>
           | WindowState.Closed, WindowState.Visible m ->
               let vm = newVm m
               log.LogTrace("[{BindingNameChain}] Creating visible window", winPropChain)
-              showNew vm Visibility.Visible b.GetCurrentModel b.Dispatch
+              showNew vm b.GetCurrentModel b.Dispatch
               b.SetVmWinState (WindowState.Visible vm)
               [ PropertyChanged name ]
       | SubModelSeqUnkeyed b ->
@@ -740,13 +726,12 @@ type Update<'t>
           this.Recursive(currentModel |> b.Get, b.Get newModel, b.Binding)
 
 
-type Get<'t>(nameChain: string) =
+type [<Struct>] Get<'t>(nameChain: string) =
 
   member _.Base (model: 'model, binding: BaseVmBinding<'model, 'msg, 't>) =
     match binding with
     | OneWay { OneWayData = d } -> d.Get model |> Ok
     | TwoWay b -> b.Get model |> Ok
-    | OneWayToSource _ -> GetError.OneWayToSource |> Error
     | OneWaySeq { Values = vals } -> vals.GetCollection () |> Ok
     | Cmd cmd -> cmd |> unbox |> Ok
     | SubModel { GetVm = getvm } -> getvm() |> ValueOption.toNull |> Result.mapError GetError.ToNullError
@@ -790,14 +775,11 @@ type Get<'t>(nameChain: string) =
     | AlterMsgStream b -> this.Recursive(b.Get model, b.Binding)
 
 
-type Set<'t>(value: 't) =
+type [<Struct>] Set<'t>(value: 't) =
 
   member _.Base(model: 'model, binding: BaseVmBinding<'model, 'msg, 't>) =
     match binding with
     | TwoWay b ->
-        b.Set value model
-        true
-    | OneWayToSource b ->
         b.Set value model
         true
     | SubModelSelectedItem b ->

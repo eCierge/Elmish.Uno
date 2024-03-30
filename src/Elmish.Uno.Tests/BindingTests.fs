@@ -1,8 +1,9 @@
-module Elmish.Uno.Tests.BindingTests
+module BindingTests.M
 
 open Xunit
 open Hedgehog
 open Swensen.Unquote
+
 open Elmish.Uno
 
 
@@ -579,7 +580,7 @@ module twoWayValidate =
         let validate x = if x < 0 then [ err ] else []
         let d = Binding.twoWayValidate(fail, fail2, validate) |> getValidationData
 
-        test <@ d.Validate x |> unbox = ((validate x) |> Seq.toArray) @>
+        test <@ d.Validate x |> unbox = validate x @>
       }
 
 
@@ -621,7 +622,7 @@ module twoWayValidate =
         let validate x = if x < 0 then [ err ] else []
         let d = Binding.twoWayValidate(fail, fail2, validate) |> getTwoWayValidateData
 
-        test <@ d.Validate x |> unbox = ((validate x) |> Seq.toArray) @>
+        test <@ d.Validate x |> unbox = validate x @>
       }
 
 
@@ -665,7 +666,7 @@ module twoWayValidate =
         let validate x = if x < 0 then [] else [ err ]
         let d = Binding.twoWayValidate(fail, fail2, validate) |> getValidationData
 
-        test <@ d.Validate x |> unbox = ((validate x) |> Seq.toArray) @>
+        test <@ d.Validate x |> unbox = validate x @>
       }
 
 
@@ -707,7 +708,7 @@ module twoWayValidate =
         let validate x = if x < 0 then [ err ] else []
         let d = Binding.twoWayValidate(fail, (fail: string -> int), validate) |> getValidationData
 
-        test <@ d.Validate x |> unbox = ((validate x) |> Seq.toArray) @>
+        test <@ d.Validate x |> unbox = validate x @>
       }
 
 
@@ -749,7 +750,7 @@ module twoWayValidate =
         let validate x = if x < 0 then [ err ] else []
         let d = Binding.twoWayValidate(fail, (fail: string -> int), validate) |> getValidationData
 
-        test <@ d.Validate x |> unbox = ((validate x) |> Seq.toArray) @>
+        test <@ d.Validate x |> unbox = validate x @>
       }
 
 
@@ -791,7 +792,7 @@ module twoWayValidate =
         let validate x = if x < 0 then [] else [ err ]
         let d = Binding.twoWayValidate(fail, (fail: string -> int), validate) |> getValidationData
 
-        test <@ d.Validate x |> unbox = ((validate x) |> Seq.toArray) @>
+        test <@ d.Validate x |> unbox = validate x @>
       }
 
 
@@ -860,7 +861,7 @@ module twoWayOptValidate =
         let validate x = if x < 0 then [ err ] else []
         let d = Binding.twoWayOptValidate((fail: _ -> _ voption), fail2, validate) |> getValidationData
 
-        test <@ d.Validate x |> unbox = ((validate x) |> Seq.toArray) @>
+        test <@ d.Validate x |> unbox = validate x @>
       }
 
 
@@ -928,7 +929,7 @@ module twoWayOptValidate =
         let validate x = if x < 0 then [ err ] else []
         let d = Binding.twoWayOptValidate((fail: _ -> _ voption), fail2, validate) |> getValidationData
 
-        test <@ d.Validate x |> unbox = ((validate x) |> Seq.toArray) @>
+        test <@ d.Validate x |> unbox = validate x @>
       }
 
 
@@ -996,7 +997,7 @@ module twoWayOptValidate =
         let validate x = if x < 0 then [] else [ err ]
         let d = Binding.twoWayOptValidate((fail: _ -> _ voption), fail2, validate) |> getValidationData
 
-        test <@ d.Validate x |> unbox = ((validate x) |> Seq.toArray) @>
+        test <@ d.Validate x |> unbox = validate x @>
       }
 
 
@@ -1062,7 +1063,7 @@ module twoWayOptValidate =
         let validate x = if x < 0 then [ err ] else []
         let d = Binding.twoWayOptValidate((fail: _ -> _ option), fail2, validate) |> getValidationData
 
-        test <@ d.Validate x |> unbox = ((validate x) |> Seq.toArray) @>
+        test <@ d.Validate x |> unbox = validate x @>
       }
 
 
@@ -1128,7 +1129,7 @@ module twoWayOptValidate =
         let validate x = if x < 0 then [ err ] else []
         let d = Binding.twoWayOptValidate((fail: _ -> _ option), fail2, validate) |> getValidationData
 
-        test <@ d.Validate x |> unbox = ((validate x) |> Seq.toArray) @>
+        test <@ d.Validate x |> unbox = validate x @>
       }
 
 
@@ -1194,7 +1195,7 @@ module twoWayOptValidate =
         let validate x = if x < 0 then [] else [ err ]
         let d = Binding.twoWayOptValidate((fail: _ -> _ option), fail2, validate) |> getValidationData
 
-        test <@ d.Validate x |> unbox = ((validate x) |> Seq.toArray) @>
+        test <@ d.Validate x |> unbox = validate x @>
       }
 
 
@@ -1213,6 +1214,8 @@ module twoWayOptValidate =
     //    test <@ d.Get x |> unbox = (get x).Value @>
     //  }
 
+    //    let get _ = ValueNone
+    //    let d = Binding.twoWayOptValidate(get, (fail: _ -> int), (fail: _ -> _ voption)) |> getValidationData
 
     //[<Fact>]
     //let ``when original get returns ValueNone, final get returns null`` () =
@@ -1225,6 +1228,8 @@ module twoWayOptValidate =
     //    test <@ isNull (d.Get x) @>
     //  }
 
+    //    let set (p: string voption) = p |> ValueOption.map (fun x -> x + x)
+    //    let d = Binding.twoWayOptValidate(fail, set, (fail: _ -> _ voption)) |> getValidationData
 
     //[<Fact>]
     //let ``when final set receives a non-null value, original get receives ValueSome`` () =
@@ -1238,6 +1243,8 @@ module twoWayOptValidate =
     //    test <@ d.Set (box p) m |> unbox = set (ValueSome p) @>
     //  }
 
+    //    let set (p: string voption) = p |> ValueOption.map (fun x -> x + x)
+    //    let d = Binding.twoWayOptValidate(fail, set, (fail: _ -> _ voption)) |> getValidationData
 
     //[<Fact>]
     //let ``when final set receives null, original get receives ValueNone`` () =
@@ -1260,7 +1267,7 @@ module twoWayOptValidate =
         let validate x = if x < 0 then [ err ] else []
         let d = Binding.twoWayOptValidate((fail: _ -> _ voption), (fail: _ -> int), validate) |> getValidationData
 
-        test <@ d.Validate x |> unbox = ((validate x) |> Seq.toArray) @>
+        test <@ d.Validate x |> unbox = validate x @>
       }
 
 
@@ -1279,6 +1286,8 @@ module twoWayOptValidate =
     //    test <@ d.Get x |> unbox = (get x).Value @>
     //  }
 
+    //    let get _ = ValueNone
+    //    let d = Binding.twoWayOptValidate(get, (fail: _ -> int), (fail: _ -> _ option)) |> getValidationData
 
     //[<Fact>]
     //let ``when original get returns ValueNone, final get returns null`` () =
@@ -1291,6 +1300,8 @@ module twoWayOptValidate =
     //    test <@ isNull (d.Get x) @>
     //  }
 
+    //    let set (p: string voption) = p |> ValueOption.map (fun x -> x + x)
+    //    let d = Binding.twoWayOptValidate(fail, set, (fail: _ -> _ option)) |> getValidationData
 
     //[<Fact>]
     //let ``when final set receives a non-null value, original get receives ValueSome`` () =
@@ -1304,6 +1315,8 @@ module twoWayOptValidate =
     //    test <@ d.Set (box p) m |> unbox = set (ValueSome p) @>
     //  }
 
+    //    let set (p: string voption) = p |> ValueOption.map (fun x -> x + x)
+    //    let d = Binding.twoWayOptValidate(fail, set, (fail: _ -> _ option)) |> getValidationData
 
     //[<Fact>]
     //let ``when final set receives null, original get receives ValueNone`` () =
@@ -1326,7 +1339,7 @@ module twoWayOptValidate =
         let validate x = if x < 0 then [ err ] else []
         let d = Binding.twoWayOptValidate((fail: _ -> _ voption), (fail: _ -> int), validate) |> getValidationData
 
-        test <@ d.Validate x |> unbox = ((validate x) |> Seq.toArray) @>
+        test <@ d.Validate x |> unbox = validate x @>
       }
 
 
@@ -1345,6 +1358,8 @@ module twoWayOptValidate =
     //    test <@ d.Get x |> unbox = (get x).Value @>
     //  }
 
+    //    let get _ = ValueNone
+    //    let d = Binding.twoWayOptValidate(get, (fail: _ -> int), (fail: _ -> Result<_,_>)) |> getValidationData
 
     //[<Fact>]
     //let ``when original get returns ValueNone, final get returns null`` () =
@@ -1357,6 +1372,8 @@ module twoWayOptValidate =
     //    test <@ isNull (d.Get x) @>
     //  }
 
+    //    let set (p: string voption) = p |> ValueOption.map (fun x -> x + x)
+    //    let d = Binding.twoWayOptValidate(fail, set, (fail: _ -> Result<_,_>)) |> getValidationData
 
     //[<Fact>]
     //let ``when final set receives a non-null value, original get receives ValueSome`` () =
@@ -1370,6 +1387,8 @@ module twoWayOptValidate =
     //    test <@ d.Set (box p) m |> unbox = set (ValueSome p) @>
     //  }
 
+    //    let set (p: string voption) = p |> ValueOption.map (fun x -> x + x)
+    //    let d = Binding.twoWayOptValidate(fail, set, (fail: _ -> Result<_,_>)) |> getValidationData
 
     //[<Fact>]
     //let ``when final set receives null, original get receives ValueNone`` () =
@@ -1392,7 +1411,7 @@ module twoWayOptValidate =
         let validate x = if x < 0 then [] else [ err ]
         let d = Binding.twoWayOptValidate((fail: _ -> _ voption), (fail: _ -> int), validate) |> getValidationData
 
-        test <@ d.Validate x |> unbox = ((validate x) |> Seq.toArray) @>
+        test <@ d.Validate x |> unbox = validate x @>
       }
 
 
@@ -1411,6 +1430,8 @@ module twoWayOptValidate =
     //    test <@ d.Get x |> unbox = (get x).Value @>
     //  }
 
+    //    let get _ = None
+    //    let d = Binding.twoWayOptValidate(get, (fail: _ -> int), (fail: _ -> _ voption)) |> getValidationData
 
     //[<Fact>]
     //let ``when original get returns None, final get returns null`` () =
@@ -1458,7 +1479,7 @@ module twoWayOptValidate =
         let validate x = if x < 0 then [ err ] else []
         let d = Binding.twoWayOptValidate((fail: _ -> _ option), (fail: _ -> int), validate) |> getValidationData
 
-        test <@ d.Validate x |> unbox = ((validate x) |> Seq.toArray) @>
+        test <@ d.Validate x |> unbox = validate x @>
       }
 
 
@@ -1524,7 +1545,7 @@ module twoWayOptValidate =
         let validate x = if x < 0 then [ err ] else []
         let d = Binding.twoWayOptValidate((fail: _ -> _ option), (fail: _ -> int), validate) |> getValidationData
 
-        test <@ d.Validate x |> unbox = ((validate x) |> Seq.toArray) @>
+        test <@ d.Validate x |> unbox = validate x @>
       }
 
 
@@ -1590,7 +1611,7 @@ module twoWayOptValidate =
         let validate x = if x < 0 then [] else [ err ]
         let d = Binding.twoWayOptValidate((fail: _ -> _ option), (fail: _ -> int), validate) |> getValidationData
 
-        test <@ d.Validate x |> unbox = ((validate x) |> Seq.toArray) @>
+        test <@ d.Validate x |> unbox = validate x @>
       }
 
 
@@ -1909,6 +1930,17 @@ module cmdParamIf =
 
 
 
+
+    [<Fact>]
+    let ``final autoRequery equals original uiBoundCmdParam`` () =
+      Property.check <| property {
+        let! uiBoundCmdParam = GenX.auto<bool>
+        let d = Binding.cmdParamIf((fail2: _ -> _ -> _ voption), uiBoundCmdParam = uiBoundCmdParam) |> getCmdData
+        test <@ d.AutoRequery = uiBoundCmdParam @>
+      }
+
+
+
   module option_model =
 
 
@@ -2038,6 +2070,23 @@ module cmdParamIf =
         let d = Binding.cmdParamIf((fail2: _ -> _ -> Result<_,_>)) |> getCmdData
         test <@ d.AutoRequery = false @>
       }
+
+    [<Fact>]
+    let ``final autoRequery defaults to false`` () =
+      Property.check <| property {
+        let d = Binding.cmdParamIf((fail2: _ -> _ -> Result<_,_>)) |> getCmdData
+        test <@ d.AutoRequery = false @>
+      }
+
+
+    [<Fact>]
+    let ``final autoRequery equals original uiBoundCmdParam`` () =
+      Property.check <| property {
+        let! uiBoundCmdParam = GenX.auto<bool>
+        let d = Binding.cmdParamIf((fail2: _ -> _ -> Result<_,_>), uiBoundCmdParam = uiBoundCmdParam) |> getCmdData
+        test <@ d.AutoRequery = uiBoundCmdParam @>
+      }
+
 
 
     [<Fact>]
@@ -2174,6 +2223,8 @@ module cmdParamIf =
 
 
 
+
+
   module option_noModel =
 
 
@@ -2231,6 +2282,23 @@ module cmdParamIf =
         let d = Binding.cmdParamIf((fail: _ -> _ option)) |> getCmdData
         test <@ d.AutoRequery = false @>
       }
+
+    [<Fact>]
+    let ``final autoRequery defaults to false`` () =
+      Property.check <| property {
+        let d = Binding.cmdParamIf((fail: _ -> _ option)) |> getCmdData
+        test <@ d.AutoRequery = false @>
+      }
+
+
+    [<Fact>]
+    let ``final autoRequery equals original uiBoundCmdParam`` () =
+      Property.check <| property {
+        let! uiBoundCmdParam = GenX.auto<bool>
+        let d = Binding.cmdParamIf((fail: _ -> _ option), uiBoundCmdParam = uiBoundCmdParam) |> getCmdData
+        test <@ d.AutoRequery = uiBoundCmdParam @>
+      }
+
 
 
     [<Fact>]
@@ -2315,6 +2383,16 @@ module cmdParamIf =
 
 
 
+    [<Fact>]
+    let ``final autoRequery equals original uiBoundCmdParam`` () =
+      Property.check <| property {
+        let! uiBoundCmdParam = GenX.auto<bool>
+        let d = Binding.cmdParamIf((fail: _ -> Result<_,_>), uiBoundCmdParam = uiBoundCmdParam) |> getCmdData
+        test <@ d.AutoRequery = uiBoundCmdParam @>
+      }
+
+
+
 module subModel =
 
 
@@ -2348,8 +2426,6 @@ module subModel =
         let d = Binding.subModel((fun _ -> 0), fail) |> getSubModelData
         test <@ d.ToMsg m (box x) = x @>
       }
-
-
 
   module toMsg_noToBindingModel =
 

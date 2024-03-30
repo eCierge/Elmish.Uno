@@ -6,8 +6,8 @@ open Xunit
 open Hedgehog
 open Swensen.Unquote
 
-open Elmish.WPF
-open Elmish.WPF.BindingVmHelpers
+open Elmish.Uno
+open Elmish.Uno.BindingVmHelpers
 
 
 

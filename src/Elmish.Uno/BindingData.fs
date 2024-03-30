@@ -1,9 +1,10 @@
 [<AutoOpen>]
-module internal Elmish.WPF.BindingData
+module internal Elmish.Uno.BindingData
 
 open System.Collections.ObjectModel
 open System.Windows
 open System.Windows.Input
+open Microsoft.UI.Xaml
 
 open Elmish
 
@@ -554,10 +555,9 @@ module BindingData =
 
   module Cmd =
 
-    let createWithParam exec canExec autoRequery : BindingData<'model, 'msg, ICommand> =
+    let createWithParam exec canExec : BindingData<'model, 'msg, ICommand> =
       { Exec = exec
-        CanExec = canExec
-        AutoRequery = autoRequery }
+        CanExec = canExec }
       |> CmdData
       |> BaseBindingData
 
@@ -680,7 +680,7 @@ module BindingData =
 
     let boxMinorTypes d = d |> mapMinorTypes box box unbox unbox
 
-    let create getState createViewModel updateViewModel toMsg getWindow isModal onCloseRequested =
+    let create getState createViewModel updateViewModel toMsg getWindow onCloseRequested =
       { GetState = getState
         CreateViewModel = createViewModel
         UpdateViewModel = updateViewModel

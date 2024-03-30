@@ -1,8 +1,9 @@
-﻿module Elmish.Uno.Tests.UtilsTests
+﻿module UtilsTests.M
 
 open Xunit
 open Hedgehog
 open Swensen.Unquote
+
 open Elmish.Uno
 
 

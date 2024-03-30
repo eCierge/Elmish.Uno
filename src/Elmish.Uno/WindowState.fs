@@ -1,4 +1,4 @@
-﻿namespace Elmish.WPF
+﻿namespace Elmish.Uno
 
 [<RequireQualifiedAccess>]
 type WindowState<'model> =
@@ -9,7 +9,7 @@ type WindowState<'model> =
 
 module WindowState =
 
-  let cata a f g = function
+  let cata a g = function
     | WindowState.Closed    -> a
     | WindowState.Hidden  a -> a |> f
     | WindowState.Visible a -> a |> g
@@ -33,8 +33,8 @@ module WindowState =
       WindowState.Visible
       WindowState.Visible
 
-  let toOption  state = state |> cata None Some Some
-  let toVOption state = state |> cata ValueNone ValueSome ValueSome
+  let toOption  state = state |> cata None Some
+  let toVOption state = state |> cata ValueNone ValueSome
 
   /// Converts None to WindowState.Closed, and Some(x) to
   /// WindowState.Visible(x).

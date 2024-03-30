@@ -1,10 +1,12 @@
-﻿namespace Elmish.WPF
+﻿namespace Elmish.Uno
 
 open System
 open System.Dynamic
 open System.Collections.Generic
+open System.Collections.ObjectModel
 open System.ComponentModel
 open Microsoft.Extensions.Logging
+open Microsoft.UI.Xaml.Data
 
 open BindingVmHelpers
 
@@ -173,6 +175,10 @@ type [<AllowNullLiteral>] internal DynamicViewModel<'model, 'msg>
       bindings
       validationErrors
 
+  member internal _.Bindings = bindings
+
+  member internal _.CurrentModel : 'model = helper.Model
+
   interface IViewModel<'model, 'msg> with
     member _.CurrentModel : 'model = helper.Model
 
@@ -183,43 +189,51 @@ type [<AllowNullLiteral>] internal DynamicViewModel<'model, 'msg>
       let eventsToRaise = if prevHasErrors = (helper :> INotifyDataErrorInfo).HasErrors then eventsToRaise else (PropertyChanged "HasErrors") :: eventsToRaise
       ViewModelHelper.raiseEvents eventsToRaise helper
 
-  override _.TryGetMember (binder, result) =
-    log.LogTrace("[{BindingNameChain}] TryGetMember {BindingName}", nameChain, binder.Name)
-    match bindings.TryGetValue binder.Name with
-    | false, _ ->
-        log.LogError("[{BindingNameChain}] TryGetMember FAILED: Property {BindingName} doesn't exist", nameChain, binder.Name)
-        false
-    | true, binding ->
-        try
-          match Get(nameChain).Recursive(helper.Model, binding) with
-          | Ok v ->
-              result <- v
-              true
-          | Error e ->
-              match e with
-              | GetError.OneWayToSource -> log.LogError("[{BindingNameChain}] TryGetMember FAILED: Binding {BindingName} is read-only", nameChain, binder.Name)
-              | GetError.SubModelSelectedItem d -> log.LogError("[{BindingNameChain}] TryGetMember FAILED: Failed to find an element of the SubModelSeq binding {SubModelSeqBindingName} with ID {ID} in the getter for the binding {BindingName}", d.NameChain, d.SubModelSeqBindingName, d.Id, binder.Name)
-              | GetError.ToNullError (ValueOption.ToNullError.ValueCannotBeNull nonNullTypeName) -> log.LogError("[{BindingNameChain}] TryGetMember FAILED: Binding {BindingName} is null, but type {Type} is non-nullable", nameChain, binder.Name, nonNullTypeName)
-              false
-        with e ->
-          log.LogError(e, "[{BindingNameChain}] TryGetMember FAILED: Exception thrown while processing binding {BindingName}", nameChain, binder.Name)
-          reraise ()
+  member _.TryGetMemberCore (name: string, binding) =
+    try
+      match Get(nameChain).Recursive(helper.Model, binding) with
+      | Ok v -> v
+      | Error e ->
+          match e with
+          | GetError.OneWayToSource -> log.LogError("[{BindingNameChain}] TryGetMember FAILED: Binding {BindingName} is read-only", nameChain, name)
+          | GetError.SubModelSelectedItem d -> log.LogError("[{BindingNameChain}] TryGetMember FAILED: Failed to find an element of the SubModelSeq binding {SubModelSeqBindingName} with ID {ID} in the getter for the binding {BindingName}", d.NameChain, d.SubModelSeqBindingName, d.Id, name)
+          | GetError.ToNullError (ValueOption.ToNullError.ValueCannotBeNull nonNullTypeName) -> log.LogError("[{BindingNameChain}] TryGetMember FAILED: Binding {BindingName} is null, but type {Type} is non-nullable", nameChain, name, nonNullTypeName)
+          null
+    with e ->
+      log.LogError(e, "[{BindingNameChain}] TryGetMember FAILED: Exception thrown while processing binding {BindingName}", nameChain, name)
+      reraise ()
 
-  override _.TrySetMember (binder, value) =
-    log.LogTrace("[{BindingNameChain}] TrySetMember {BindingName}", nameChain, binder.Name)
-    match bindings.TryGetValue binder.Name with
+  override vm.TryGetMember (binder, result) =
+    let name = binder.Name
+    log.LogTrace("[{BindingNameChain}] TryGetMember {BindingName}", nameChain, name)
+    match bindings.TryGetValue name with
     | false, _ ->
-        log.LogError("[{BindingNameChain}] TrySetMember FAILED: Property {BindingName} doesn't exist", nameChain, binder.Name)
+        log.LogError("[{BindingNameChain}] TryGetMember FAILED: Property {BindingName} doesn't exist", nameChain, name)
         false
     | true, binding ->
-        try
-          let success = Set(value).Recursive(helper.Model, binding)
-          if not success then
-            log.LogError("[{BindingNameChain}] TrySetMember FAILED: Binding {BindingName} is read-only", nameChain, binder.Name)
-          success
-        with e ->
-          log.LogError(e, "[{BindingNameChain}] TrySetMember FAILED: Exception thrown while processing binding {BindingName}", nameChain, binder.Name)
-          reraise ()
+      result <- vm.TryGetMemberCore(name, binding)
+      result <> null
+
+  member _.TrySetMemberCore (name, binding, value) =
+    try
+      let success = Set(value).Recursive(helper.Model, binding)
+      if not success then
+        log.LogError("[{BindingNameChain}] TrySetMember FAILED: Binding {BindingName} is read-only", nameChain, name)
+      success
+    with e ->
+      log.LogError(e, "[{BindingNameChain}] TrySetMember FAILED: Exception thrown while processing binding {BindingName}", nameChain, name)
+      reraise ()
+
+  override vm.TrySetMember (binder, value) =
+    let name = binder.Name
+    log.LogTrace("[{BindingNameChain}] TrySetMember {BindingName}", nameChain, name)
+    match bindings.TryGetValue name with
+    | false, _ ->
+        log.LogError("[{BindingNameChain}] TrySetMember FAILED: Property {BindingName} doesn't exist", nameChain, name)
+        false
+    | true, binding ->
+      vm.TrySetMemberCore(name, binding, value)
+
 
   override _.GetDynamicMemberNames () =
     log.LogTrace("[{BindingNameChain}] GetDynamicMemberNames", nameChain)
@@ -235,6 +249,66 @@ type [<AllowNullLiteral>] internal DynamicViewModel<'model, 'msg>
     member _.ErrorsChanged = (helper :> INotifyDataErrorInfo).ErrorsChanged
     member _.HasErrors = (helper :> INotifyDataErrorInfo).HasErrors
     member _.GetErrors name = (helper :> INotifyDataErrorInfo).GetErrors name
+
+  member private this.GetProperty(name : string) : ICustomProperty =
+    if name = "CurrentModel" then DynamicCustomProperty<DynamicViewModel<'model,'msg>, obj>(name, fun vm -> vm.CurrentModel |> box) :> _
+    else
+    match this.Bindings.TryGetValue name with
+    | false, _ ->
+      System.Diagnostics.Debugger.Break()
+      null
+    | true, binding ->
+      GetCustomProperty(name).Recursive(this, binding)
+
+  interface ICustomPropertyProvider with
+
+    member this.GetCustomProperty(name) = this.GetProperty(name)
+
+    member this.GetIndexedProperty(name, _ : Type) = this.GetProperty(name)
+
+    member this.GetStringRepresentation() = this.CurrentModel.ToString()
+
+    member this.Type = this.CurrentModel.GetType()
+
+and [<Struct>] GetCustomProperty<'t>(name: string) =
+
+  member _.Base (vm: DynamicViewModel<'model, 'msg>, rootBinding: VmBinding<'model, 'msg, 't>, vmBinding: BaseVmBinding<'model, 'msg, 't>) : ICustomProperty =
+    match vmBinding with
+    | OneWay _ -> DynamicCustomProperty<DynamicViewModel<'model,'msg>, obj>(name, fun vm -> vm.TryGetMemberCore(name, rootBinding)) :> _
+    | TwoWay _ ->
+      DynamicCustomProperty<DynamicViewModel<'model,'msg>, obj>(name,
+        (fun vm -> vm.TryGetMemberCore(name, rootBinding)),
+        (fun vm value -> vm.TrySetMemberCore(name, rootBinding, value) |> ignore)) :> _
+    | OneWaySeq _ ->
+      DynamicCustomProperty<DynamicViewModel<'model,'msg>, ObservableCollection<obj>>(name,
+        fun vm -> vm.TryGetMemberCore(name, rootBinding) :?> _) :> _
+    | Cmd _ ->
+      DynamicCustomProperty<DynamicViewModel<'model,'msg>, System.Windows.Input.ICommand>(name,
+        fun vm -> vm.TryGetMemberCore(name, rootBinding) :?> _) :> _
+    | SubModel _
+    | SubModelWin _ ->
+      DynamicCustomProperty<DynamicViewModel<'model,'msg>, DynamicViewModel<obj, obj>>(name,
+        fun vm -> vm.TryGetMemberCore(name, rootBinding) :?> _) :> _
+    | SubModelSeqUnkeyed _
+    | SubModelSeqKeyed _ ->
+      DynamicCustomProperty<DynamicViewModel<'model,'msg>, ObservableCollection<DynamicViewModel<obj, obj>>>(name,
+        fun vm -> vm.TryGetMemberCore(name, rootBinding) :?> _) :> _
+    | SubModelSelectedItem b ->
+      DynamicCustomProperty<DynamicViewModel<'model,'msg>, DynamicViewModel<obj, obj>>(name,
+        fun vm -> vm.TryGetMemberCore(name, rootBinding) :?> _) :> _
+
+  member this.Recursive<'model, 'msg, 't>
+      (vm: DynamicViewModel<'model, 'msg>,
+       rootBinding: VmBinding<'model, 'msg, 't>,
+       binding: VmBinding<'model, 'msg, 't>)
+      : ICustomProperty =
+    match binding with
+    | BaseVmBinding b -> this.Base(vm, rootBinding, b)
+    | Cached b -> this.Recursive(vm, rootBinding, b.Binding)
+    | Validatation b -> this.Recursive(vm, rootBinding, b.Binding)
+    | Lazy b -> this.Recursive(vm, rootBinding, b.Binding)
+    | AlterMsgStream b -> this.Recursive(vm, rootBinding, b.Binding)
+
 
 open System.Runtime.CompilerServices
 

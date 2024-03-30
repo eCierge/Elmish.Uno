@@ -1,4 +1,4 @@
-﻿namespace Elmish.WPF
+﻿namespace Elmish.Uno
 
 open Microsoft.Extensions.Logging
 open Microsoft.Extensions.Logging.Abstractions
@@ -48,5 +48,5 @@ module ViewModelArgs =
     { initialModel = initialModel
       dispatch = dispatch
       loggingArgs = LoggingViewModelArgs.none }
-  
+
   let simple initialModel = createWithoutLogging initialModel ignore
