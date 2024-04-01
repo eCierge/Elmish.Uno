@@ -376,10 +376,10 @@ module Binding =
     ///   to the <c>DataContext</c> of a <c>UserControl</c> or similar.
     /// </summary>
     /// <param name="bindings">Returns the bindings for the sub-model.</param>
-    let vopt (bindings: unit -> Binding<'model, 'msg> list)
+    let vopt (bindings: Binding<'model, 'msg> list)
         : string -> Binding<'model voption, 'msg> =
       SubModel.create
-        (fun args -> DynamicViewModel<'model, 'msg>(args, bindings ()))
+        (fun args -> DynamicViewModel<'model, 'msg>(args, bindings))
         IViewModel.updateModel
       |> createBinding
 
@@ -388,7 +388,7 @@ module Binding =
     ///   to the <c>DataContext</c> of a <c>UserControl</c> or similar.
     /// </summary>
     /// <param name="bindings">Returns the bindings for the sub-model.</param>
-    let opt (bindings: unit -> Binding<'model, 'msg> list)
+    let opt (bindings: Binding<'model, 'msg> list)
         : string -> Binding<'model option, 'msg> =
       vopt bindings
       >> mapModel ValueOption.ofOption
@@ -398,7 +398,7 @@ module Binding =
     ///   to the <c>DataContext</c> of a <c>UserControl</c> or similar.
     /// </summary>
     /// <param name="bindings">Returns the bindings for the sub-model.</param>
-    let required (bindings: unit -> Binding<'model, 'msg> list)
+    let required (bindings: Binding<'model, 'msg> list)
         : string -> Binding<'model, 'msg> =
       vopt bindings
       >> mapModel ValueSome
@@ -1276,7 +1276,7 @@ type Binding private () =
       (getSubModel: 'model -> 'subModel,
        toBindingModel: 'model * 'subModel -> 'bindingModel,
        toMsg: 'bindingMsg -> 'msg,
-       bindings: unit -> Binding<'bindingModel, 'bindingMsg> list)
+       bindings: Binding<'bindingModel, 'bindingMsg> list)
       : string -> Binding<'model, 'msg> =
     Binding.SubModel.required bindings
     >> Binding.mapModel (fun m -> toBindingModel (m, getSubModel m))
@@ -1297,7 +1297,7 @@ type Binding private () =
   static member subModel
       (getSubModel: 'model -> 'subModel,
        toMsg: 'subMsg -> 'msg,
-       bindings: unit -> Binding<'model * 'subModel, 'subMsg> list)
+       bindings: Binding<'model * 'subModel, 'subMsg> list)
       : string -> Binding<'model, 'msg> =
     Binding.SubModel.required bindings
     >> Binding.mapModel (fun m -> (m, getSubModel m))
@@ -1314,7 +1314,7 @@ type Binding private () =
   [<System.Obsolete("In version 5, the type of the argument \"bindings\" will be changed to \"unit -> Binding<'model, 'msg> list\".  To avoid a compile error when upgrading, replace this method call with its implementation.")>]
   static member subModel
       (getSubModel: 'model -> 'subModel,
-       bindings: unit -> Binding<'model * 'subModel, 'msg> list)
+       bindings: Binding<'model * 'subModel, 'msg> list)
       : string -> Binding<'model, 'msg> =
     Binding.SubModel.required bindings
     >> Binding.mapModel (fun m -> (m, getSubModel m))
@@ -1352,7 +1352,7 @@ type Binding private () =
       (getSubModel: 'model -> 'subModel voption,
        toBindingModel: 'model * 'subModel -> 'bindingModel,
        toMsg: 'bindingMsg -> 'msg,
-       bindings: unit -> Binding<'bindingModel, 'bindingMsg> list,
+       bindings: Binding<'bindingModel, 'bindingMsg> list,
        ?sticky: bool)
       : string -> Binding<'model, 'msg> =
     Binding.SubModel.vopt bindings
@@ -1393,7 +1393,7 @@ type Binding private () =
       (getSubModel: 'model -> 'subModel option,
        toBindingModel: 'model * 'subModel -> 'bindingModel,
        toMsg: 'bindingMsg -> 'msg,
-       bindings: unit -> Binding<'bindingModel, 'bindingMsg> list,
+       bindings: Binding<'bindingModel, 'bindingMsg> list,
        ?sticky: bool)
       : string -> Binding<'model, 'msg> =
     Binding.SubModel.opt bindings
@@ -1429,7 +1429,7 @@ type Binding private () =
   static member subModelOpt
       (getSubModel: 'model -> 'subModel voption,
        toMsg: 'subMsg -> 'msg,
-       bindings: unit -> Binding<'model * 'subModel, 'subMsg> list,
+       bindings: Binding<'model * 'subModel, 'subMsg> list,
        ?sticky: bool)
       : string -> Binding<'model, 'msg> =
     Binding.SubModel.vopt bindings
@@ -1466,7 +1466,7 @@ type Binding private () =
   static member subModelOpt
       (getSubModel: 'model -> 'subModel option,
        toMsg: 'subMsg -> 'msg,
-       bindings: unit -> Binding<'model * 'subModel, 'subMsg> list,
+       bindings: Binding<'model * 'subModel, 'subMsg> list,
        ?sticky: bool)
       : string -> Binding<'model, 'msg> =
     Binding.SubModel.opt bindings
@@ -1498,7 +1498,7 @@ type Binding private () =
   [<System.Obsolete("In version 5, the type of the argument \"bindings\" will be changed to \"unit -> Binding<'model, 'msg> list\".  To avoid a compile error when upgrading, replace this method call with (a specialization of) its implementation.")>]
   static member subModelOpt
       (getSubModel: 'model -> 'subModel voption,
-       bindings: unit -> Binding<'model * 'subModel, 'msg> list,
+       bindings: Binding<'model * 'subModel, 'msg> list,
        ?sticky: bool)
       : string -> Binding<'model, 'msg> =
     Binding.SubModel.vopt bindings
@@ -1529,7 +1529,7 @@ type Binding private () =
   [<System.Obsolete("In version 5, the type of the argument \"bindings\" will be changed to \"unit -> Binding<'model, 'msg> list\".  To avoid a compile error when upgrading, replace this method call with (a specialization of) its implementation.")>]
   static member subModelOpt
       (getSubModel: 'model -> 'subModel option,
-       bindings: unit -> Binding<'model * 'subModel, 'msg> list,
+       bindings: Binding<'model * 'subModel, 'msg> list,
        ?sticky: bool)
       : string -> Binding<'model, 'msg> =
     Binding.SubModel.opt bindings
