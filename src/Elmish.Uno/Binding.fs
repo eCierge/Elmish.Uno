@@ -1311,7 +1311,6 @@ type Binding private () =
   /// </summary>
   /// <param name="getSubModel">Gets the sub-model from the model.</param>
   /// <param name="bindings">Returns the bindings for the sub-model.</param>
-  [<System.Obsolete("In version 5, the type of the argument \"bindings\" will be changed to \"unit -> Binding<'model, 'msg> list\".  To avoid a compile error when upgrading, replace this method call with its implementation.")>]
   static member subModel
       (getSubModel: 'model -> 'subModel,
        bindings: Binding<'model * 'subModel, 'msg> list)
@@ -1495,7 +1494,6 @@ type Binding private () =
   ///   If <c>true</c>, when the model is missing, the last non-<c>null</c>
   ///   model will be returned instead of <c>null</c>.
   /// </param>
-  [<System.Obsolete("In version 5, the type of the argument \"bindings\" will be changed to \"unit -> Binding<'model, 'msg> list\".  To avoid a compile error when upgrading, replace this method call with (a specialization of) its implementation.")>]
   static member subModelOpt
       (getSubModel: 'model -> 'subModel voption,
        bindings: Binding<'model * 'subModel, 'msg> list,
@@ -1526,7 +1524,6 @@ type Binding private () =
   ///   If <c>true</c>, when the model is missing, the last non-<c>null</c>
   ///   model will be returned instead of <c>null</c>.
   /// </param>
-  [<System.Obsolete("In version 5, the type of the argument \"bindings\" will be changed to \"unit -> Binding<'model, 'msg> list\".  To avoid a compile error when upgrading, replace this method call with (a specialization of) its implementation.")>]
   static member subModelOpt
       (getSubModel: 'model -> 'subModel option,
        bindings: Binding<'model * 'subModel, 'msg> list,
@@ -1578,13 +1575,13 @@ type Binding private () =
       (getState: 'model -> WindowState<'subModel>,
        toBindingModel: 'model * 'subModel -> 'bindingModel,
        toMsg: 'bindingMsg -> 'msg,
-       bindings: unit -> Binding<'bindingModel, 'bindingMsg> list,
+       bindings: Binding<'bindingModel, 'bindingMsg> list,
        getWindow: 'model -> Dispatch<'msg> -> Window,
        ?onCloseRequested: 'msg)
       : string -> Binding<'model, 'msg> =
     Binding.SubModelWin.create
       (fun m -> getState m |> WindowState.map (fun sub -> toBindingModel (m, sub)))
-      (fun args -> DynamicViewModel<'bindingModel, 'bindingMsg>(args, bindings ()))
+      (fun args -> DynamicViewModel<'bindingModel, 'bindingMsg>(args, bindings))
       IViewModel.updateModel
       (fun _ -> toMsg)
       (fun m d -> getWindow m d)
@@ -1632,7 +1629,7 @@ type Binding private () =
       (getState: 'model -> WindowState<'subModel>,
        toBindingModel: 'model * 'subModel -> 'bindingModel,
        toMsg: 'bindingMsg -> 'msg,
-       bindings: unit -> Binding<'bindingModel, 'bindingMsg> list,
+       bindings: Binding<'bindingModel, 'bindingMsg> list,
        getWindow: unit -> Window,
        ?onCloseRequested: 'msg)
       : string -> Binding<'model, 'msg> =
@@ -1678,13 +1675,13 @@ type Binding private () =
   static member subModelWin
       (getState: 'model -> WindowState<'subModel>,
        toMsg: 'subMsg -> 'msg,
-       bindings: unit -> Binding<'model * 'subModel, 'subMsg> list,
+       bindings: Binding<'model * 'subModel, 'subMsg> list,
        getWindow: 'model -> Dispatch<'msg> -> Window,
        ?onCloseRequested: 'msg)
       : string -> Binding<'model, 'msg> =
     Binding.SubModelWin.create
       (fun m -> getState m |> WindowState.map (fun sub -> (m, sub)))
-      (fun args -> DynamicViewModel<'model * 'subModel, 'subMsg>(args, bindings ()))
+      (fun args -> DynamicViewModel<'model * 'subModel, 'subMsg>(args, bindings))
       IViewModel.updateModel
       (fun _ -> toMsg)
       (fun m d -> getWindow m d)
@@ -1724,7 +1721,7 @@ type Binding private () =
   static member subModelWin
       (getState: 'model -> WindowState<'subModel>,
        toMsg: 'subMsg -> 'msg,
-       bindings: unit -> Binding<'model * 'subModel, 'subMsg> list,
+       bindings: Binding<'model * 'subModel, 'subMsg> list,
        getWindow: unit -> Window,
        ?onCloseRequested: 'msg)
       : string -> Binding<'model, 'msg> =
@@ -1764,13 +1761,13 @@ type Binding private () =
   /// </param>
   static member subModelWin
       (getState: 'model -> WindowState<'subModel>,
-       bindings: unit -> Binding<'model * 'subModel, 'msg> list,
+       bindings: Binding<'model * 'subModel, 'msg> list,
        getWindow: 'model -> Dispatch<'msg> -> Window,
        ?onCloseRequested: 'msg)
       : string -> Binding<'model, 'msg> =
     Binding.SubModelWin.create
       (fun m -> getState m |> WindowState.map (fun sub -> (m, sub)))
-      (fun args -> DynamicViewModel<'model * 'subModel, 'msg>(args, bindings ()))
+      (fun args -> DynamicViewModel<'model * 'subModel, 'msg>(args, bindings))
       IViewModel.updateModel
       (fun _ -> id)
       (fun m d -> getWindow m d)
@@ -1805,7 +1802,7 @@ type Binding private () =
   /// </param>
   static member subModelWin
       (getState: 'model -> WindowState<'subModel>,
-       bindings: unit -> Binding<'model * 'subModel, 'msg> list,
+       bindings: Binding<'model * 'subModel, 'msg> list,
        getWindow: unit -> Window,
        ?onCloseRequested: 'msg)
       : string -> Binding<'model, 'msg> =
@@ -1816,18 +1813,18 @@ type Binding private () =
       ?onCloseRequested = onCloseRequested)
 
   static member subModelSeq // TODO: make into function
-      (getBindings: unit -> Binding<'model, 'msg> list)
+      (bindings: Binding<'model, 'msg> list)
       : string -> Binding<'model seq, int * 'msg> =
     Binding.SubModelSeqUnkeyed.create
-      (fun args -> DynamicViewModel<'model, 'msg>(args, getBindings ()))
+      (fun args -> DynamicViewModel<'model, 'msg>(args, bindings))
       IViewModel.updateModel
 
   static member subModelSeq // TODO: make into function
-      (getBindings: unit -> Binding<'model, 'msg> list,
+      (bindings: Binding<'model, 'msg> list,
        getId: 'model -> 'id)
       : string -> Binding<'model seq, 'id * 'msg> =
     Binding.SubModelSeqKeyed.create
-      (fun args -> DynamicViewModel<'model, 'msg>(args, getBindings ()))
+      (fun args -> DynamicViewModel<'model, 'msg>(args, bindings))
       IViewModel.updateModel
       getId
       (IViewModel.currentModel >> getId)
@@ -1856,10 +1853,10 @@ type Binding private () =
        toBindingModel: 'model * 'subModel -> 'bindingModel,
        getId: 'bindingModel -> 'id,
        toMsg: 'id * 'bindingMsg -> 'msg,
-       bindings: unit -> Binding<'bindingModel, 'bindingMsg> list)
+       bindings: Binding<'bindingModel, 'bindingMsg> list)
       : string -> Binding<'model, 'msg> =
     Binding.SubModelSeqKeyed.create
-      (fun args -> DynamicViewModel<'bindingModel, 'bindingMsg>(args, bindings ()))
+      (fun args -> DynamicViewModel<'bindingModel, 'bindingMsg>(args, bindings))
       IViewModel.updateModel
       getId
       (IViewModel.currentModel >> getId)
@@ -1886,10 +1883,10 @@ type Binding private () =
       (getSubModels: 'model -> #seq<'subModel>,
        getId: 'subModel -> 'id,
        toMsg: 'id * 'subMsg -> 'msg,
-       bindings: unit -> Binding<'model * 'subModel, 'subMsg> list)
+       bindings: Binding<'model * 'subModel, 'subMsg> list)
       : string -> Binding<'model, 'msg> =
     Binding.SubModelSeqKeyed.create
-      (fun args -> DynamicViewModel<'model * 'subModel, 'subMsg>(args, bindings ()))
+      (fun args -> DynamicViewModel<'model * 'subModel, 'subMsg>(args, bindings))
       IViewModel.updateModel
       (snd >> getId)
       (IViewModel.currentModel >> snd >> getId)
@@ -1910,10 +1907,10 @@ type Binding private () =
   static member subModelSeq
       (getSubModels: 'model -> #seq<'subModel>,
        getId: 'subModel -> 'id,
-       bindings: unit -> Binding<'model * 'subModel, 'msg> list)
+       bindings: Binding<'model * 'subModel, 'msg> list)
       : string -> Binding<'model, 'msg> =
     Binding.SubModelSeqKeyed.create
-      (fun args -> DynamicViewModel<'model * 'subModel, 'msg>(args, bindings ()))
+      (fun args -> DynamicViewModel<'model * 'subModel, 'msg>(args, bindings))
       IViewModel.updateModel
       (snd >> getId)
       (IViewModel.currentModel >> snd >> getId)
@@ -2423,7 +2420,7 @@ module Extensions =
         (getSubModel: 'model -> 'subModel,
          toBindingModel: 'model * 'subModel -> 'bindingModel,
          toMsg: 'bindingMsg -> 'msg,
-         bindings: unit -> Binding<'bindingModel, 'bindingMsg> list)
+         bindings: Binding<'bindingModel, 'bindingMsg> list)
         : string -> Binding<'model, 'msg> =
       Binding.SubModel.required bindings
       >> Binding.mapModel (fun m -> toBindingModel (m, getSubModel m))
@@ -2444,7 +2441,7 @@ module Extensions =
     static member subModel
         (getSubModel: 'model -> 'subModel,
          toMsg: 'subMsg -> 'msg,
-         bindings: unit -> Binding<'model * 'subModel, 'subMsg> list)
+         bindings: Binding<'model * 'subModel, 'subMsg> list)
         : string -> Binding<'model, 'msg> =
       Binding.SubModel.required bindings
       >> Binding.mapModel (fun m -> (m, getSubModel m))
@@ -2458,10 +2455,9 @@ module Extensions =
     /// </summary>
     /// <param name="getSubModel">Gets the sub-model from the model.</param>
     /// <param name="bindings">Returns the bindings for the sub-model.</param>
-    [<System.Obsolete("In version 5, the type of the argument \"bindings\" will be changed to \"unit -> Binding<'model, 'msg> list\".  To avoid a compile error when upgrading, replace this method call with its implementation.")>]
     static member subModel
         (getSubModel: 'model -> 'subModel,
-         bindings: unit -> Binding<'model * 'subModel, 'msg> list)
+         bindings: Binding<'model * 'subModel, 'msg> list)
         : string -> Binding<'model, 'msg> =
       Binding.SubModel.required bindings
       >> Binding.mapModel (fun m -> (m, getSubModel m))

@@ -58,7 +58,7 @@ module Get =
 
   [<Fact>]
   let ``should return error on bad typing`` () =
-    let binding = Binding.SubModel.opt (fun () -> []) >> Binding.mapModel (fun () -> None) <| ""
+    let binding = Binding.SubModel.opt [] >> Binding.mapModel (fun () -> None) <| ""
 
     let dispatch msg =
       failwith $"Should not dispatch, got {msg}"

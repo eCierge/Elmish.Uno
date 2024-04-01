@@ -216,21 +216,25 @@ module Bindings =
         OutMoveDown |> Some
     | _ -> None
 
-  let rec subtreeBindings () : Binding<Model * SelfWithParent<RoseTree<Identifiable<Counter.Model>>>, InOutMsg<RoseTreeMsg<Guid, SubtreeMsg>, SubtreeOutMsg>> list = [
-    "CounterIdText" |> Binding.oneWay(fun (_, { Self = s }) -> s.Data.Id)
+  let rec subtreeBindings () : Binding<Model * SelfWithParent<RoseTree<Identifiable<Counter>>>, InOutMsg<RoseTreeMsg<Guid, SubtreeMsg>, SubtreeOutMsg>> list =
+    let counterBindings =
+      Counter.bindings
+      |> Bindings.mapModel (fun (_, { Self = s }) -> s.Data.Value)
+      |> Bindings.mapMsg (CounterMsg >> LeafMsg)
 
-    "CounterValue" |> Binding.oneWay(fun (_, { Self = s }) -> s.Data.Value.Count)
-    "Increment" |> Binding.cmd(Counter.Increment |> CounterMsg |> LeafMsg |> InMsg)
-    "Decrement" |> Binding.cmd(Counter.Decrement |> CounterMsg |> LeafMsg |> InMsg)
-    "StepSize" |> Binding.twoWay(
-      (fun (_, { Self = s }) -> float <| (s.Data.Value : Counter.Model).StepSize),
-      (fun v _ -> v |> int |> Counter.SetStepSize |> CounterMsg |> LeafMsg |> InMsg))
-    "Reset" |> Binding.cmdIf(
-      Counter.Reset |> CounterMsg |> LeafMsg |> InMsg,
-      (fun (_, { Self = s }) -> Counter.canReset s.Data.Value))
-
-    "Remove" |> Binding.cmd(OutRemove |> OutMsg)
-    "AddChild" |> Binding.cmd(AddChild |> LeafMsg |> InMsg)
+    let inMsgBindings =
+      [ "CounterIdText" |> Binding.oneWay(fun (_, { Self = s }) -> s.Data.Id)
+        "AddChild" |> Binding.cmd(AddChild |> LeafMsg)
+        "GlobalState" |> Binding.oneWay(fun (m, _) -> m.SomeGlobalState)
+        "ChildCounters"
+          |> Binding.subModelSeq (subtreeBindings, (fun (_, { Self = c }) -> c.Data.Id))
+          |> Binding.mapModel (fun (m, { Self = p }) -> p.Children |> Seq.map (fun c -> m, { Self = c; Parent = p }))
+          |> Binding.mapMsg (fun (cId, inOutMsg) ->
+            match inOutMsg with
+            | InMsg msg -> (cId, msg) |> BranchMsg
+            | OutMsg msg -> cId |> mapOutMsg msg |> LeafMsg)
+      ] @ counterBindings
+      |> Bindings.mapMsg InMsg
 
     let outMsgBindings =
       [ "Remove" |> Binding.cmd OutRemove
@@ -239,7 +243,6 @@ module Bindings =
       ] |> Bindings.mapMsg OutMsg
 
     outMsgBindings @ inMsgBindings
-
 
   let rootBindings : Binding<Model, Msg> list = [
     "Counters"
@@ -257,13 +260,10 @@ module Bindings =
   ]
 
 
-[<CompiledName("DesignModel")>]
-let designModel = App.init ()
+[<CompiledName("DesignInstance")>]
+let designInstance = ViewModel.designInstance (App.init ()) Bindings.rootBindings
 
 [<CompiledName("Program")>]
 let program =
-  Program.mkSimpleUno App.init App.update Bindings.rootBindings
-  |> Program.withLogger (new SerilogLoggerFactory(logger))
-
-[<CompiledName("Config")>]
-let config = { ElmConfig.Default with LogConsole = true; Measure = true }
+  UnoProgram.mkSimple App.init App.update Bindings.rootBindings
+  |> UnoProgram.withLogger (new SerilogLoggerFactory(logger))

@@ -145,7 +145,7 @@ module Helpers =
       (toMsg: 'subMsg -> 'msg)
       (bindings: Binding<'subModel, 'subMsg> list)
       (sticky: bool) =
-    Binding.subModelOpt(getModel, snd, toMsg, (fun () -> bindings), sticky) name
+    Binding.subModelOpt(getModel, snd, toMsg, bindings, sticky) name
 
 
   let internal subModelSeq
@@ -155,7 +155,7 @@ module Helpers =
       (toMsg: 'id * 'subMsg -> 'msg)
       (bindings: Binding<'subModel, 'subMsg> list) =
     name
-    |> Binding.subModelSeq (getBindings = (fun () -> bindings), getId = getId)
+    |> Binding.subModelSeq (bindings = bindings, getId = getId)
     |> Binding.mapModel (fun m -> upcast getModels m)
     |> Binding.mapMsg toMsg
 
@@ -1289,7 +1289,7 @@ module SubModel =
 
       let subBinding = cmd ValueSome (fun _ -> true) subName
       let binding =
-        Binding.SubModel.opt (fun () -> [subBinding]) name
+        Binding.SubModel.opt [subBinding] name
         |> Binding.mapModel (fun m -> if m <> initialModel then Some m else None)
         |> Binding.setMsgWithModel id
       let vm = TestVm(initialModel, binding)
@@ -1506,7 +1506,7 @@ module SubModelSelectedItem =
     let subModelSeqName = "Bar"
     let bindings =
       [ selectedItemName |> Binding.subModelSelectedItem (subModelSeqName, Some, ignore)
-        subModelSeqName |> Binding.subModelSeq ((fun _ -> []), ignore, (fun () -> [])) ]
+        subModelSeqName |> Binding.subModelSeq ((fun _ -> []), ignore, []) ]
     let mutable error : string option = None
     let loggingArgs =
       { LoggingViewModelArgs.none

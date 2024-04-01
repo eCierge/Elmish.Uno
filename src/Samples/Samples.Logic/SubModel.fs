@@ -39,7 +39,7 @@ module Clock =
     | SetTimeType t -> { m with TimeType = t }
 
   [<CompiledName("Bindings")>]
-  let bindings () : Binding<Model, Msg> list = [
+  let bindings : Binding<Model, Msg> list = [
     "Time" |> Binding.oneWay getTime
     "IsLocal" |> Binding.oneWay (fun m -> m.TimeType = Local)
     "SetLocal" |> Binding.cmd (SetTimeType Local)
@@ -47,8 +47,8 @@ module Clock =
     "SetUtc" |> Binding.cmd (SetTimeType Utc)
   ]
 
-  [<CompiledName("DesignModel")>]
-  let designModel = initial
+  [<CompiledName("DesignInstance")>]
+  let designInstance = ViewModel.designInstance initial bindings
 
 
 module CounterWithClock =
@@ -73,13 +73,13 @@ module CounterWithClock =
     | ClockMsg msg -> { m with Clock = Clock.update msg m.Clock }
 
   [<CompiledName("Bindings")>]
-  let bindings () : Binding<Model, Msg> list = [
-    "Counter" |> Binding.subModel((fun m -> m.Counter), snd, CounterMsg, fun () -> Counter.bindings)
+  let bindings : Binding<Model, Msg> list = [
+    "Counter" |> Binding.subModel((fun m -> m.Counter), snd, CounterMsg, Counter.bindings)
     "Clock" |> Binding.subModel((fun m -> m.Clock), snd, ClockMsg, Clock.bindings)
   ]
 
-  [<CompiledName("DesignModel")>]
-  let designModel = initial
+  [<CompiledName("DesignInstance")>]
+  let designInstance = ViewModel.designInstance initial bindings
 
 module App =
 
@@ -136,16 +136,15 @@ let subscriptions (model: App.Model) : Sub<App.Msg> =
     [ nameof timerTickSub ], timerTickSub
   ]
 
-[<CompiledName("DesignModel")>]
 let designModel : App.Model =
   { ClockCounter1 = CounterWithClock.initial
     ClockCounter2 = CounterWithClock.initial }
 
+[<CompiledName("DesignInstance")>]
+let designInstance = ViewModel.designInstance designModel App.bindings
+
 [<CompiledName("Program")>]
 let program =
-  Program.mkSimpleUno App.init App.update App.bindings
-  |> Program.withSubscription subscriptions
-  |> Program.withLogger (new SerilogLoggerFactory(logger))
-
-[<CompiledName("Config")>]
-let config = { ElmConfig.Default with LogConsole = true; Measure = true }
+  UnoProgram.mkSimple App.init App.update App.bindings
+  |> UnoProgram.withSubscription subscriptions
+  |> UnoProgram.withLogger (new SerilogLoggerFactory(logger))

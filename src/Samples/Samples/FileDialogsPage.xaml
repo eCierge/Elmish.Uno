@@ -15,7 +15,7 @@
       <RowDefinition Height="*" />
       <RowDefinition Height="Auto" />
     </Grid.RowDefinitions>
-    
+
     <StackPanel Padding="10">
       <TextBox
         Width="200"

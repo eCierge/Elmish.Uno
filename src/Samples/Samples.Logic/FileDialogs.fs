@@ -1,4 +1,4 @@
-module Elmish.Uno.Samples.FileDialogs.Program
+﻿module Elmish.Uno.Samples.FileDialogs.Program
 
 open System
 open System.IO
@@ -79,7 +79,6 @@ let load () =
       | _ ->
         let! contents = Windows.Storage.FileIO.ReadTextAsync(file).AsTask()
         return LoadSuccess contents
-    else return LoadCanceled
     }
   //).AsTask().AsAsync()
 
@@ -108,23 +107,20 @@ let bindings : Binding<Model, Msg> list = [
 
 let subscriptions (model: Model) : Sub<Msg> =
   let timerTickSub dispatch =
-  let timer = new Timers.Timer(1000.)
+    let timer = new Timers.Timer(1000.)
     let disp = timer.Elapsed.Subscribe(fun _ -> dispatch (SetTime DateTimeOffset.Now))
-  timer.Start()
+    timer.Start()
     disp
 
   [
     [ nameof timerTickSub ], timerTickSub
   ]
 
-[<CompiledName("DesignModel")>]
-let designModel = initial
+[<CompiledName("DesignInstance")>]
+let designInstance = ViewModel.designInstance initial bindings
 
 [<CompiledName("Program")>]
 let program =
-  Program.mkProgramUno init update bindings
-  |> Program.withSubscription subscription
-  |> Program.withLogger (new SerilogLoggerFactory(logger))
-
-[<CompiledName("Config")>]
-let config = { ElmConfig.Default with LogConsole = true }
+  UnoProgram.mkProgram init update bindings
+  |> UnoProgram.withSubscription subscriptions
+  |> UnoProgram.withLogger (new SerilogLoggerFactory(logger))

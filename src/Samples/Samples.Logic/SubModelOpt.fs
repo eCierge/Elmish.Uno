@@ -16,7 +16,7 @@ module Form1 =
     | SetText of string
     | Submit
 
-  let init =
+  let initial =
     { Text = "" }
 
   let update msg m =
@@ -25,13 +25,13 @@ module Form1 =
     | Submit -> m  // handled by parent
 
   [<CompiledName("Bindings")>]
-  let bindings () : Binding<Model, Msg> list = [
+  let bindings : Binding<Model, Msg> list = [
     "Text" |> Binding.twoWay ((fun m -> m.Text), SetText)
     "Submit" |> Binding.cmd Submit
   ]
 
-  [<CompiledName("DesignModel")>]
-  let designModel = init
+  [<CompiledName("DesignInstance")>]
+  let designInstance = ViewModel.designInstance initial bindings
 
 
 module Form2 =
@@ -45,7 +45,7 @@ module Form2 =
     | SetText2 of string
     | Submit
 
-  let init =
+  let initial =
     { Text1 = ""
       Text2 = "" }
 
@@ -56,14 +56,14 @@ module Form2 =
     | Submit -> m  // handled by parent
 
   [<CompiledName("Bindings")>]
-  let bindings () : Binding<Model, Msg> list = [
+  let bindings : Binding<Model, Msg> list = [
     "Text1" |> Binding.twoWay ((fun m -> m.Text1), SetText1)
     "Text2" |> Binding.twoWay ((fun m -> m.Text2), SetText2)
     "Submit" |> Binding.cmd Submit
   ]
 
-  [<CompiledName("DesignModel")>]
-  let designModel = init
+  [<CompiledName("DesignInstance")>]
+  let designInstance = ViewModel.designInstance initial bindings
 
 module App =
 
@@ -87,8 +87,8 @@ module App =
 
   let update msg m =
     match msg with
-    | ShowForm1 -> { m with Dialog = Some <| Form1 Form1.init }
-    | ShowForm2 -> { m with Dialog = Some <| Form2 Form2.init }
+    | ShowForm1 -> { m with Dialog = Some <| Form1 Form1.initial }
+    | ShowForm2 -> { m with Dialog = Some <| Form2 Form2.initial }
     | Form1Msg Form1.Submit -> { m with Dialog = None }
     | Form1Msg msg' ->
         match m.Dialog with
@@ -125,13 +125,10 @@ module App =
   ]
 
 
-[<CompiledName("DesignModel")>]
-let designModel = App.initial
+[<CompiledName("DesignInstance")>]
+let designInstance = ViewModel.designInstance App.initial App.bindings
 
 [<CompiledName("Program")>]
 let program =
-  Program.mkSimpleUno App.init App.update App.bindings
-  |> Program.withLogger (new SerilogLoggerFactory(logger))
-
-[<CompiledName("Config")>]
-let config = { ElmConfig.Default with LogConsole = true; Measure = true }
+  UnoProgram.mkSimple App.init App.update App.bindings
+  |> UnoProgram.withLogger (new SerilogLoggerFactory(logger))

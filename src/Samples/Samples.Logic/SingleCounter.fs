@@ -31,6 +31,7 @@ let update msg m =
   | SetStepSize x -> { m with StepSize = x }
   | Reset -> initial
 
+[<CompiledName "Bindings">]
 let bindings : Binding<Model, Msg> list = [
   "CounterValue" |> Binding.oneWay (fun m -> m.Count)
   "Increment" |> Binding.cmd Increment
@@ -41,13 +42,11 @@ let bindings : Binding<Model, Msg> list = [
   "Reset" |> Binding.cmdIf(Reset, canReset)
 ]
 
-[<CompiledName("DesignModel")>]
-let designModel = initial
+[<CompiledName("DesignInstance")>]
+let designInstance = ViewModel.designInstance initial bindings
 
 [<CompiledName("Program")>]
 let program =
-  Program.mkSimpleUno init update bindings
-  |> Program.withLogger (new SerilogLoggerFactory(logger))
+  UnoProgram.mkSimple init update bindings
+  |> UnoProgram.withLogger (new SerilogLoggerFactory(logger))
 
-[<CompiledName("Config")>]
-let config = { ElmConfig.Default with LogConsole = true; Measure = true }
