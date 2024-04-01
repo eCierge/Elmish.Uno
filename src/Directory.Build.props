@@ -12,7 +12,4 @@
     <AccelerateBuildsInVisualStudio>true</AccelerateBuildsInVisualStudio>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
-  <ItemGroup>
-    <PackageReference Include="FSharp.Core" Condition="'$(DefaultLanguageSourceExtension)'!='.fs'"/>
-  </ItemGroup>
 </Project>

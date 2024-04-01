@@ -1,4 +1,4 @@
-module internal Elmish.Uno.BindingVmHelpers
+﻿module internal Elmish.Uno.BindingVmHelpers
 
 open System
 open System.Windows.Input
@@ -33,11 +33,9 @@ module Helpers2 =
   let showNewWindow
       (winRef: WeakReference<Window>)
       (getWindow: 'model -> Dispatch<'msg> -> Window)
-      (isDialog: bool)
       (onCloseRequested: 'model -> 'msg voption)
       (preventClose: bool ref)
       dataContext
-      (initialVisibility: Visibility)
       (getCurrentModel: unit -> 'model)
       (dispatch: 'msg -> unit) =
     let win = getWindow (getCurrentModel ()) dispatch
@@ -149,7 +147,6 @@ type SubModelSelectedItemBinding<'model, 'msg, 'bindingModel, 'bindingMsg, 'vm, 
 
 type BaseVmBinding<'model, 'msg, 't> =
   | OneWay of OneWayBinding<'model, 't>
-  | OneWayToSource of OneWayToSourceBinding<'model, 't>
   | OneWaySeq of OneWaySeqBinding<'model, obj, 't, obj>
   | TwoWay of TwoWayBinding<'model, 't>
   | Cmd of cmd: Command
@@ -204,7 +201,6 @@ module internal MapOutputType =
   let private baseCase (fOut: 'a -> 'b) (fIn: 'b -> 'a) (data: BaseVmBinding<'model, 'msg, 'a>) : BaseVmBinding<'model, 'msg, 'b> =
     match data with
     | OneWay b -> OneWay { OneWayData = { Get = b.OneWayData.Get >> fOut } }
-    | OneWayToSource b -> OneWayToSource { Set = fIn >> b.Set }
     | Cmd b -> Cmd b
     | TwoWay b -> TwoWay { Get = b.Get >> fOut; Set = fIn >> b.Set }
     | OneWaySeq b -> OneWaySeq {
@@ -231,7 +227,6 @@ module internal MapOutputType =
           UpdateViewModel = (fun (vm,m) -> b.SubModelWinData.UpdateViewModel (fIn vm, m))
           ToMsg = b.SubModelWinData.ToMsg
           GetWindow = b.SubModelWinData.GetWindow
-          IsModal = b.SubModelWinData.IsModal
           OnCloseRequested = b.SubModelWinData.OnCloseRequested }
         Dispatch = b.Dispatch
         WinRef = b.WinRef
@@ -351,7 +346,7 @@ type FuncsFromSubModelSeqKeyed() =
 type Initialize<'t>
       (loggingArgs: LoggingViewModelArgs,
        name: string,
-       getFunctionsForSubModelSelectedItem: string -> SelectedItemBinding<obj, obj, 't, obj> option) =
+       getFunctionsForSubModelSelectedItem: string -> SelectedItemBinding<obj, obj, 't, obj> voption) =
 
   let { log = log
         logPerformance = logPerformance
@@ -373,11 +368,6 @@ type Initialize<'t>
           { OneWayData = d |> BindingData.OneWay.measureFunctions measure }
           |> OneWay
           |> Some
-      | OneWayToSourceData d ->
-          let d = d |> BindingData.OneWayToSource.measureFunctions measure
-          { Set = fun obj m -> d.Set obj m |> dispatch }
-          |> OneWayToSource
-          |> Some
       | OneWaySeqData d ->
           { OneWaySeqData = d |> BindingData.OneWaySeq.measureFunctions measure measure measure2
             Values = d.CreateCollection (initialModel |> d.Get) }
@@ -394,8 +384,6 @@ type Initialize<'t>
           let execute param = d.Exec param (getCurrentModel ()) |> ValueOption.iter dispatch
           let canExecute param = d.CanExec param (getCurrentModel ())
           let cmd = Command(execute, canExecute)
-          if d.AutoRequery then
-            cmd.AddRequeryHandler ()
           cmd
           |> Cmd
           |> Some
@@ -426,23 +414,6 @@ type Initialize<'t>
                 PreventClose = ref true
                 GetVmWinState = fun () -> vmWinState
                 SetVmWinState = fun vmState -> vmWinState <- vmState
-                GetCurrentModel = getCurrentModel
-              }
-          | WindowState.Hidden m ->
-              let chain = LoggingViewModelArgs.getNameChainFor nameChain name
-              let args = ViewModelArgs.create m (toMsg >> dispatch) chain loggingArgs
-              let vm = d.CreateViewModel args
-              let winRef = WeakReference<_>(null)
-              let preventClose = ref true
-              log.LogTrace("[{BindingNameChain}] Creating hidden window", chain)
-              Helpers2.showNewWindow winRef d.GetWindow d.IsModal d.OnCloseRequested preventClose vm Visibility.Hidden getCurrentModel dispatch
-              let mutable vmWinState = WindowState.Hidden vm
-              { SubModelWinData = d
-                Dispatch = dispatch
-                WinRef = winRef
-                PreventClose = preventClose
-                GetVmWinState = fun () -> vmWinState
-                SetVmWinState = fun vm -> vmWinState <- vm
                 GetCurrentModel = getCurrentModel
               }
           | WindowState.Visible m ->
@@ -504,12 +475,13 @@ type Initialize<'t>
           let d = d |> BindingData.SubModelSelectedItem.measureFunctions measure measure2
           d.SubModelSeqBindingName
           |> getFunctionsForSubModelSelectedItem
-          |> Option.map (fun selectedItemBinding ->
+          |> ValueOption.map (fun selectedItemBinding ->
               { Get = d.Get
                 Set = fun obj m -> d.Set obj m |> dispatch
                 SubModelSeqBindingName = d.SubModelSeqBindingName
                 SelectedItemBinding = selectedItemBinding }
               |> SubModelSelectedItem)
+          |> ValueOption.toOption
 
   member this.Recursive<'model, 'msg>
       (initialModel: 'model,
@@ -566,7 +538,6 @@ type Update<'t>
       | OneWay _
       | TwoWay _
       | SubModelSelectedItem _ -> [ PropertyChanged name ]
-      | OneWayToSource _ -> []
       | OneWaySeq b ->
           b.OneWaySeqData.Merge(b.Values, newModel)
           []
@@ -607,22 +578,6 @@ type Update<'t>
                 w.DispatcherQueue.TryEnqueue(fun () -> w.Close()) |> ignore
             b.WinRef.SetTarget null
 
-          let hide () =
-            match b.WinRef.TryGetTarget () with
-            | false, _ ->
-                log.LogError("[{BindingNameChain}] Attempted to hide window, but did not find window reference", winPropChain)
-            | true, w ->
-                log.LogTrace("[{BindingNameChain}] Hiding window", winPropChain)
-                w.Dispatcher.Invoke(fun () -> w.Visibility <- Visibility.Hidden)
-
-          let showHidden () =
-            match b.WinRef.TryGetTarget () with
-            | false, _ ->
-                log.LogError("[{BindingNameChain}] Attempted to show existing hidden window, but did not find window reference", winPropChain)
-            | true, w ->
-                log.LogTrace("[{BindingNameChain}] Showing existing hidden window", winPropChain)
-                w.Dispatcher.Invoke(fun () -> w.Visibility <- Visibility.Visible)
-
           let showNew vm =
             b.PreventClose.Value <- true
             Helpers2.showNewWindow b.WinRef d.GetWindow d.OnCloseRequested b.PreventClose vm
@@ -636,30 +591,12 @@ type Update<'t>
           match b.GetVmWinState(), d.GetState newModel with
           | WindowState.Closed, WindowState.Closed ->
               []
-          | WindowState.Hidden vm, WindowState.Hidden m
           | WindowState.Visible vm, WindowState.Visible m ->
               d.UpdateViewModel (vm, m)
               []
-          | WindowState.Hidden _, WindowState.Closed
           | WindowState.Visible _, WindowState.Closed ->
               close ()
               b.SetVmWinState WindowState.Closed
-              [ PropertyChanged name ]
-          | WindowState.Visible vm, WindowState.Hidden m ->
-              hide ()
-              d.UpdateViewModel (vm, m)
-              b.SetVmWinState (WindowState.Hidden vm)
-              []
-          | WindowState.Hidden vm, WindowState.Visible m ->
-              d.UpdateViewModel (vm, m)
-              showHidden ()
-              b.SetVmWinState (WindowState.Visible vm)
-              []
-          | WindowState.Closed, WindowState.Hidden m ->
-              let vm = newVm m
-              log.LogTrace("[{BindingNameChain}] Creating hidden window", winPropChain)
-              showNew vm Visibility.Hidden b.GetCurrentModel b.Dispatch
-              b.SetVmWinState (WindowState.Hidden vm)
               [ PropertyChanged name ]
           | WindowState.Closed, WindowState.Visible m ->
               let vm = newVm m
@@ -728,7 +665,7 @@ type Update<'t>
 
 type [<Struct>] Get<'t>(nameChain: string) =
 
-  member _.Base (model: 'model, binding: BaseVmBinding<'model, 'msg, 't>) =
+  member this.Base (model: 'model, binding: BaseVmBinding<'model, 'msg, 't>) =
     match binding with
     | OneWay { OneWayData = d } -> d.Get model |> Ok
     | TwoWay b -> b.Get model |> Ok
@@ -743,18 +680,20 @@ type [<Struct>] Get<'t>(nameChain: string) =
     | SubModelSeqUnkeyed { Vms = vms }
     | SubModelSeqKeyed { Vms = vms } -> vms.GetCollection () |> Ok
     | SubModelSelectedItem b ->
+        let toResult nameChain binding viewModel =
+            match viewModel with
+            | ValueNone -> ValueNone |> Ok // deselecting successful
+            | ValueSome (id, mVm) ->
+                match mVm with
+                | Some vm -> vm |> ValueSome |> Ok // selecting successful
+                | None -> // selecting failed
+                    { NameChain = nameChain
+                      SubModelSeqBindingName = binding.SubModelSeqBindingName
+                      Id = id.ToString() }
+                    |> GetError.SubModelSelectedItem
+                    |> Error
         b.TypedGet model
-        |> function
-          | ValueNone -> ValueNone |> Ok // deselecting successful
-          | ValueSome (id, mVm) ->
-              match mVm with
-              | Some vm -> vm |> ValueSome |> Ok // selecting successful
-              | None -> // selecting failed
-                  { NameChain = nameChain
-                    SubModelSeqBindingName = b.SubModelSeqBindingName
-                    Id = id.ToString() }
-                  |> GetError.SubModelSelectedItem
-                  |> Error
+        |> toResult nameChain b
         |> Result.bind (ValueOption.toNull >> Result.mapError GetError.ToNullError)
 
   member this.Recursive<'model, 'msg>

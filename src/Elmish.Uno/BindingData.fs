@@ -1,4 +1,4 @@
-[<AutoOpen>]
+﻿[<AutoOpen>]
 module internal Elmish.Uno.BindingData
 
 open System.Collections.ObjectModel
@@ -21,10 +21,6 @@ module Helper =
 
 type OneWayData<'model, 'a> =
   { Get: 'model -> 'a }
-
-
-type OneWayToSourceData<'model, 'msg, 'a> =
-  { Set: 'a -> 'model -> 'msg }
 
 
 type OneWaySeqData<'model, 'a, 'aCollection, 'id when 'id : equality> =
@@ -50,7 +46,6 @@ type TwoWayData<'model, 'msg, 'a> =
 type CmdData<'model, 'msg> = {
   Exec: obj -> 'model -> 'msg voption
   CanExec: obj -> 'model -> bool
-  AutoRequery: bool
 }
 
 
@@ -74,7 +69,6 @@ and SubModelWinData<'model, 'msg, 'bindingModel, 'bindingMsg, 'vm> = {
   UpdateViewModel: 'vm * 'bindingModel -> unit
   ToMsg: 'model -> 'bindingMsg -> 'msg
   GetWindow: 'model -> Dispatch<'msg> -> Window
-  IsModal: bool
   OnCloseRequested: 'model -> 'msg voption
 }
 
@@ -139,7 +133,6 @@ and AlterMsgStreamData<'model, 'msg, 'bindingModel, 'bindingMsg, 'dispatchMsg, '
 
 and BaseBindingData<'model, 'msg, 't> =
   | OneWayData of OneWayData<'model, 't>
-  | OneWayToSourceData of OneWayToSourceData<'model, 'msg, 't>
   | OneWaySeqData of OneWaySeqData<'model, obj, 't, obj>
   | TwoWayData of TwoWayData<'model, 'msg, 't>
   | CmdData of CmdData<'model, 'msg>
@@ -168,9 +161,6 @@ module BindingData =
       | OneWayData d -> OneWayData {
           Get = d.Get >> fOut
         }
-      | OneWayToSourceData d -> OneWayToSourceData {
-          Set = fIn >> d.Set
-        }
       | OneWaySeqData d -> OneWaySeqData {
           Get = d.Get
           CreateCollection = d.CreateCollection >> CollectionTarget.mapCollection fOut
@@ -184,7 +174,6 @@ module BindingData =
       | CmdData d -> CmdData {
           Exec = d.Exec
           CanExec = d.CanExec
-          AutoRequery = d.AutoRequery
         }
       | SubModelData d -> SubModelData {
           GetModel = d.GetModel
@@ -198,7 +187,6 @@ module BindingData =
           UpdateViewModel = (fun (vm,m) -> d.UpdateViewModel (fIn vm, m))
           ToMsg = d.ToMsg
           GetWindow = d.GetWindow
-          IsModal = d.IsModal
           OnCloseRequested = d.OnCloseRequested
         }
       | SubModelSeqUnkeyedData d -> SubModelSeqUnkeyedData {
@@ -254,9 +242,6 @@ module BindingData =
       | OneWayData d -> OneWayData {
           Get = f >> d.Get
         }
-      | OneWayToSourceData d -> OneWayToSourceData {
-          Set = binaryHelper d.Set
-        }
       | OneWaySeqData d -> OneWaySeqData {
           Get = f >> d.Get
           CreateCollection = d.CreateCollection
@@ -270,7 +255,6 @@ module BindingData =
       | CmdData d -> CmdData {
           Exec = binaryHelper d.Exec
           CanExec = binaryHelper d.CanExec
-          AutoRequery = d.AutoRequery
         }
       | SubModelData d -> SubModelData {
           GetModel = f >> d.GetModel
@@ -284,7 +268,6 @@ module BindingData =
           UpdateViewModel = d.UpdateViewModel
           ToMsg = f >> d.ToMsg
           GetWindow = f >> d.GetWindow
-          IsModal = d.IsModal
           OnCloseRequested = f >> d.OnCloseRequested
         }
       | SubModelSeqUnkeyedData d -> SubModelSeqUnkeyedData {
@@ -332,9 +315,6 @@ module BindingData =
   let mapMsgWithModel (f: 'a -> 'model -> 'b) =
     let baseCase = function
       | OneWayData d -> d |> OneWayData
-      | OneWayToSourceData d -> OneWayToSourceData {
-          Set = fun v m -> f (d.Set v m) m
-        }
       | OneWaySeqData d -> d |> OneWaySeqData
       | TwoWayData d -> TwoWayData {
           Get = d.Get
@@ -343,7 +323,6 @@ module BindingData =
       | CmdData d -> CmdData {
           Exec = fun p m -> d.Exec p m |> ValueOption.map (fun msg -> f msg m)
           CanExec = fun p m -> d.CanExec p m
-          AutoRequery = d.AutoRequery
         }
       | SubModelData d -> SubModelData {
           GetModel = d.GetModel
@@ -357,7 +336,6 @@ module BindingData =
           UpdateViewModel = d.UpdateViewModel
           ToMsg = fun m bMsg -> f (d.ToMsg m bMsg) m
           GetWindow = fun m dispatch -> d.GetWindow m (fun msg -> f msg m |> dispatch)
-          IsModal = d.IsModal
           OnCloseRequested = fun m -> m |> d.OnCloseRequested |> ValueOption.map (fun msg -> f msg m)
         }
       | SubModelSeqUnkeyedData d -> SubModelSeqUnkeyedData {
@@ -467,24 +445,6 @@ module BindingData =
         mGet =
       mapFunctions
         (mGet "get")
-
-
-  module OneWayToSource =
-
-    let id<'model, 'a> : BindingData<'model, 'a, 'a> =
-      { OneWayToSourceData.Set = Func2.id1 }
-      |> OneWayToSourceData
-      |> BaseBindingData
-
-    let private mapFunctions
-        mSet
-        (d: OneWayToSourceData<'model, 'msg, 'a>) =
-      { d with Set = mSet d.Set }
-
-    let measureFunctions
-        mSet =
-      mapFunctions
-        (mSet "set")
 
 
   module OneWaySeq =
@@ -674,7 +634,6 @@ module BindingData =
       UpdateViewModel = fun (vm, m) -> d.UpdateViewModel (vm, inMapBindingModel m)
       ToMsg = fun m bMsg -> d.ToMsg m (inMapBindingMsg bMsg)
       GetWindow = d.GetWindow
-      IsModal = d.IsModal
       OnCloseRequested = d.OnCloseRequested
     }
 
@@ -686,7 +645,6 @@ module BindingData =
         UpdateViewModel = updateViewModel
         ToMsg = toMsg
         GetWindow = getWindow
-        IsModal = isModal
         OnCloseRequested = onCloseRequested }
       |> boxMinorTypes
       |> SubModelWinData

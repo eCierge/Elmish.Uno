@@ -1,4 +1,4 @@
-﻿module UtilsTests.M
+﻿module Elmish.Uno.Tests.UtilsTests
 
 open Xunit
 open Hedgehog

@@ -54,6 +54,9 @@
     <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
       <_Parameter1>Elmish.Uno.Benchmarks</_Parameter1>
     </AssemblyAttribute>
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Include="InternalUtils.fs" />
     <Compile Include="Merge.fs" />
     <Compile Include="Command.fs" />
@@ -62,16 +65,18 @@
     <Compile Include="ViewModelArgs.fs" />
     <Compile Include="BindingData.fs" />
     <Compile Include="BindingVmHelpers.fs" />
+    <Compile Include="DynamicCustomProperty.fs" />
     <Compile Include="ViewModels.fs" />
     <Compile Include="Binding.fs" />
-    <Compile Include="DynamicCustomProperty.fs" />
     <Compile Include="ViewModelModule.fs" />
-    <Compile Include="Program.fs" />
+    <Compile Include="UnoProgram.fs" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Elmish" />
     <PackageReference Include="FSharp.Collections.Immutable" />
+    <PackageReference Include="FSharp.Core" />
+    <PackageReference Include="System.Private.Uri" />
     <PackageReference Include="Uno.WinUI" />
     <PackageReference Include="Microsoft.Extensions.Logging" />
     <PackageReference Include="Microsoft.WindowsAppSDK" Condition="$(TargetFramework.Contains('windows10'))" />

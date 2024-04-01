@@ -7,9 +7,9 @@ open Microsoft.UI.Xaml
 open Elmish
 
 
-type UnoProgram<'model, 'msg, 'viewModel> =
+type UnoProgram<'arg, 'model, 'msg, 'viewModel> =
   internal {
-    ElmishProgram: Program<unit, 'model, 'msg, unit>
+    ElmishProgram: Program<'arg, 'model, 'msg, unit>
     CreateViewModel: ViewModelArgs<'model,'msg> -> 'viewModel
     UpdateViewModel: 'viewModel * 'model -> unit
     LoggerFactory: ILoggerFactory
@@ -18,13 +18,15 @@ type UnoProgram<'model, 'msg, 'viewModel> =
     PerformanceLogThreshold: int
   }
 
+type UnoProgram<'model, 'msg, 'viewModel> = UnoProgram<unit, 'model, 'msg, 'viewModel>
+
 type UnoProgram<'model, 'msg> = UnoProgram<'model, 'msg, obj>
 
 
 [<RequireQualifiedAccess>]
 module UnoProgram =
 
-  let private mapVm fOut fIn (p: UnoProgram<'model, 'msg, 'viewModel0>) : UnoProgram<'model, 'msg, 'viewModel1> =
+  let private mapVm fOut fIn (p: UnoProgram<'arg, 'model, 'msg, 'viewModel0>) : UnoProgram<'arg, 'model, 'msg, 'viewModel1> =
     { ElmishProgram = p.ElmishProgram
       CreateViewModel = p.CreateViewModel >> fOut
       UpdateViewModel = (fun (vm, m) -> p.UpdateViewModel(fIn vm, m))

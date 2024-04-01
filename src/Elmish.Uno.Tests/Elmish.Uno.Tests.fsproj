@@ -6,11 +6,14 @@
     <GenerateProgramFile>false</GenerateProgramFile>
     <IsTestProject>true</IsTestProject>
     <OutputType>Library</OutputType>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <NoWarn>$(NoWarn);FS0988;NETSDK1206</NoWarn>
     <!--Turn on warnings for unused values (arguments and let bindings) -->
-    <OtherFlags>$(OtherFlags) --warnon:1182</OtherFlags>
+    <NoWarn>$(NoWarn);FS1182</NoWarn>
     <!--Ignore obsolete warnings -->
-    <OtherFlags>$(OtherFlags) --nowarn:0044</OtherFlags>
-    <NoWarn>FS0988</NoWarn>
+    <NoWarn>$(NoWarn);FS0044</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
@@ -24,7 +27,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="FSharp.Interop.Dynamic" />
+    <PackageReference Include="FSharp.Interop.Dynamic" NoWarn="NU1603" />
+    <PackageReference Include="FSharp.Core" />
     <PackageReference Include="Hedgehog" />
     <PackageReference Include="Hedgehog.Experimental" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" />

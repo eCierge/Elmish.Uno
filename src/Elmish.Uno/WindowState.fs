@@ -3,7 +3,6 @@
 [<RequireQualifiedAccess>]
 type WindowState<'model> =
   | Closed
-  | Hidden  of 'model
   | Visible of 'model
 
 
@@ -11,26 +10,17 @@ module WindowState =
 
   let cata a g = function
     | WindowState.Closed    -> a
-    | WindowState.Hidden  a -> a |> f
     | WindowState.Visible a -> a |> g
 
   let map f =
     cata
       WindowState.Closed
-      (f >> WindowState.Hidden)
       (f >> WindowState.Visible)
   let set a = map (fun _ -> a)
-
-  let toHidden a =
-    cata
-      (WindowState.Hidden a)
-      WindowState.Hidden
-      WindowState.Hidden
 
   let toVisible a =
     cata
       (WindowState.Visible a)
-      WindowState.Visible
       WindowState.Visible
 
   let toOption  state = state |> cata None Some
