@@ -818,22 +818,6 @@ type Binding private () =
     >> Binding.mapModel get
     >> Binding.mapMsgWithModel set
 
-  /// <summary>Creates a two-way binding.</summary>
-  /// <param name="get">Gets the value from the model.</param>
-  /// <param name="set">Returns the message to dispatch.</param>
-  /// <param name="wrapDispatch">
-  ///   Wraps the dispatch function with additional behavior, such as
-  ///   throttling, debouncing, or limiting.
-  /// </param>
-  [<System.Obsolete("In version 5, this method will be removed.  Use the overload without the \"wrapDispatch\" parameter followed by a call to \"Binding.alterMsgStream\".  For an example, see how this method is implemented.")>]
-  static member twoWay
-      (get: 'model -> 'a,
-       set: 'a -> 'model -> 'msg,
-       wrapDispatch: Dispatch<'msg> -> Dispatch<'msg>)
-      : string -> Binding<'model, 'msg> =
-    Binding.twoWay (get, set)
-    >> Binding.alterMsgStream wrapDispatch
-
 
   /// <summary>
   ///   Creates a two-way binding to an optional value. The binding
@@ -858,27 +842,6 @@ type Binding private () =
   /// </summary>
   /// <param name="get">Gets the value from the model.</param>
   /// <param name="set">Returns the message to dispatch.</param>
-  /// <param name="wrapDispatch">
-  ///   Wraps the dispatch function with additional behavior, such as
-  ///   throttling, debouncing, or limiting.
-  /// </param>
-  [<System.Obsolete("In version 5, this method will be removed.  Use the overload without the \"wrapDispatch\" parameter followed by a call to \"Binding.alterMsgStream\".  For an example, see how this method is implemented.")>]
-  static member twoWayOpt
-      (get: 'model -> 'a option,
-       set: 'a option -> 'model -> 'msg,
-       wrapDispatch: Dispatch<'msg> -> Dispatch<'msg>)
-      : string -> Binding<'model, 'msg> =
-    Binding.twoWayOpt (get, set)
-    >> Binding.alterMsgStream wrapDispatch
-
-
-  /// <summary>
-  ///   Creates a two-way binding to an optional value. The binding
-  ///   automatically converts between the optional source value and an
-  ///   unwrapped (possibly <c>null</c>) value on the view side.
-  /// </summary>
-  /// <param name="get">Gets the value from the model.</param>
-  /// <param name="set">Returns the message to dispatch.</param>
   static member twoWayOpt
       (get: 'model -> 'a voption,
        set: 'a voption -> 'model -> 'msg)
@@ -888,26 +851,6 @@ type Binding private () =
     >> Binding.mapModel get
     >> Binding.mapMsgWithModel set
 
-  /// <summary>
-  ///   Creates a two-way binding to an optional value. The binding
-  ///   automatically converts between the optional source value and an
-  ///   unwrapped (possibly <c>null</c>) value on the view side.
-  /// </summary>
-  /// <param name="get">Gets the value from the model.</param>
-  /// <param name="set">Returns the message to dispatch.</param>
-  /// <param name="wrapDispatch">
-  ///   Wraps the dispatch function with additional behavior, such as
-  ///   throttling, debouncing, or limiting.
-  /// </param>
-  [<System.Obsolete("In version 5, this method will be removed.  Use the overload without the \"wrapDispatch\" parameter followed by a call to \"Binding.alterMsgStream\".  For an example, see how this method is implemented.")>]
-  static member twoWayOpt
-      (get: 'model -> 'a voption,
-       set: 'a voption -> 'model -> 'msg,
-       wrapDispatch: Dispatch<'msg> -> Dispatch<'msg>)
-      : string -> Binding<'model, 'msg> =
-    Binding.twoWayOpt (get, set)
-    >> Binding.alterMsgStream wrapDispatch
-
 
   /// <summary>
   ///   Creates a two-way binding with validation using
@@ -928,30 +871,6 @@ type Binding private () =
     >> Binding.mapModel get
     >> Binding.mapMsgWithModel set
     >> Binding.addValidation validate
-
-  /// <summary>
-  ///   Creates a two-way binding with validation using
-  ///   <c>INotifyDataErrorInfo</c>.
-  /// </summary>
-  /// <param name="get">Gets the value from the model.</param>
-  /// <param name="set">Returns the message to dispatch.</param>
-  /// <param name="validate">
-  ///   Returns the validation messages from the updated model.
-  /// </param>
-  /// <param name="wrapDispatch">
-  ///   Wraps the dispatch function with additional behavior, such as
-  ///   throttling, debouncing, or limiting.
-  /// </param>
-  [<System.Obsolete("In version 5, this method will be removed.  Use the overload without the \"wrapDispatch\" parameter followed by a call to \"Binding.alterMsgStream\".  For an example, see how this method is implemented.")>]
-  static member twoWayValidate
-      (get: 'model -> 'a,
-       set: 'a -> 'model -> 'msg,
-       validate: 'model -> string list,
-       wrapDispatch: Dispatch<'msg> -> Dispatch<'msg>)
-      : string -> Binding<'model, 'msg> =
-    Binding.twoWayValidate (get, set, validate)
-    >> Binding.alterMsgStream wrapDispatch
-
 
   /// <summary>
   ///   Creates a two-way binding with validation using
@@ -982,30 +901,6 @@ type Binding private () =
   /// <param name="validate">
   ///   Returns the validation message from the updated model.
   /// </param>
-  /// <param name="wrapDispatch">
-  ///   Wraps the dispatch function with additional behavior, such as
-  ///   throttling, debouncing, or limiting.
-  /// </param>
-  [<System.Obsolete("In version 5, this method will be removed.  Use the overload without the \"wrapDispatch\" parameter followed by a call to \"Binding.alterMsgStream\".  For an example, see how this method is implemented.")>]
-  static member twoWayValidate
-      (get: 'model -> 'a,
-       set: 'a -> 'model -> 'msg,
-       validate: 'model -> string voption,
-       wrapDispatch: Dispatch<'msg> -> Dispatch<'msg>)
-      : string -> Binding<'model, 'msg> =
-    Binding.twoWayValidate (get, set, validate)
-    >> Binding.alterMsgStream wrapDispatch
-
-
-  /// <summary>
-  ///   Creates a two-way binding with validation using
-  ///   <c>INotifyDataErrorInfo</c>.
-  /// </summary>
-  /// <param name="get">Gets the value from the model.</param>
-  /// <param name="set">Returns the message to dispatch.</param>
-  /// <param name="validate">
-  ///   Returns the validation message from the updated model.
-  /// </param>
   static member twoWayValidate
       (get: 'model -> 'a,
        set: 'a -> 'model -> 'msg,
@@ -1026,30 +921,6 @@ type Binding private () =
   /// <param name="validate">
   ///   Returns the validation message from the updated model.
   /// </param>
-  /// <param name="wrapDispatch">
-  ///   Wraps the dispatch function with additional behavior, such as
-  ///   throttling, debouncing, or limiting.
-  /// </param>
-  [<System.Obsolete("In version 5, this method will be removed.  Use the overload without the \"wrapDispatch\" parameter followed by a call to \"Binding.alterMsgStream\".  For an example, see how this method is implemented.")>]
-  static member twoWayValidate
-      (get: 'model -> 'a,
-       set: 'a -> 'model -> 'msg,
-       validate: 'model -> string option,
-       wrapDispatch: Dispatch<'msg> -> Dispatch<'msg>)
-      : string -> Binding<'model, 'msg> =
-    Binding.twoWayValidate (get, set, validate)
-    >> Binding.alterMsgStream wrapDispatch
-
-
-  /// <summary>
-  ///   Creates a two-way binding with validation using
-  ///   <c>INotifyDataErrorInfo</c>.
-  /// </summary>
-  /// <param name="get">Gets the value from the model.</param>
-  /// <param name="set">Returns the message to dispatch.</param>
-  /// <param name="validate">
-  ///   Returns the validation message from the updated model.
-  /// </param>
   static member twoWayValidate
       (get: 'model -> 'a,
        set: 'a -> 'model -> 'msg,
@@ -1060,29 +931,6 @@ type Binding private () =
     >> Binding.mapModel get
     >> Binding.mapMsgWithModel set
     >> Binding.addValidation (validate >> ValueOption.ofError >> ValueOption.toList)
-
-  /// <summary>
-  ///   Creates a two-way binding with validation using
-  ///   <c>INotifyDataErrorInfo</c>.
-  /// </summary>
-  /// <param name="get">Gets the value from the model.</param>
-  /// <param name="set">Returns the message to dispatch.</param>
-  /// <param name="validate">
-  ///   Returns the validation message from the updated model.
-  /// </param>
-  /// <param name="wrapDispatch">
-  ///   Wraps the dispatch function with additional behavior, such as
-  ///   throttling, debouncing, or limiting.
-  /// </param>
-  [<System.Obsolete("In version 5, this method will be removed.  Use the overload without the \"wrapDispatch\" parameter followed by a call to \"Binding.alterMsgStream\".  For an example, see how this method is implemented.")>]
-  static member twoWayValidate
-      (get: 'model -> 'a,
-       set: 'a -> 'model -> 'msg,
-       validate: 'model -> Result<'ignored, string>,
-       wrapDispatch: Dispatch<'msg> -> Dispatch<'msg>)
-      : string -> Binding<'model, 'msg> =
-    Binding.twoWayValidate (get, set, validate)
-    >> Binding.alterMsgStream wrapDispatch
 
 
   /// <summary>
@@ -1106,32 +954,6 @@ type Binding private () =
     >> Binding.mapModel get
     >> Binding.mapMsgWithModel set
     >> Binding.addValidation validate
-
-  /// <summary>
-  ///   Creates a two-way binding to an optional value with validation using
-  ///   <c>INotifyDataErrorInfo</c>. The binding automatically converts between
-  ///   the optional source value and an unwrapped (possibly <c>null</c>) value
-  ///   on the view side.
-  /// </summary>
-  /// <param name="get">Gets the value from the model.</param>
-  /// <param name="set">Returns the message to dispatch.</param>
-  /// <param name="validate">
-  ///   Returns the validation messages from the updated model.
-  /// </param>
-  /// <param name="wrapDispatch">
-  ///   Wraps the dispatch function with additional behavior, such as
-  ///   throttling, debouncing, or limiting.
-  /// </param>
-  [<System.Obsolete("In version 5, this method will be removed.  Use the overload without the \"wrapDispatch\" parameter followed by a call to \"Binding.alterMsgStream\".  For an example, see how this method is implemented.")>]
-  static member twoWayOptValidate
-      (get: 'model -> 'a voption,
-       set: 'a voption -> 'model -> 'msg,
-       validate: 'model -> string list,
-       wrapDispatch: Dispatch<'msg> -> Dispatch<'msg>)
-      : string -> Binding<'model, 'msg> =
-    Binding.twoWayOptValidate (get, set, validate)
-    >> Binding.alterMsgStream wrapDispatch
-
 
   /// <summary>
   ///   Creates a two-way binding to an optional value with validation using
@@ -1166,32 +988,6 @@ type Binding private () =
   /// <param name="validate">
   ///   Returns the validation message from the updated model.
   /// </param>
-  /// <param name="wrapDispatch">
-  ///   Wraps the dispatch function with additional behavior, such as
-  ///   throttling, debouncing, or limiting.
-  /// </param>
-  [<System.Obsolete("In version 5, this method will be removed.  Use the overload without the \"wrapDispatch\" parameter followed by a call to \"Binding.alterMsgStream\".  For an example, see how this method is implemented.")>]
-  static member twoWayOptValidate
-      (get: 'model -> 'a voption,
-       set: 'a voption -> 'model -> 'msg,
-       validate: 'model -> string voption,
-       wrapDispatch: Dispatch<'msg> -> Dispatch<'msg>)
-      : string -> Binding<'model, 'msg> =
-    Binding.twoWayOptValidate (get, set, validate)
-    >> Binding.alterMsgStream wrapDispatch
-
-
-  /// <summary>
-  ///   Creates a two-way binding to an optional value with validation using
-  ///   <c>INotifyDataErrorInfo</c>. The binding automatically converts between
-  ///   the optional source value and an unwrapped (possibly <c>null</c>) value
-  ///   on the view side.
-  /// </summary>
-  /// <param name="get">Gets the value from the model.</param>
-  /// <param name="set">Returns the message to dispatch.</param>
-  /// <param name="validate">
-  ///   Returns the validation message from the updated model.
-  /// </param>
   static member twoWayOptValidate
       (get: 'model -> 'a voption,
        set: 'a voption -> 'model -> 'msg,
@@ -1202,32 +998,6 @@ type Binding private () =
     >> Binding.mapModel get
     >> Binding.mapMsgWithModel set
     >> Binding.addValidation (validate >> Option.toList)
-
-  /// <summary>
-  ///   Creates a two-way binding to an optional value with validation using
-  ///   <c>INotifyDataErrorInfo</c>. The binding automatically converts between
-  ///   the optional source value and an unwrapped (possibly <c>null</c>) value
-  ///   on the view side.
-  /// </summary>
-  /// <param name="get">Gets the value from the model.</param>
-  /// <param name="set">Returns the message to dispatch.</param>
-  /// <param name="validate">
-  ///   Returns the validation message from the updated model.
-  /// </param>
-  /// <param name="wrapDispatch">
-  ///   Wraps the dispatch function with additional behavior, such as
-  ///   throttling, debouncing, or limiting.
-  /// </param>
-  [<System.Obsolete("In version 5, this method will be removed.  Use the overload without the \"wrapDispatch\" parameter followed by a call to \"Binding.alterMsgStream\".  For an example, see how this method is implemented.")>]
-  static member twoWayOptValidate
-      (get: 'model -> 'a voption,
-       set: 'a voption -> 'model -> 'msg,
-       validate: 'model -> string option,
-       wrapDispatch: Dispatch<'msg> -> Dispatch<'msg>)
-      : string -> Binding<'model, 'msg> =
-    Binding.twoWayOptValidate (get, set, validate)
-    >> Binding.alterMsgStream wrapDispatch
-
 
   /// <summary>
   ///   Creates a two-way binding to an optional value with validation using
@@ -1260,32 +1030,6 @@ type Binding private () =
   /// <param name="get">Gets the value from the model.</param>
   /// <param name="set">Returns the message to dispatch.</param>
   /// <param name="validate">
-  ///   Returns the validation message from the updated model.
-  /// </param>
-  /// <param name="wrapDispatch">
-  ///   Wraps the dispatch function with additional behavior, such as
-  ///   throttling, debouncing, or limiting.
-  /// </param>
-  [<System.Obsolete("In version 5, this method will be removed.  Use the overload without the \"wrapDispatch\" parameter followed by a call to \"Binding.alterMsgStream\".  For an example, see how this method is implemented.")>]
-  static member twoWayOptValidate
-      (get: 'model -> 'a voption,
-       set: 'a voption -> 'model -> 'msg,
-       validate: 'model -> Result<'ignored, string>,
-       wrapDispatch: Dispatch<'msg> -> Dispatch<'msg>)
-      : string -> Binding<'model, 'msg> =
-    Binding.twoWayOptValidate (get, set, validate)
-    >> Binding.alterMsgStream wrapDispatch
-
-
-  /// <summary>
-  ///   Creates a two-way binding to an optional value with validation using
-  ///   <c>INotifyDataErrorInfo</c>. The binding automatically converts between
-  ///   the optional source value and an unwrapped (possibly <c>null</c>) value
-  ///   on the view side.
-  /// </summary>
-  /// <param name="get">Gets the value from the model.</param>
-  /// <param name="set">Returns the message to dispatch.</param>
-  /// <param name="validate">
   ///   Returns the validation messages from the updated model.
   /// </param>
   static member twoWayOptValidate
@@ -1298,32 +1042,6 @@ type Binding private () =
     >> Binding.mapModel get
     >> Binding.mapMsgWithModel set
     >> Binding.addValidation validate
-
-  /// <summary>
-  ///   Creates a two-way binding to an optional value with validation using
-  ///   <c>INotifyDataErrorInfo</c>. The binding automatically converts between
-  ///   the optional source value and an unwrapped (possibly <c>null</c>) value
-  ///   on the view side.
-  /// </summary>
-  /// <param name="get">Gets the value from the model.</param>
-  /// <param name="set">Returns the message to dispatch.</param>
-  /// <param name="validate">
-  ///   Returns the validation messages from the updated model.
-  /// </param>
-  /// <param name="wrapDispatch">
-  ///   Wraps the dispatch function with additional behavior, such as
-  ///   throttling, debouncing, or limiting.
-  /// </param>
-  [<System.Obsolete("In version 5, this method will be removed.  Use the overload without the \"wrapDispatch\" parameter followed by a call to \"Binding.alterMsgStream\".  For an example, see how this method is implemented.")>]
-  static member twoWayOptValidate
-      (get: 'model -> 'a option,
-       set: 'a option -> 'model -> 'msg,
-       validate: 'model -> string list,
-       wrapDispatch: Dispatch<'msg> -> Dispatch<'msg>)
-      : string -> Binding<'model, 'msg> =
-    Binding.twoWayOptValidate (get, set, validate)
-    >> Binding.alterMsgStream wrapDispatch
-
 
   /// <summary>
   ///   Creates a two-way binding to an optional value with validation using
@@ -1358,32 +1076,6 @@ type Binding private () =
   /// <param name="validate">
   ///   Returns the validation message from the updated model.
   /// </param>
-  /// <param name="wrapDispatch">
-  ///   Wraps the dispatch function with additional behavior, such as
-  ///   throttling, debouncing, or limiting.
-  /// </param>
-  [<System.Obsolete("In version 5, this method will be removed.  Use the overload without the \"wrapDispatch\" parameter followed by a call to \"Binding.alterMsgStream\".  For an example, see how this method is implemented.")>]
-  static member twoWayOptValidate
-      (get: 'model -> 'a option,
-       set: 'a option -> 'model -> 'msg,
-       validate: 'model -> string voption,
-       wrapDispatch: Dispatch<'msg> -> Dispatch<'msg>)
-      : string -> Binding<'model, 'msg> =
-    Binding.twoWayOptValidate (get, set, validate)
-    >> Binding.alterMsgStream wrapDispatch
-
-
-  /// <summary>
-  ///   Creates a two-way binding to an optional value with validation using
-  ///   <c>INotifyDataErrorInfo</c>. The binding automatically converts between
-  ///   the optional source value and an unwrapped (possibly <c>null</c>) value
-  ///   on the view side.
-  /// </summary>
-  /// <param name="get">Gets the value from the model.</param>
-  /// <param name="set">Returns the message to dispatch.</param>
-  /// <param name="validate">
-  ///   Returns the validation message from the updated model.
-  /// </param>
   static member twoWayOptValidate
       (get: 'model -> 'a option,
        set: 'a option -> 'model -> 'msg,
@@ -1406,32 +1098,6 @@ type Binding private () =
   /// <param name="validate">
   ///   Returns the validation message from the updated model.
   /// </param>
-  /// <param name="wrapDispatch">
-  ///   Wraps the dispatch function with additional behavior, such as
-  ///   throttling, debouncing, or limiting.
-  /// </param>
-  [<System.Obsolete("In version 5, this method will be removed.  Use the overload without the \"wrapDispatch\" parameter followed by a call to \"Binding.alterMsgStream\".  For an example, see how this method is implemented.")>]
-  static member twoWayOptValidate
-      (get: 'model -> 'a option,
-       set: 'a option -> 'model -> 'msg,
-       validate: 'model -> string option,
-       wrapDispatch: Dispatch<'msg> -> Dispatch<'msg>)
-      : string -> Binding<'model, 'msg> =
-    Binding.twoWayOptValidate (get, set, validate)
-    >> Binding.alterMsgStream wrapDispatch
-
-
-  /// <summary>
-  ///   Creates a two-way binding to an optional value with validation using
-  ///   <c>INotifyDataErrorInfo</c>. The binding automatically converts between
-  ///   the optional source value and an unwrapped (possibly <c>null</c>) value
-  ///   on the view side.
-  /// </summary>
-  /// <param name="get">Gets the value from the model.</param>
-  /// <param name="set">Returns the message to dispatch.</param>
-  /// <param name="validate">
-  ///   Returns the validation message from the updated model.
-  /// </param>
   static member twoWayOptValidate
       (get: 'model -> 'a option,
        set: 'a option -> 'model -> 'msg,
@@ -1442,31 +1108,6 @@ type Binding private () =
     >> Binding.mapModel get
     >> Binding.mapMsgWithModel set
     >> Binding.addValidation (validate >> ValueOption.ofError >> ValueOption.toList)
-
-  /// <summary>
-  ///   Creates a two-way binding to an optional value with validation using
-  ///   <c>INotifyDataErrorInfo</c>. The binding automatically converts between
-  ///   the optional source value and an unwrapped (possibly <c>null</c>) value
-  ///   on the view side.
-  /// </summary>
-  /// <param name="get">Gets the value from the model.</param>
-  /// <param name="set">Returns the message to dispatch.</param>
-  /// <param name="validate">
-  ///   Returns the validation message from the updated model.
-  /// </param>
-  /// <param name="wrapDispatch">
-  ///   Wraps the dispatch function with additional behavior, such as
-  ///   throttling, debouncing, or limiting.
-  /// </param>
-  [<System.Obsolete("In version 5, this method will be removed.  Use the overload without the \"wrapDispatch\" parameter followed by a call to \"Binding.alterMsgStream\".  For an example, see how this method is implemented.")>]
-  static member twoWayOptValidate
-      (get: 'model -> 'a option,
-       set: 'a option -> 'model -> 'msg,
-       validate: 'model -> Result<'ignored, string>,
-       wrapDispatch: Dispatch<'msg> -> Dispatch<'msg>)
-      : string -> Binding<'model, 'msg> =
-    Binding.twoWayOptValidate (get, set, validate)
-    >> Binding.alterMsgStream wrapDispatch
 
 
   /// <summary>
@@ -1480,23 +1121,6 @@ type Binding private () =
     Binding.Cmd.create
       (exec >> ValueSome)
       (fun _ -> true)
-
-  /// <summary>
-  ///   Creates a <c>Command</c> binding that depends only on the model (not the
-  ///   <c>CommandParameter</c>) and can always execute.
-  /// </summary>
-  /// <param name="exec">Returns the message to dispatch.</param>
-  /// <param name="wrapDispatch">
-  ///   Wraps the dispatch function with additional behavior, such as
-  ///   throttling, debouncing, or limiting.
-  /// </param>
-  [<System.Obsolete("In version 5, this method will be removed.  Use the overload without the \"wrapDispatch\" parameter followed by a call to \"Binding.alterMsgStream\".  For an example, see how this method is implemented.")>]
-  static member cmd
-      (exec: 'model -> 'msg,
-       wrapDispatch: Dispatch<'msg> -> Dispatch<'msg>)
-      : string -> Binding<'model, 'msg> =
-    Binding.cmd exec
-    >> Binding.alterMsgStream wrapDispatch
 
 
   /// <summary>
@@ -1515,28 +1139,6 @@ type Binding private () =
       (exec >> ValueSome)
       canExec
 
-  /// <summary>
-  ///   Creates a conditional <c>Command</c> binding that depends only on the
-  ///   model (not the <c>CommandParameter</c>) and can execute if <paramref
-  ///   name="canExec" />
-  ///   returns <c>true</c>.
-  /// </summary>
-  /// <param name="exec">Returns the message to dispatch.</param>
-  /// <param name="canExec">Indicates whether the command can execute.</param>
-
-  /// <param name="wrapDispatch">
-  ///   Wraps the dispatch function with additional behavior, such as
-  ///   throttling, debouncing, or limiting.
-  /// </param>
-  [<System.Obsolete("In version 5, this method will be removed.  Use the overload without the \"wrapDispatch\" parameter followed by a call to \"Binding.alterMsgStream\".  For an example, see how this method is implemented.")>]
-  static member cmdIf
-      (exec: 'model -> 'msg,
-       canExec: 'model -> bool,
-       wrapDispatch: Dispatch<'msg> -> Dispatch<'msg>)
-      : string -> Binding<'model, 'msg> =
-    Binding.cmdIf (exec, canExec)
-    >> Binding.alterMsgStream wrapDispatch
-
 
   /// <summary>
   ///   Creates a conditional <c>Command</c> binding that depends only on the
@@ -1552,26 +1154,6 @@ type Binding private () =
       exec
       (exec >> ValueOption.isSome)
 
-  /// <summary>
-  ///   Creates a conditional <c>Command</c> binding that depends only on the
-  ///   model (not the <c>CommandParameter</c>) and can execute if <paramref
-  ///   name="exec" />
-  ///   returns <c>ValueSome</c>.
-  /// </summary>
-  /// <param name="exec">Returns the message to dispatch.</param>
-
-  /// <param name="wrapDispatch">
-  ///   Wraps the dispatch function with additional behavior, such as
-  ///   throttling, debouncing, or limiting.
-  /// </param>
-  [<System.Obsolete("In version 5, this method will be removed.  Use the overload without the \"wrapDispatch\" parameter followed by a call to \"Binding.alterMsgStream\".  For an example, see how this method is implemented.")>]
-  static member cmdIf
-      (exec: 'model -> 'msg voption,
-       wrapDispatch: Dispatch<'msg> -> Dispatch<'msg>)
-      : string -> Binding<'model, 'msg> =
-    Binding.cmdIf exec
-    >> Binding.alterMsgStream wrapDispatch
-
 
   /// <summary>
   ///   Creates a conditional <c>Command</c> binding that depends only on the
@@ -1586,26 +1168,6 @@ type Binding private () =
     Binding.Cmd.create
       (exec >> ValueOption.ofOption)
       (exec >> Option.isSome)
-
-  /// <summary>
-  ///   Creates a conditional <c>Command</c> binding that depends only on the
-  ///   model (not the <c>CommandParameter</c>) and can execute if <paramref
-  ///   name="exec" />
-  ///   returns <c>Some</c>.
-  /// </summary>
-  /// <param name="exec">Returns the message to dispatch.</param>
-
-  /// <param name="wrapDispatch">
-  ///   Wraps the dispatch function with additional behavior, such as
-  ///   throttling, debouncing, or limiting.
-  /// </param>
-  [<System.Obsolete("In version 5, this method will be removed.  Use the overload without the \"wrapDispatch\" parameter followed by a call to \"Binding.alterMsgStream\".  For an example, see how this method is implemented.")>]
-  static member cmdIf
-      (exec: 'model -> 'msg option,
-       wrapDispatch: Dispatch<'msg> -> Dispatch<'msg>)
-      : string -> Binding<'model, 'msg> =
-    Binding.cmdIf exec
-    >> Binding.alterMsgStream wrapDispatch
 
 
   /// <summary>
@@ -1626,29 +1188,6 @@ type Binding private () =
       (exec >> Result.isOk)
 
   /// <summary>
-  ///   Creates a conditional <c>Command</c> binding that depends only on the
-  ///   model (not the <c>CommandParameter</c>) and can execute if <paramref
-  ///   name="exec" />
-  ///   returns <c>Ok</c>.
-  ///
-  ///   This overload allows more easily re-using the same validation functions
-  ///   for inputs and commands.
-  /// </summary>
-  /// <param name="exec">Returns the message to dispatch.</param>
-  /// <param name="wrapDispatch">
-  ///   Wraps the dispatch function with additional behavior, such as
-  ///   throttling, debouncing, or limiting.
-  /// </param>
-  [<System.Obsolete("In version 5, this method will be removed.  Use the overload without the \"wrapDispatch\" parameter followed by a call to \"Binding.alterMsgStream\".  For an example, see how this method is implemented.")>]
-  static member cmdIf
-      (exec: 'model -> Result<'msg, 'ignored>,
-       wrapDispatch: Dispatch<'msg> -> Dispatch<'msg>)
-      : string -> Binding<'model, 'msg> =
-    Binding.cmdIf exec
-    >> Binding.alterMsgStream wrapDispatch
-
-
-  /// <summary>
   ///   Creates a <c>Command</c> binding that depends on the
   ///   <c>CommandParameter</c>
   ///   and can always execute.
@@ -1660,25 +1199,6 @@ type Binding private () =
     Binding.Cmd.createWithParam
       (fun p model -> exec p model |> ValueSome)
       (fun _ _ -> true)
-
-  /// <summary>
-  ///   Creates a <c>Command</c> binding that depends on the
-  ///   <c>CommandParameter</c>
-  ///   and can always execute.
-  /// </summary>
-  /// <param name="exec">Returns the message to dispatch.</param>
-  /// <param name="wrapDispatch">
-  ///   Wraps the dispatch function with additional behavior, such as
-  ///   throttling, debouncing, or limiting.
-  /// </param>
-  [<System.Obsolete("In version 5, this method will be removed.  Use the overload without the \"wrapDispatch\" parameter followed by a call to \"Binding.alterMsgStream\".  For an example, see how this method is implemented.")>]
-  static member cmdParam
-      (exec: obj -> 'model -> 'msg,
-       wrapDispatch: Dispatch<'msg> -> Dispatch<'msg>)
-      : string -> Binding<'model, 'msg> =
-    Binding.cmdParam exec
-    >> Binding.alterMsgStream wrapDispatch
-
 
   /// <summary>
   ///   Creates a <c>Command</c> binding that depends on the
@@ -1696,27 +1216,6 @@ type Binding private () =
       canExec
 
   /// <summary>
-  ///   Creates a <c>Command</c> binding that depends on the
-  ///   <c>CommandParameter</c>
-  ///   and can execute if <paramref name="canExec" /> returns <c>true</c>.
-  /// </summary>
-  /// <param name="exec">Returns the message to dispatch.</param>
-  /// <param name="canExec">Indicates whether the command can execute.</param>
-  /// <param name="wrapDispatch">
-  ///   Wraps the dispatch function with additional behavior, such as
-  ///   throttling, debouncing, or limiting.
-  /// </param>
-  [<System.Obsolete("In version 5, this method will be removed.  Use the overload without the \"wrapDispatch\" parameter followed by a call to \"Binding.alterMsgStream\".  For an example, see how this method is implemented.")>]
-  static member cmdParamIf
-      (exec: obj -> 'model -> 'msg,
-       canExec: obj -> 'model -> bool,
-       wrapDispatch: Dispatch<'msg> -> Dispatch<'msg>)
-      : string -> Binding<'model, 'msg> =
-    Binding.cmdParamIf (exec, canExec)
-    >> Binding.alterMsgStream wrapDispatch
-
-
-  /// <summary>
   ///   Creates a conditional <c>Command</c> binding that depends on the
   ///   <c>CommandParameter</c>
   ///   and can execute if <paramref name="exec" /> returns <c>ValueSome</c>.
@@ -1728,25 +1227,6 @@ type Binding private () =
     Binding.Cmd.createWithParam
       exec
       (fun p m -> exec p m |> ValueOption.isSome)
-
-  /// <summary>
-  ///   Creates a conditional <c>Command</c> binding that depends on the
-  ///   <c>CommandParameter</c>
-  ///   and can execute if <paramref name="exec" /> returns <c>ValueSome</c>.
-  /// </summary>
-  /// <param name="exec">Returns the message to dispatch.</param>
-  /// <param name="wrapDispatch">
-  ///   Wraps the dispatch function with additional behavior, such as
-  ///   throttling, debouncing, or limiting.
-  /// </param>
-  [<System.Obsolete("In version 5, this method will be removed.  Use the overload without the \"wrapDispatch\" parameter followed by a call to \"Binding.alterMsgStream\".  For an example, see how this method is implemented.")>]
-  static member cmdParamIf
-      (exec: obj -> 'model -> 'msg voption,
-       wrapDispatch: Dispatch<'msg> -> Dispatch<'msg>)
-      : string -> Binding<'model, 'msg> =
-    Binding.cmdParamIf exec
-    >> Binding.alterMsgStream wrapDispatch
-
 
   /// <summary>
   ///   Creates a conditional <c>Command</c> binding that depends on the
@@ -1764,25 +1244,6 @@ type Binding private () =
   /// <summary>
   ///   Creates a conditional <c>Command</c> binding that depends on the
   ///   <c>CommandParameter</c>
-  ///   and can execute if <paramref name="exec" /> returns <c>Some</c>.
-  /// </summary>
-  /// <param name="exec">Returns the message to dispatch.</param>
-  /// <param name="wrapDispatch">
-  ///   Wraps the dispatch function with additional behavior, such as
-  ///   throttling, debouncing, or limiting.
-  /// </param>
-  [<System.Obsolete("In version 5, this method will be removed.  Use the overload without the \"wrapDispatch\" parameter followed by a call to \"Binding.alterMsgStream\".  For an example, see how this method is implemented.")>]
-  static member cmdParamIf
-      (exec: obj -> 'model -> 'msg option,
-       wrapDispatch: Dispatch<'msg> -> Dispatch<'msg>)
-      : string -> Binding<'model, 'msg> =
-    Binding.cmdParamIf exec
-    >> Binding.alterMsgStream wrapDispatch
-
-
-  /// <summary>
-  ///   Creates a conditional <c>Command</c> binding that depends on the
-  ///   <c>CommandParameter</c>
   ///   and can execute if <paramref name="exec" /> returns <c>Ok</c>.
   ///
   ///   This overload allows more easily re-using the same validation functions
@@ -1795,28 +1256,6 @@ type Binding private () =
     Binding.Cmd.createWithParam
       (fun p m -> exec p m |> ValueOption.ofOk)
       (fun p m -> exec p m |> Result.isOk)
-
-  /// <summary>
-  ///   Creates a conditional <c>Command</c> binding that depends on the
-  ///   <c>CommandParameter</c>
-  ///   and can execute if <paramref name="exec" /> returns <c>Ok</c>.
-  ///
-  ///   This overload allows more easily re-using the same validation functions
-  ///   for inputs and commands.
-  /// </summary>
-  /// <param name="exec">Returns the message to dispatch.</param>
-  /// <param name="wrapDispatch">
-  ///   Wraps the dispatch function with additional behavior, such as
-  ///   throttling, debouncing, or limiting.
-  /// </param>
-  [<System.Obsolete("In version 5, this method will be removed.  Use the overload without the \"wrapDispatch\" parameter followed by a call to \"Binding.alterMsgStream\".  For an example, see how this method is implemented.")>]
-  static member cmdParamIf
-      (exec: obj -> 'model -> Result<'msg, 'ignored>,
-       wrapDispatch: Dispatch<'msg> -> Dispatch<'msg>)
-      : string -> Binding<'model, 'msg> =
-    Binding.cmdParamIf exec
-    >> Binding.alterMsgStream wrapDispatch
-
 
   /// <summary>
   ///   Creates a binding to a sub-model/component that has its own bindings and
@@ -2523,47 +1962,6 @@ type Binding private () =
   ///   Creates a two-way binding to a <c>SelectedItem</c>-like property where
   ///   the
   ///   <c>ItemsSource</c>-like property is a <see cref="subModelSeq" />
-  ///   binding. Automatically converts the dynamically created Elmish.WPF view
-  ///   models to/from their corresponding IDs, so the Elmish user code only has
-  ///   to work with the IDs.
-  ///
-  ///   Only use this if you are unable to use some kind of <c>SelectedValue</c>
-  ///   or
-  ///   <c>SelectedIndex</c> property with a normal <see cref="twoWay" />
-  ///   binding. This binding is less type-safe. It will throw when initializing
-  ///   the bindings if <paramref name="subModelSeqBindingName" />
-  ///   does not correspond to a <see cref="subModelSeq" /> binding, and it will
-  ///   throw at runtime if the inferred <c>'id</c> type does not match the
-  ///   actual ID type used in that binding.
-  /// </summary>
-  /// <param name="subModelSeqBindingName">
-  ///   The name of the <see cref="subModelSeq" /> binding used as the items
-  ///   source.
-  /// </param>
-  /// <param name="get">Gets the selected sub-model/sub-binding ID from the
-  /// model.</param>
-  /// <param name="set">
-  ///   Returns the message to dispatch on selections/de-selections.
-  /// </param>
-  /// <param name="wrapDispatch">
-  ///   Wraps the dispatch function with additional behavior, such as
-  ///   throttling, debouncing, or limiting.
-  /// </param>
-  [<System.Obsolete("In version 5, this method will be removed.  Use the overload without the \"wrapDispatch\" parameter followed by a call to \"Binding.alterMsgStream\".  For an example, see how this method is implemented.")>]
-  static member subModelSelectedItem
-      (subModelSeqBindingName: string,
-       get: 'model -> 'id voption,
-       set: 'id voption -> 'model -> 'msg,
-       wrapDispatch: Dispatch<'msg> -> Dispatch<'msg>)
-      : string -> Binding<'model, 'msg> =
-    Binding.subModelSelectedItem (subModelSeqBindingName, get, set)
-    >> Binding.alterMsgStream wrapDispatch
-
-
-  /// <summary>
-  ///   Creates a two-way binding to a <c>SelectedItem</c>-like property where
-  ///   the
-  ///   <c>ItemsSource</c>-like property is a <see cref="subModelSeq" />
   ///   binding. Automatically converts the dynamically created Elmish.Uno view
   ///   models to/from their corresponding IDs, so the Elmish user code only has
   ///   to work with the IDs.
@@ -2597,47 +1995,6 @@ type Binding private () =
     >> Binding.mapMsgWithModel set
     >> Binding.addCaching
 
-  /// <summary>
-  ///   Creates a two-way binding to a <c>SelectedItem</c>-like property where
-  ///   the
-  ///   <c>ItemsSource</c>-like property is a <see cref="subModelSeq" />
-  ///   binding. Automatically converts the dynamically created Elmish.WPF view
-  ///   models to/from their corresponding IDs, so the Elmish user code only has
-  ///   to work with the IDs.
-  ///
-  ///   Only use this if you are unable to use some kind of <c>SelectedValue</c>
-  ///   or
-  ///   <c>SelectedIndex</c> property with a normal <see cref="twoWay" />
-  ///   binding. This binding is less type-safe. It will throw when initializing
-  ///   the bindings if <paramref name="subModelSeqBindingName" />
-  ///   does not correspond to a <see cref="subModelSeq" /> binding, and it will
-  ///   throw at runtime if the inferred <c>'id</c> type does not match the
-  ///   actual ID type used in that binding.
-  /// </summary>
-  /// <param name="subModelSeqBindingName">
-  ///   The name of the <see cref="subModelSeq" /> binding used as the items
-  ///   source.
-  /// </param>
-  /// <param name="get">Gets the selected sub-model/sub-binding ID from the
-  /// model.</param>
-  /// <param name="set">
-  ///   Returns the message to dispatch on selections/de-selections.
-  /// </param>
-  /// <param name="wrapDispatch">
-  ///   Wraps the dispatch function with additional behavior, such as
-  ///   throttling, debouncing, or limiting.
-  /// </param>
-  [<System.Obsolete("In version 5, this method will be removed.  Use the overload without the \"wrapDispatch\" parameter followed by a call to \"Binding.alterMsgStream\".  For an example, see how this method is implemented.")>]
-  static member subModelSelectedItem
-      (subModelSeqBindingName: string,
-       get: 'model -> 'id option,
-       set: 'id option -> 'model -> 'msg,
-       wrapDispatch: Dispatch<'msg> -> Dispatch<'msg>)
-      : string -> Binding<'model, 'msg> =
-    Binding.subModelSelectedItem (subModelSeqBindingName, get, set)
-    >> Binding.alterMsgStream wrapDispatch
-
-
 
 // Some members are implemented as extensions to help overload resolution
 [<AutoOpen>]
@@ -2656,22 +2013,6 @@ module Extensions =
       >> Binding.addLazy (=)
       >> Binding.mapModel get
       >> Binding.mapMsg set
-
-    /// <summary>Creates a two-way binding.</summary>
-    /// <param name="get">Gets the value from the model.</param>
-    /// <param name="set">Returns the message to dispatch.</param>
-    /// <param name="wrapDispatch">
-    ///   Wraps the dispatch function with additional behavior, such as
-    ///   throttling, debouncing, or limiting.
-    /// </param>
-    [<System.Obsolete("In version 5, this method will be removed.  Use the overload without the \"wrapDispatch\" parameter followed by a call to \"Binding.alterMsgStream\".  For an example, see how this method is implemented.")>]
-    static member twoWay
-        (get: 'model -> 'a,
-         set: 'a -> 'msg,
-         wrapDispatch: Dispatch<'msg> -> Dispatch<'msg>)
-        : string -> Binding<'model, 'msg> =
-      Binding.twoWay (get, set)
-      >> Binding.alterMsgStream wrapDispatch
 
 
     /// <summary>
@@ -2697,28 +2038,6 @@ module Extensions =
     /// </summary>
     /// <param name="get">Gets the value from the model.</param>
     /// <param name="set">Returns the message to dispatch.</param>
-    /// <param name="wrapDispatch">
-    ///   Wraps the dispatch function with additional behavior, such as
-    ///   throttling, debouncing, or limiting.
-    /// </param>
-    [<System.Obsolete("In version 5, this method will be removed.  Use the overload without the \"wrapDispatch\" parameter followed by a call to \"Binding.alterMsgStream\".  For an example, see how this method is implemented.")>]
-
-    static member twoWayOpt
-        (get: 'model -> 'a option,
-         set: 'a option -> 'msg,
-         wrapDispatch: Dispatch<'msg> -> Dispatch<'msg>)
-        : string -> Binding<'model, 'msg> =
-      Binding.twoWayOpt (get, set)
-      >> Binding.alterMsgStream wrapDispatch
-
-
-    /// <summary>
-    ///   Creates a two-way binding to an optional value. The binding
-    ///   automatically converts between the optional source value and an
-    ///   unwrapped (possibly <c>null</c>) value on the view side.
-    /// </summary>
-    /// <param name="get">Gets the value from the model.</param>
-    /// <param name="set">Returns the message to dispatch.</param>
     static member twoWayOpt
         (get: 'model -> 'a voption,
          set: 'a voption -> 'msg)
@@ -2728,27 +2047,6 @@ module Extensions =
       >> Binding.mapModel get
       >> Binding.mapMsg set
 
-    /// <summary>
-    ///   Creates a two-way binding to an optional value. The binding
-    ///   automatically converts between the optional source value and an
-    ///   unwrapped (possibly <c>null</c>) value on the view side.
-    /// </summary>
-    /// <param name="get">Gets the value from the model.</param>
-    /// <param name="set">Returns the message to dispatch.</param>
-    /// <param name="wrapDispatch">
-    ///   Wraps the dispatch function with additional behavior, such as
-    ///   throttling, debouncing, or limiting.
-    /// </param>
-    [<System.Obsolete("In version 5, this method will be removed.  Use the overload without the \"wrapDispatch\" parameter followed by a call to \"Binding.alterMsgStream\".  For an example, see how this method is implemented.")>]
-
-    static member twoWayOpt
-        (get: 'model -> 'a voption,
-         set: 'a voption -> 'msg,
-         wrapDispatch: Dispatch<'msg> -> Dispatch<'msg>)
-        : string -> Binding<'model, 'msg> =
-      Binding.twoWayOpt (get, set)
-      >> Binding.alterMsgStream wrapDispatch
-
 
     /// <summary>
     ///   Creates a two-way binding with validation using
@@ -2777,31 +2075,6 @@ module Extensions =
     /// <param name="get">Gets the value from the model.</param>
     /// <param name="set">Returns the message to dispatch.</param>
     /// <param name="validate">
-    ///   Returns the validation messages from the updated model.
-    /// </param>
-    /// <param name="wrapDispatch">
-    ///   Wraps the dispatch function with additional behavior, such as
-    ///   throttling, debouncing, or limiting.
-    /// </param>
-    [<System.Obsolete("In version 5, this method will be removed.  Use the overload without the \"wrapDispatch\" parameter followed by a call to \"Binding.alterMsgStream\".  For an example, see how this method is implemented.")>]
-
-    static member twoWayValidate
-        (get: 'model -> 'a,
-         set: 'a -> 'msg,
-         validate: 'model -> string list,
-         wrapDispatch: Dispatch<'msg> -> Dispatch<'msg>)
-        : string -> Binding<'model, 'msg> =
-      Binding.twoWayValidate (get, set, validate)
-      >> Binding.alterMsgStream wrapDispatch
-
-
-    /// <summary>
-    ///   Creates a two-way binding with validation using
-    ///   <c>INotifyDataErrorInfo</c>.
-    /// </summary>
-    /// <param name="get">Gets the value from the model.</param>
-    /// <param name="set">Returns the message to dispatch.</param>
-    /// <param name="validate">
     ///   Returns the validation message from the updated model.
     /// </param>
     static member twoWayValidate
@@ -2814,30 +2087,6 @@ module Extensions =
       >> Binding.mapModel get
       >> Binding.mapMsg set
       >> Binding.addValidation (validate >> ValueOption.toList)
-
-    /// <summary>
-    ///   Creates a two-way binding with validation using
-    ///   <c>INotifyDataErrorInfo</c>.
-    /// </summary>
-    /// <param name="get">Gets the value from the model.</param>
-    /// <param name="set">Returns the message to dispatch.</param>
-    /// <param name="validate">
-    ///   Returns the validation message from the updated model.
-    /// </param>
-    /// <param name="wrapDispatch">
-    ///   Wraps the dispatch function with additional behavior, such as
-    ///   throttling, debouncing, or limiting.
-    /// </param>
-    [<System.Obsolete("In version 5, this method will be removed.  Use the overload without the \"wrapDispatch\" parameter followed by a call to \"Binding.alterMsgStream\".  For an example, see how this method is implemented.")>]
-
-    static member twoWayValidate
-        (get: 'model -> 'a,
-         set: 'a -> 'msg,
-         validate: 'model -> string voption,
-         wrapDispatch: Dispatch<'msg> -> Dispatch<'msg>)
-        : string -> Binding<'model, 'msg> =
-      Binding.twoWayValidate (get, set, validate)
-      >> Binding.alterMsgStream wrapDispatch
 
 
     /// <summary>
@@ -2869,31 +2118,6 @@ module Extensions =
     /// <param name="validate">
     ///   Returns the validation message from the updated model.
     /// </param>
-    /// <param name="wrapDispatch">
-    ///   Wraps the dispatch function with additional behavior, such as
-    ///   throttling, debouncing, or limiting.
-    /// </param>
-    [<System.Obsolete("In version 5, this method will be removed.  Use the overload without the \"wrapDispatch\" parameter followed by a call to \"Binding.alterMsgStream\".  For an example, see how this method is implemented.")>]
-
-    static member twoWayValidate
-        (get: 'model -> 'a,
-         set: 'a -> 'msg,
-         validate: 'model -> string option,
-         wrapDispatch: Dispatch<'msg> -> Dispatch<'msg>)
-        : string -> Binding<'model, 'msg> =
-      Binding.twoWayValidate (get, set, validate)
-      >> Binding.alterMsgStream wrapDispatch
-
-
-    /// <summary>
-    ///   Creates a two-way binding with validation using
-    ///   <c>INotifyDataErrorInfo</c>.
-    /// </summary>
-    /// <param name="get">Gets the value from the model.</param>
-    /// <param name="set">Returns the message to dispatch.</param>
-    /// <param name="validate">
-    ///   Returns the validation message from the updated model.
-    /// </param>
     static member twoWayValidate
         (get: 'model -> 'a,
          set: 'a -> 'msg,
@@ -2906,31 +2130,6 @@ module Extensions =
       >> Binding.addValidation (validate >> ValueOption.ofError >> ValueOption.toList)
 
     /// <summary>
-    ///   Creates a two-way binding with validation using
-    ///   <c>INotifyDataErrorInfo</c>.
-    /// </summary>
-    /// <param name="get">Gets the value from the model.</param>
-    /// <param name="set">Returns the message to dispatch.</param>
-    /// <param name="validate">
-    ///   Returns the validation message from the updated model.
-    /// </param>
-    /// <param name="wrapDispatch">
-    ///   Wraps the dispatch function with additional behavior, such as
-    ///   throttling, debouncing, or limiting.
-    /// </param>
-    [<System.Obsolete("In version 5, this method will be removed.  Use the overload without the \"wrapDispatch\" parameter followed by a call to \"Binding.alterMsgStream\".  For an example, see how this method is implemented.")>]
-
-    static member twoWayValidate
-        (get: 'model -> 'a,
-         set: 'a -> 'msg,
-         validate: 'model -> Result<'ignored, string>,
-         wrapDispatch: Dispatch<'msg> -> Dispatch<'msg>)
-        : string -> Binding<'model, 'msg> =
-      Binding.twoWayValidate (get, set, validate)
-      >> Binding.alterMsgStream wrapDispatch
-
-
-    /// <summary>
     ///   Creates a two-way binding to an optional value with validation using
     ///   <c>INotifyDataErrorInfo</c>. The binding automatically converts
     ///   between the optional source value and an unwrapped (possibly
@@ -2951,34 +2150,6 @@ module Extensions =
       >> Binding.mapModel get
       >> Binding.mapMsg set
       >> Binding.addValidation validate
-
-
-    /// <summary>
-    ///   Creates a two-way binding to an optional value with validation using
-    ///   <c>INotifyDataErrorInfo</c>. The binding automatically converts
-    ///   between the optional source value and an unwrapped (possibly
-    ///   <c>null</c>) value on the view side.
-    /// </summary>
-    /// <param name="get">Gets the value from the model.</param>
-    /// <param name="set">Returns the message to dispatch.</param>
-    /// <param name="validate">
-    ///   Returns the validation messages from the updated model.
-    /// </param>
-    /// <param name="wrapDispatch">
-    ///   Wraps the dispatch function with additional behavior, such as
-    ///   throttling, debouncing, or limiting.
-    /// </param>
-    [<System.Obsolete("In version 5, this method will be removed.  Use the overload without the \"wrapDispatch\" parameter followed by a call to \"Binding.alterMsgStream\".  For an example, see how this method is implemented.")>]
-
-    static member twoWayOptValidate
-        (get: 'model -> 'a voption,
-         set: 'a voption -> 'msg,
-         validate: 'model -> string list,
-         wrapDispatch: Dispatch<'msg> -> Dispatch<'msg>)
-        : string -> Binding<'model, 'msg> =
-      Binding.twoWayOptValidate (get, set, validate)
-      >> Binding.alterMsgStream wrapDispatch
-
 
     /// <summary>
     ///   Creates a two-way binding to an optional value with validation using
@@ -3002,34 +2173,6 @@ module Extensions =
       >> Binding.mapMsg set
       >> Binding.addValidation (validate >> ValueOption.toList)
 
-
-    /// <summary>
-    ///   Creates a two-way binding to an optional value with validation using
-    ///   <c>INotifyDataErrorInfo</c>. The binding automatically converts
-    ///   between the optional source value and an unwrapped (possibly
-    ///   <c>null</c>) value on the view side.
-    /// </summary>
-    /// <param name="get">Gets the value from the model.</param>
-    /// <param name="set">Returns the message to dispatch.</param>
-    /// <param name="validate">
-    ///   Returns the validation message from the updated model.
-    /// </param>
-    /// <param name="wrapDispatch">
-    ///   Wraps the dispatch function with additional behavior, such as
-    ///   throttling, debouncing, or limiting.
-    /// </param>
-    [<System.Obsolete("In version 5, this method will be removed.  Use the overload without the \"wrapDispatch\" parameter followed by a call to \"Binding.alterMsgStream\".  For an example, see how this method is implemented.")>]
-
-    static member twoWayOptValidate
-        (get: 'model -> 'a voption,
-         set: 'a voption -> 'msg,
-         validate: 'model -> string voption,
-         wrapDispatch: Dispatch<'msg> -> Dispatch<'msg>)
-        : string -> Binding<'model, 'msg> =
-      Binding.twoWayOptValidate (get, set, validate)
-      >> Binding.alterMsgStream wrapDispatch
-
-
     /// <summary>
     ///   Creates a two-way binding to an optional value with validation using
     ///   <c>INotifyDataErrorInfo</c>. The binding automatically converts
@@ -3052,34 +2195,6 @@ module Extensions =
       >> Binding.mapMsg set
       >> Binding.addValidation (validate >> Option.toList)
 
-
-    /// <summary>
-    ///   Creates a two-way binding to an optional value with validation using
-    ///   <c>INotifyDataErrorInfo</c>. The binding automatically converts
-    ///   between the optional source value and an unwrapped (possibly
-    ///   <c>null</c>) value on the view side.
-    /// </summary>
-    /// <param name="get">Gets the value from the model.</param>
-    /// <param name="set">Returns the message to dispatch.</param>
-    /// <param name="validate">
-    ///   Returns the validation message from the updated model.
-    /// </param>
-    /// <param name="wrapDispatch">
-    ///   Wraps the dispatch function with additional behavior, such as
-    ///   throttling, debouncing, or limiting.
-    /// </param>
-    [<System.Obsolete("In version 5, this method will be removed.  Use the overload without the \"wrapDispatch\" parameter followed by a call to \"Binding.alterMsgStream\".  For an example, see how this method is implemented.")>]
-
-    static member twoWayOptValidate
-        (get: 'model -> 'a voption,
-         set: 'a voption -> 'msg,
-         validate: 'model -> string option,
-         wrapDispatch: Dispatch<'msg> -> Dispatch<'msg>)
-        : string -> Binding<'model, 'msg> =
-      Binding.twoWayOptValidate (get, set, validate)
-      >> Binding.alterMsgStream wrapDispatch
-
-
     /// <summary>
     ///   Creates a two-way binding to an optional value with validation using
     ///   <c>INotifyDataErrorInfo</c>. The binding automatically converts
@@ -3101,34 +2216,6 @@ module Extensions =
       >> Binding.mapModel get
       >> Binding.mapMsg set
       >> Binding.addValidation (validate >> ValueOption.ofError >> ValueOption.toList)
-
-
-    /// <summary>
-    ///   Creates a two-way binding to an optional value with validation using
-    ///   <c>INotifyDataErrorInfo</c>. The binding automatically converts
-    ///   between the optional source value and an unwrapped (possibly
-    ///   <c>null</c>) value on the view side.
-    /// </summary>
-    /// <param name="get">Gets the value from the model.</param>
-    /// <param name="set">Returns the message to dispatch.</param>
-    /// <param name="validate">
-    ///   Returns the validation message from the updated model.
-    /// </param>
-    /// <param name="wrapDispatch">
-    ///   Wraps the dispatch function with additional behavior, such as
-    ///   throttling, debouncing, or limiting.
-    /// </param>
-    [<System.Obsolete("In version 5, this method will be removed.  Use the overload without the \"wrapDispatch\" parameter followed by a call to \"Binding.alterMsgStream\".  For an example, see how this method is implemented.")>]
-
-    static member twoWayOptValidate
-        (get: 'model -> 'a voption,
-         set: 'a voption -> 'msg,
-         validate: 'model -> Result<'ignored, string>,
-         wrapDispatch: Dispatch<'msg> -> Dispatch<'msg>)
-        : string -> Binding<'model, 'msg> =
-      Binding.twoWayOptValidate (get, set, validate)
-      >> Binding.alterMsgStream wrapDispatch
-
 
     /// <summary>
     ///   Creates a two-way binding to an optional value with validation using
@@ -3152,34 +2239,6 @@ module Extensions =
       >> Binding.mapMsg set
       >> Binding.addValidation validate
 
-
-    /// <summary>
-    ///   Creates a two-way binding to an optional value with validation using
-    ///   <c>INotifyDataErrorInfo</c>. The binding automatically converts
-    ///   between the optional source value and an unwrapped (possibly
-    ///   <c>null</c>) value on the view side.
-    /// </summary>
-    /// <param name="get">Gets the value from the model.</param>
-    /// <param name="set">Returns the message to dispatch.</param>
-    /// <param name="validate">
-    ///   Returns the validation messages from the updated model.
-    /// </param>
-    /// <param name="wrapDispatch">
-    ///   Wraps the dispatch function with additional behavior, such as
-    ///   throttling, debouncing, or limiting.
-    /// </param>
-    [<System.Obsolete("In version 5, this method will be removed.  Use the overload without the \"wrapDispatch\" parameter followed by a call to \"Binding.alterMsgStream\".  For an example, see how this method is implemented.")>]
-
-    static member twoWayOptValidate
-        (get: 'model -> 'a option,
-         set: 'a option -> 'msg,
-         validate: 'model -> string list,
-         wrapDispatch: Dispatch<'msg> -> Dispatch<'msg>)
-        : string -> Binding<'model, 'msg> =
-      Binding.twoWayOptValidate (get, set, validate)
-      >> Binding.alterMsgStream wrapDispatch
-
-
     /// <summary>
     ///   Creates a two-way binding to an optional value with validation using
     ///   <c>INotifyDataErrorInfo</c>. The binding automatically converts
@@ -3201,34 +2260,6 @@ module Extensions =
       >> Binding.mapModel get
       >> Binding.mapMsg set
       >> Binding.addValidation (validate >> ValueOption.toList)
-
-
-    /// <summary>
-    ///   Creates a two-way binding to an optional value with validation using
-    ///   <c>INotifyDataErrorInfo</c>. The binding automatically converts
-    ///   between the optional source value and an unwrapped (possibly
-    ///   <c>null</c>) value on the view side.
-    /// </summary>
-    /// <param name="get">Gets the value from the model.</param>
-    /// <param name="set">Returns the message to dispatch.</param>
-    /// <param name="validate">
-    ///   Returns the validation message from the updated model.
-    /// </param>
-    /// <param name="wrapDispatch">
-    ///   Wraps the dispatch function with additional behavior, such as
-    ///   throttling, debouncing, or limiting.
-    /// </param>
-    [<System.Obsolete("In version 5, this method will be removed.  Use the overload without the \"wrapDispatch\" parameter followed by a call to \"Binding.alterMsgStream\".  For an example, see how this method is implemented.")>]
-
-    static member twoWayOptValidate
-        (get: 'model -> 'a option,
-         set: 'a option -> 'msg,
-         validate: 'model -> string voption,
-         wrapDispatch: Dispatch<'msg> -> Dispatch<'msg>)
-        : string -> Binding<'model, 'msg> =
-      Binding.twoWayOptValidate (get, set, validate)
-      >> Binding.alterMsgStream wrapDispatch
-
 
     /// <summary>
     ///   Creates a two-way binding to an optional value with validation using
@@ -3252,34 +2283,6 @@ module Extensions =
       >> Binding.mapMsg set
       >> Binding.addValidation (validate >> Option.toList)
 
-
-    /// <summary>
-    ///   Creates a two-way binding to an optional value with validation using
-    ///   <c>INotifyDataErrorInfo</c>. The binding automatically converts
-    ///   between the optional source value and an unwrapped (possibly
-    ///   <c>null</c>) value on the view side.
-    /// </summary>
-    /// <param name="get">Gets the value from the model.</param>
-    /// <param name="set">Returns the message to dispatch.</param>
-    /// <param name="validate">
-    ///   Returns the validation message from the updated model.
-    /// </param>
-    /// <param name="wrapDispatch">
-    ///   Wraps the dispatch function with additional behavior, such as
-    ///   throttling, debouncing, or limiting.
-    /// </param>
-    [<System.Obsolete("In version 5, this method will be removed.  Use the overload without the \"wrapDispatch\" parameter followed by a call to \"Binding.alterMsgStream\".  For an example, see how this method is implemented.")>]
-
-    static member twoWayOptValidate
-        (get: 'model -> 'a option,
-         set: 'a option -> 'msg,
-         validate: 'model -> string option,
-         wrapDispatch: Dispatch<'msg> -> Dispatch<'msg>)
-        : string -> Binding<'model, 'msg> =
-      Binding.twoWayOptValidate (get, set, validate)
-      >> Binding.alterMsgStream wrapDispatch
-
-
     /// <summary>
     ///   Creates a two-way binding to an optional value with validation using
     ///   <c>INotifyDataErrorInfo</c>. The binding automatically converts
@@ -3301,34 +2304,6 @@ module Extensions =
       >> Binding.mapModel get
       >> Binding.mapMsg set
       >> Binding.addValidation (validate >> ValueOption.ofError >> ValueOption.toList)
-
-
-    /// <summary>
-    ///   Creates a two-way binding to an optional value with validation using
-    ///   <c>INotifyDataErrorInfo</c>. The binding automatically converts
-    ///   between the optional source value and an unwrapped (possibly
-    ///   <c>null</c>) value on the view side.
-    /// </summary>
-    /// <param name="get">Gets the value from the model.</param>
-    /// <param name="set">Returns the message to dispatch.</param>
-    /// <param name="validate">
-    ///   Returns the validation message from the updated model.
-    /// </param>
-    /// <param name="wrapDispatch">
-    ///   Wraps the dispatch function with additional behavior, such as
-    ///   throttling, debouncing, or limiting.
-    /// </param>
-    [<System.Obsolete("In version 5, this method will be removed.  Use the overload without the \"wrapDispatch\" parameter followed by a call to \"Binding.alterMsgStream\".  For an example, see how this method is implemented.")>]
-
-    static member twoWayOptValidate
-        (get: 'model -> 'a option,
-         set: 'a option -> 'msg,
-         validate: 'model -> Result<'ignored, string>,
-         wrapDispatch: Dispatch<'msg> -> Dispatch<'msg>)
-        : string -> Binding<'model, 'msg> =
-      Binding.twoWayOptValidate (get, set, validate)
-      >> Binding.alterMsgStream wrapDispatch
-
 
     /// <summary>
     ///   Creates a <c>Command</c> binding that dispatches the specified message
@@ -3341,24 +2316,6 @@ module Extensions =
       Binding.Cmd.create
         (fun _ -> exec |> ValueSome)
         (fun _ -> true)
-
-
-    /// <summary>
-    ///   Creates a <c>Command</c> binding that dispatches the specified message
-    ///   and can always execute.
-    /// </summary>
-    /// <param name="exec">Returns the message to dispatch.</param>
-    /// <param name="wrapDispatch">
-    ///   Wraps the dispatch function with additional behavior, such as
-    ///   throttling, debouncing, or limiting.
-    /// </param>
-    [<System.Obsolete("In version 5, this method will be removed.  Use the overload without the \"wrapDispatch\" parameter followed by a call to \"Binding.alterMsgStream\".  For an example, see how this method is implemented.")>]
-    static member cmd
-        (exec: 'msg,
-         wrapDispatch: Dispatch<'msg> -> Dispatch<'msg>)
-        : string -> Binding<'model, 'msg> =
-      Binding.cmd exec
-      >> Binding.alterMsgStream wrapDispatch
 
 
     /// <summary>
@@ -3377,27 +2334,6 @@ module Extensions =
 
 
     /// <summary>
-    ///   Creates a <c>Command</c> binding that dispatches the specified message
-    ///   and can execute if <paramref name="canExec" /> returns <c>true</c>.
-    /// </summary>
-    /// <param name="exec">Returns the message to dispatch.</param>
-    /// <param name="canExec">Indicates whether the command can execute.</param>
-    /// <param name="wrapDispatch">
-    ///   Wraps the dispatch function with additional behavior, such as
-    ///   throttling, debouncing, or limiting.
-    /// </param>
-    [<System.Obsolete("In version 5, this method will be removed.  Use the overload without the \"wrapDispatch\" parameter followed by a call to \"Binding.alterMsgStream\".  For an example, see how this method is implemented.")>]
-
-    static member cmdIf
-        (exec: 'msg,
-         canExec: 'model -> bool,
-         wrapDispatch: Dispatch<'msg> -> Dispatch<'msg>)
-        : string -> Binding<'model, 'msg> =
-      Binding.cmdIf (exec, canExec)
-      >> Binding.alterMsgStream wrapDispatch
-
-
-    /// <summary>
     ///   Creates a <c>Command</c> binding that depends on the
     ///   <c>CommandParameter</c>
     ///   and can always execute.
@@ -3409,25 +2345,6 @@ module Extensions =
       Binding.Cmd.createWithParam
         (fun p _ -> exec p |> ValueSome)
         (fun _ _ -> true)
-
-
-    /// <summary>
-    ///   Creates a <c>Command</c> binding that depends on the
-    ///   <c>CommandParameter</c>
-    ///   and can always execute.
-    /// </summary>
-    /// <param name="exec">Returns the message to dispatch.</param>
-    /// <param name="wrapDispatch">
-    ///   Wraps the dispatch function with additional behavior, such as
-    ///   throttling, debouncing, or limiting.
-    /// </param>
-    [<System.Obsolete("In version 5, this method will be removed.  Use the overload without the \"wrapDispatch\" parameter followed by a call to \"Binding.alterMsgStream\".  For an example, see how this method is implemented.")>]
-    static member cmdParam
-        (exec: obj -> 'msg,
-         wrapDispatch: Dispatch<'msg> -> Dispatch<'msg>)
-        : string -> Binding<'model, 'msg> =
-      Binding.cmdParam exec
-      >> Binding.alterMsgStream wrapDispatch
 
 
     /// <summary>
@@ -3446,25 +2363,6 @@ module Extensions =
     /// <summary>
     ///   Creates a conditional <c>Command</c> binding that depends on the
     ///   <c>CommandParameter</c>
-    ///   and can execute if <paramref name="exec" /> returns <c>ValueSome</c>.
-    /// </summary>
-    /// <param name="exec">Returns the message to dispatch.</param>
-    /// <param name="wrapDispatch">
-    ///   Wraps the dispatch function with additional behavior, such as
-    ///   throttling, debouncing, or limiting.
-    /// </param>
-    [<System.Obsolete("In version 5, this method will be removed.  Use the overload without the \"wrapDispatch\" parameter followed by a call to \"Binding.alterMsgStream\".  For an example, see how this method is implemented.")>]
-    static member cmdParamIf
-        (exec: obj -> 'msg voption,
-         wrapDispatch: Dispatch<'msg> -> Dispatch<'msg>)
-        : string -> Binding<'model, 'msg> =
-      Binding.cmdParamIf exec
-      >> Binding.alterMsgStream wrapDispatch
-
-
-    /// <summary>
-    ///   Creates a conditional <c>Command</c> binding that depends on the
-    ///   <c>CommandParameter</c>
     ///   and can execute if <paramref name="exec" /> returns <c>Some</c>.
     /// </summary>
     /// <param name="exec">Returns the message to dispatch.</param>
@@ -3474,25 +2372,6 @@ module Extensions =
       Binding.Cmd.createWithParam
         (fun p _ -> exec p |> ValueOption.ofOption)
         (fun p _ -> exec p |> Option.isSome)
-
-    /// <summary>
-    ///   Creates a conditional <c>Command</c> binding that depends on the
-    ///   <c>CommandParameter</c>
-    ///   and can execute if <paramref name="exec" /> returns <c>Some</c>.
-    /// </summary>
-    /// <param name="exec">Returns the message to dispatch.</param>
-    /// <param name="wrapDispatch">
-    ///   Wraps the dispatch function with additional behavior, such as
-    ///   throttling, debouncing, or limiting.
-    /// </param>
-    [<System.Obsolete("In version 5, this method will be removed.  Use the overload without the \"wrapDispatch\" parameter followed by a call to \"Binding.alterMsgStream\".  For an example, see how this method is implemented.")>]
-    static member cmdParamIf
-        (exec: obj -> 'msg option,
-         wrapDispatch: Dispatch<'msg> -> Dispatch<'msg>)
-        : string -> Binding<'model, 'msg> =
-      Binding.cmdParamIf exec
-      >> Binding.alterMsgStream wrapDispatch
-
 
     /// <summary>
     ///   Creates a conditional <c>Command</c> binding that depends on the
@@ -3511,28 +2390,6 @@ module Extensions =
         (fun p _ -> exec p |> Result.isOk)
 
     /// <summary>
-    ///   Creates a conditional <c>Command</c> binding that depends on the
-    ///   <c>CommandParameter</c>
-    ///   and can execute if <paramref name="exec" /> returns <c>Ok</c>.
-    ///
-    ///   This overload allows more easily re-using the same validation
-    ///   functions for inputs and commands.
-    /// </summary>
-    /// <param name="exec">Returns the message to dispatch.</param>
-    /// <param name="wrapDispatch">
-    ///   Wraps the dispatch function with additional behavior, such as
-    ///   throttling, debouncing, or limiting.
-    /// </param>
-    [<System.Obsolete("In version 5, this method will be removed.  Use the overload without the \"wrapDispatch\" parameter followed by a call to \"Binding.alterMsgStream\".  For an example, see how this method is implemented.")>]
-    static member cmdParamIf
-        (exec: obj -> Result<'msg, 'ignored>,
-         wrapDispatch: Dispatch<'msg> -> Dispatch<'msg>)
-        : string -> Binding<'model, 'msg> =
-      Binding.cmdParamIf exec
-      >> Binding.alterMsgStream wrapDispatch
-
-
-    /// <summary>
     ///   Creates a <c>Command</c> binding that depends on the
     ///   <c>CommandParameter</c>
     ///   and can execute if <paramref name="canExec" /> returns <c>true</c>.
@@ -3546,27 +2403,6 @@ module Extensions =
       Binding.Cmd.createWithParam
         (fun p _ -> exec p |> ValueSome)
         (fun p _ -> canExec p)
-
-    /// <summary>
-    ///   Creates a <c>Command</c> binding that depends on the
-    ///   <c>CommandParameter</c>
-    ///   and can execute if <paramref name="canExec" /> returns <c>true</c>.
-    /// </summary>
-    /// <param name="exec">Returns the message to dispatch.</param>
-    /// <param name="canExec">Indicates whether the command can execute.</param>
-    /// <param name="wrapDispatch">
-    ///   Wraps the dispatch function with additional behavior, such as
-    ///   throttling, debouncing, or limiting.
-    /// </param>
-    [<System.Obsolete("In version 5, this method will be removed.  Use the overload without the \"wrapDispatch\" parameter followed by a call to \"Binding.alterMsgStream\".  For an example, see how this method is implemented.")>]
-    static member cmdParamIf
-        (exec: obj -> 'msg,
-         canExec: obj -> bool,
-         wrapDispatch: Dispatch<'msg> -> Dispatch<'msg>)
-        : string -> Binding<'model, 'msg> =
-      Binding.cmdParamIf (exec, canExec)
-      >> Binding.alterMsgStream wrapDispatch
-
 
     /// <summary>
     ///   Creates a binding to a sub-model/component that has its own bindings and
@@ -3669,50 +2505,6 @@ module Extensions =
       >> Binding.mapMsg set
       >> Binding.addCaching
 
-    /// <summary>
-    ///   Creates a two-way binding to a <c>SelectedItem</c>-like property where
-    ///   the
-    ///   <c>ItemsSource</c>-like property is a <see cref="subModelSeq" />
-    ///   binding. Automatically converts the dynamically created Elmish.WPF
-    ///   view models to/from their corresponding IDs, so the Elmish user code
-    ///   only has to work with the IDs.
-    ///
-    ///   Only use this if you are unable to use some kind of
-    ///   <c>SelectedValue</c> or
-    ///   <c>SelectedIndex</c> property with a normal <see cref="twoWay" />
-    ///   binding. This binding is less type-safe. It will throw when
-    ///   initializing the bindings if <paramref name="subModelSeqBindingName"
-    ///   />
-    ///   does not correspond to a <see cref="subModelSeq" /> binding, and it
-    ///   will throw at runtime if the inferred <c>'id</c> type does not
-
-    ///   match the actual ID type used in that binding.
-    /// </summary>
-    /// <param name="subModelSeqBindingName">
-    ///   The name of the <see cref="subModelSeq" /> binding used as the items
-    ///   source.
-    /// </param>
-    /// <param name="get">Gets the selected sub-model/sub-binding ID from the
-    /// model.</param>
-    /// <param name="set">
-    ///   Returns the message to dispatch on selections/de-selections.
-    /// </param>
-    /// <param name="wrapDispatch">
-    ///   Wraps the dispatch function with additional behavior, such as
-    ///   throttling, debouncing, or limiting.
-    /// </param>
-    [<System.Obsolete("In version 5, this method will be removed.  Use the overload without the \"wrapDispatch\" parameter followed by a call to \"Binding.alterMsgStream\".  For an example, see how this method is implemented.")>]
-
-    static member subModelSelectedItem
-        (subModelSeqBindingName: string,
-         get: 'model -> 'id voption,
-         set: 'id voption -> 'msg,
-         wrapDispatch: Dispatch<'msg> -> Dispatch<'msg>)
-        : string -> Binding<'model, 'msg> =
-      Binding.subModelSelectedItem (subModelSeqBindingName, get, set)
-      >> Binding.alterMsgStream wrapDispatch
-
-
 
     /// <summary>
     ///   Creates a two-way binding to a <c>SelectedItem</c>-like property where
@@ -3751,47 +2543,3 @@ module Extensions =
       >> Binding.mapModel get
       >> Binding.mapMsg set
       >> Binding.addCaching
-
-    /// <summary>
-    ///   Creates a two-way binding to a <c>SelectedItem</c>-like property where
-    ///   the
-    ///   <c>ItemsSource</c>-like property is a <see cref="subModelSeq" />
-    ///   binding. Automatically converts the dynamically created Elmish.WPF
-    ///   view models to/from their corresponding IDs, so the Elmish user code
-    ///   only has to work with the IDs.
-    ///
-    ///   Only use this if you are unable to use some kind of
-    ///   <c>SelectedValue</c> or
-    ///   <c>SelectedIndex</c> property with a normal <see cref="twoWay" />
-    ///   binding. This binding is less type-safe. It will throw when
-    ///   initializing the bindings if <paramref name="subModelSeqBindingName"
-    ///   />
-    ///   does not correspond to a <see cref="subModelSeq" /> binding, and it
-    ///   will throw at runtime if the inferred <c>'id</c> type does not
-
-    ///   match the actual ID type used in that binding.
-    /// </summary>
-    /// <param name="subModelSeqBindingName">
-    ///   The name of the <see cref="subModelSeq" /> binding used as the items
-    ///   source.
-    /// </param>
-    /// <param name="get">Gets the selected sub-model/sub-binding ID from the
-    /// model.</param>
-    /// <param name="set">
-    ///   Returns the message to dispatch on selections/de-selections.
-    /// </param>
-    /// <param name="wrapDispatch">
-    ///   Wraps the dispatch function with additional behavior, such as
-    ///   throttling, debouncing, or limiting.
-    /// </param>
-    [<System.Obsolete("In version 5, this method will be removed.  Use the overload without the \"wrapDispatch\" parameter followed by a call to \"Binding.alterMsgStream\".  For an example, see how this method is implemented.")>]
-
-    static member subModelSelectedItem
-        (subModelSeqBindingName: string,
-         get: 'model -> 'id option,
-         set: 'id option -> 'msg,
-         wrapDispatch: Dispatch<'msg> -> Dispatch<'msg>)
-        : string -> Binding<'model, 'msg> =
-      Binding.subModelSelectedItem (subModelSeqBindingName, get, set)
-      >> Binding.alterMsgStream wrapDispatch
-
