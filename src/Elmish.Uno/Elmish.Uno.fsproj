@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Uno.Sdk">
   <PropertyGroup>
-    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows')) or '$(EnableWindowsTargeting)' == 'true'">$(TargetFrameworks);$(DotNetVersion)-windows10.0.22621</TargetFrameworks>
-    <TargetFrameworks>$(TargetFrameworks);$(DotNetVersion)</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows')) or '$(EnableWindowsTargeting)' == 'true'">$(DotNetVersion)-windows10.0.22621;$(TargetFrameworks)</TargetFrameworks>
+    <TargetFrameworks>$(DotNetVersion);$(TargetFrameworks)</TargetFrameworks>
     <TargetFrameworks Condition="'$(OverrideTargetFramework)'!=''">$(OverrideTargetFramework)</TargetFrameworks>
 
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -78,6 +78,7 @@
 
   <ItemGroup>
     <PackageReference Include="Elmish" />
+    <PackageReference Include="FSharp.Core" />
     <PackageReference Include="FSharp.Collections.Immutable" />
     <PackageReference Include="FSharp.Core" />
     <PackageReference Include="System.Private.Uri" />
