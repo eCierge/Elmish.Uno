@@ -272,6 +272,7 @@ module UnoProgram =
 
   [<CompiledName "CreateVmArgs">]
   let createVmArgsWith
+      (dispatcher: DispatcherQueue)
       (getVm: Func<'viewModel>)
       (program: UnoProgram<'arg, 'model, 'msg, IViewModel<'model, 'msg>>)
       arg
@@ -298,7 +299,7 @@ module UnoProgram =
      *)
     let mutable dispatch = Unchecked.defaultof<Dispatch<'msg>>
 
-    let elmishDispatcher = DispatcherQueue.GetForCurrentThread()
+    let elmishDispatcher = dispatcher
 
     // Dispatch that comes in from a view model message (setter or Uno ICommand). These may come from UI thread, so must be streated specially
     let dispatchFromViewModel msg =
@@ -344,10 +345,11 @@ module UnoProgram =
 
   [<CompiledName "CreateVmArgs">]
   let createVmArgs
+      dispatcher
       getVm
       (program: UnoProgram<unit, 'model, 'msg, IViewModel<'model, 'msg>>)
       =
-    createVmArgsWith getVm program ()
+    createVmArgsWith dispatcher getVm program ()
 
   /// Starts the Elmish and Uno dispatch loops. Will instantiate Application and set its
   /// MainWindow if it is not already running, and then run the specified window. This is a

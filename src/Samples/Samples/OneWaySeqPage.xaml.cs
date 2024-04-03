@@ -9,7 +9,7 @@ public partial class OneWaySeqPage : Page
     public OneWaySeqPage()
     {
         InitializeComponent();
-        DataContext = new ElmishProgram.ViewModel();
+        DataContext = new ElmishProgram.ViewModel(DispatcherQueue);
         //UnoProgram.StartElmishLoop(this, ElmishProgram.Program);
     }
 }

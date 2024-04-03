@@ -43,8 +43,8 @@ let program =
   UnoProgram.mkProgram init update bindings
   |> UnoProgram.withLogger (new SerilogLoggerFactory(logger))
 
-type ViewModel() as vm =
+type ViewModel(dispatcher) as vm =
   inherit DynamicViewModel<Model, Msg>(
-    UnoProgram.createVmArgs (Func<_>(fun () -> vm)) program,
+    UnoProgram.createVmArgs dispatcher (Func<_>(fun () -> vm)) program,
     bindings
   )
