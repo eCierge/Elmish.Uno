@@ -316,7 +316,14 @@ module UnoProgram =
             logPerformance = performanceLogger } }
 
     let setUiState model _syncDispatch =
-      elmishDispatcher.TryEnqueue(fun () -> program.UpdateViewModel (getVm.Invoke(), model)) |> ignore
+      elmishDispatcher.TryEnqueue(
+        fun () ->
+          try
+            program.UpdateViewModel (getVm.Invoke(), model)
+          with :? InvalidOperationException -> elmishDispatcher.TryEnqueue(
+              DispatcherQueuePriority.Low,
+              fun () -> program.UpdateViewModel (getVm.Invoke(), model)) |> ignore
+      ) |> ignore
 
     let cmdDispatch (innerDispatch: Dispatch<'msg>) : Dispatch<'msg> =
       let innerDispatch = measure "dispatch" innerDispatch
