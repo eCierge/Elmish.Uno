@@ -406,7 +406,7 @@ module Binding =
   /// <summary>
   ///   The strongly-typed counterpart of module <c>SubModel</c>.
   ///   For creating bindings to child view models that have their own bindings.
-  ///   Typically bound from WPF using <c>DataContext</c> and <c>Binding</c>.
+  ///   Typically bound from XAML using <c>DataContext</c> and <c>Binding</c>.
   ///   Can be used in binding lists if boxed using <see cref="boxT" />.
   /// </summary>
   module SubModelT =
