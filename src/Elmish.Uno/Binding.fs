@@ -130,14 +130,14 @@ module Binding =
     /// a <c>null</c> value in the view.
     let optobj<'a, 'msg when 'a : null> : string -> Binding<'a option, 'msg, 'a> =
       id<'a, 'msg>
-      >> mapModel Option.toObj
+      >> mapModel (function Some v -> v | None -> Unchecked.defaultof<'a>)
 
     /// Creates a one-way binding to an optional value. The binding
     /// automatically converts between a missing value in the model and
     /// a <c>null</c> value in the view.
     let voptobj<'a, 'msg when 'a : null> : string -> Binding<'a voption, 'msg, 'a> =
       id<'a, 'msg>
-      >> mapModel ValueOption.toObj
+      >> mapModel (function ValueSome v -> v | ValueNone -> Unchecked.defaultof<'a>)
 
   /// <summary>
   ///   Strongly-typed bindings that update both ways
