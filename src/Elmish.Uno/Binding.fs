@@ -262,6 +262,56 @@ module Binding =
         : string -> Binding<'model, 'msg, ICommand> =
       set (fun _ -> true) msg
 
+  /// <summary>
+  ///   Strongly-typed bindings that dispatch messages from the view.
+  /// </summary>
+  module CmdParamT =
+
+    /// <summary>
+    ///   Creates a <c>Command</c> binding that depends on the model and the
+    ///   <c>CommandParameter</c>.
+    /// </summary>
+    /// <param name="canExec">Indicates whether the command can execute.</param>
+    /// <param name="exec">Returns the message to dispatch.</param>
+    let model
+        canExec
+        (exec: 'param -> 'model -> 'msg)
+        : string -> Binding<'model, 'msg, ICommand> =
+      CmdT.id (fun p model  -> canExec (unbox p) model)
+      >> mapMsgWithModel (fun p model -> exec (unbox p) model)
+
+    /// <summary>
+    ///   Creates a <c>Command</c> binding that dispatches the specified message.
+    /// </summary>
+    /// <param name="canExec">Indicates whether the command can execute.</param>
+    /// <param name="msg">The message to dispatch.</param>
+    let set
+        canExec
+        (createMsg: 'param -> 'msg)
+        : string -> Binding<'model, 'msg, ICommand> =
+      CmdT.id (fun p model  -> canExec (unbox p) model)
+      >> mapMsgWithModel (fun p _ -> createMsg (unbox p))
+
+    /// <summary>
+    ///   Creates a <c>Command</c> binding that depends on the model and the
+    ///   <c>CommandParameter</c> and always executes.
+    /// </summary>
+    /// <param name="exec">Returns the message to dispatch.</param>
+    let modelAlways
+        (exec: 'param -> 'model -> 'msg)
+        : string -> Binding<'model, 'msg, ICommand> =
+      model (fun _ _ -> true) exec
+
+    /// <summary>
+    ///   Creates a <c>Command</c> binding that dispatches the specified message
+    ///   and always executes.
+    /// </summary>
+    /// <param name="msg">The message to dispatch.</param>
+    let setAlways
+        (createMsg: 'param -> 'msg)
+        : string -> Binding<'model, 'msg, ICommand> =
+      set (fun _ _ -> true) createMsg
+
   module OneWay =
 
     /// Elemental instance of a one-way binding.
