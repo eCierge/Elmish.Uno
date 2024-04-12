@@ -379,8 +379,8 @@ type [<AllowNullLiteral>] ViewModelBase<'model, 'msg>(args: ViewModelArgs<'model
         failwithf $"[%s{nameChain}] Get FAILED: Binding {memberName} returned an error {e}"
       | ValueSome (Ok r) -> r
 
-  member vm.Get<'a> (binding: Binding<'model, 'msg, 'a>, [<Optional; CallerMemberName>] memberName: string) =
-    vm.Get<'a>(memberName) (fun _ -> binding)
+  member vm.Get<'a> (binding: Binding<'model, 'msg, 'a>) =
+    vm.Get<'a>(binding.Name) (fun _ -> binding)
 
   member _.Set<'a> (value: 'a, [<Optional; CallerMemberName>] memberName: string) =
     fun (binding: string -> Binding<'model, 'msg, 'a>) ->
@@ -408,8 +408,8 @@ type [<AllowNullLiteral>] ViewModelBase<'model, 'msg>(args: ViewModelArgs<'model
         log.LogError(e, "[{BindingNameChain}] Set FAILED: Exception thrown while processing binding {BindingName}", nameChain, memberName)
         reraise ()
 
-  member vm.Set<'a> (binding: Binding<'model, 'msg, 'a>, value: 'a, [<Optional; CallerMemberName>] memberName: string) =
-    vm.Set<'a>(value, memberName) (fun _ -> binding)
+  member vm.Set<'a> (binding: Binding<'model, 'msg, 'a>, value: 'a) =
+    vm.Set<'a>(value, binding.Name) (fun _ -> binding)
 
   interface IViewModel<'model, 'msg> with
     member _.CurrentModel = helper.Model
