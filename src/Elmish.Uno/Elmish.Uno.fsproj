@@ -81,6 +81,7 @@
     <PackageReference Include="FSharp.Core" />
     <PackageReference Include="FSharp.Collections.Immutable" />
     <PackageReference Include="FSharp.Core" />
+    <PackageReference Include="FsToolkit.ErrorHandling" />
     <PackageReference Include="System.Private.Uri" />
     <PackageReference Include="Uno.WinUI" />
     <PackageReference Include="Microsoft.Extensions.Logging" />

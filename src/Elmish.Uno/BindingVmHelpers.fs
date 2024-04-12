@@ -4,6 +4,7 @@ open System
 open System.Windows.Input
 open Microsoft.Extensions.Logging
 open Microsoft.UI.Xaml
+open FsToolkit.ErrorHandling
 
 open Elmish
 
@@ -488,8 +489,8 @@ type Initialize<'t>
        dispatch: 'msg -> unit,
        getCurrentModel: unit -> 'model,
        binding: BindingData<'model, 'msg, 't>)
-      : VmBinding<'model, 'msg, 't> option =
-    option {
+      : VmBinding<'model, 'msg, 't> voption =
+    voption {
       match binding with
       | BaseBindingData d ->
           let! b = this.Base(initialModel, dispatch, getCurrentModel, d)

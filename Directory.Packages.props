@@ -93,8 +93,7 @@
     <PackageVersion Include="FSharp.Control.FusionTasks" Version="2.6.0" />
     <PackageVersion Include="FSharp.Control.Reactive" Version="5.0.2" />
     <PackageVersion Include="FSharp.Core" Version="8.0.200" />
-    <PackageVersion Include="FSharpPlus" Version="1.2.0" />
-    <PackageVersion Include="FSharpx.Extras" Version="3.0" />
+    <PackageVersion Include="FsToolkit.ErrorHandling" Version="4.15.1" />
   </ItemGroup>
   <ItemGroup Label="Build and Test">
     <PackageVersion Include="BenchmarkDotNet" Version="0.13.2" />

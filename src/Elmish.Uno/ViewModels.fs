@@ -6,6 +6,7 @@ open System.Collections.Generic
 open System.Collections.ObjectModel
 open Microsoft.Extensions.Logging
 open Microsoft.UI.Xaml.Data
+open FsToolkit.ErrorHandling
 
 open BindingVmHelpers
 
@@ -323,6 +324,7 @@ and GetCustomProperty(name: string) =
 
 
 open System.Runtime.CompilerServices
+open System.Runtime.InteropServices
 
 type [<AllowNullLiteral>] ViewModelBase<'model, 'msg>(args: ViewModelArgs<'model, 'msg>)
   as this =
@@ -340,12 +342,12 @@ type [<AllowNullLiteral>] ViewModelBase<'model, 'msg>(args: ViewModelArgs<'model
     Initialize(loggingArgs, binding.Name, ViewModelHelper.getFunctionsForSubModelSelectedItem loggingArgs initializedBindings)
       .Recursive(initialModel, dispatch, (fun () -> this |> IViewModel.currentModel), binding.Data)
 
-  member _.Get<'a> ([<CallerMemberName>] ?memberName: string) =
+  member _.Get<'a> ([<Optional; CallerMemberName>] memberName: string) =
     fun (binding: string -> Binding<'model, 'msg, 'a>) ->
       let result =
-        option {
-          let! name = memberName
-          let! vmBinding = option {
+        voption {
+          let! name = memberName |> ValueOption.ofObj
+          let! vmBinding = voption {
             match helper.Bindings.TryGetValue name with
             | true, value ->
               return value |> MapOutputType.unboxVm
@@ -366,24 +368,27 @@ type [<AllowNullLiteral>] ViewModelBase<'model, 'msg>(args: ViewModelArgs<'model
           return Get(nameChain).Recursive(helper.Model, vmBinding)
         }
       match result with
-      | None ->
+      | ValueNone ->
         log.LogError("[{BindingNameChain}] Get FAILED: Binding {BindingName} could not be constructed", nameChain, memberName)
         failwithf $"[%s{nameChain}] Get FAILED: Binding {memberName} could not be constructed"
-      | Some (Error e) ->
+      | ValueSome (Error e) ->
         match e with
         | GetError.OneWayToSource -> log.LogError("[{BindingNameChain}] Get FAILED: Binding {BindingName} is read-only", nameChain, memberName)
         | GetError.SubModelSelectedItem d -> log.LogError("[{BindingNameChain}] Get FAILED: Failed to find an element of the SubModelSeq binding {SubModelSeqBindingName} with ID {ID} in the getter for the binding {BindingName}", d.NameChain, d.SubModelSeqBindingName, d.Id, memberName)
         | GetError.ToNullError (ValueOption.ToNullError.ValueCannotBeNull nonNullTypeName) -> log.LogError("[{BindingNameChain}] Get FAILED: Binding {BindingName} is null, but type {Type} is non-nullable", nameChain, memberName, nonNullTypeName)
         failwithf $"[%s{nameChain}] Get FAILED: Binding {memberName} returned an error {e}"
-      | Some (Ok r) -> r
+      | ValueSome (Ok r) -> r
 
-  member _.Set<'a> (value: 'a, [<CallerMemberName>] ?memberName: string) =
+  member vm.Get<'a> (binding: Binding<'model, 'msg, 'a>, [<Optional; CallerMemberName>] memberName: string) =
+    vm.Get<'a>(memberName) (fun _ -> binding)
+
+  member _.Set<'a> (value: 'a, [<Optional; CallerMemberName>] memberName: string) =
     fun (binding: string -> Binding<'model, 'msg, 'a>) ->
       try
         let success =
-          option {
-            let! name = memberName
-            let! vmBinding = option {
+          voption {
+            let! name = memberName |> ValueOption.ofObj
+            let! vmBinding = voption {
               match setBindings.TryGetValue name with
               | true, value ->
                 return value |> MapOutputType.unboxVm
@@ -395,13 +400,16 @@ type [<AllowNullLiteral>] ViewModelBase<'model, 'msg>(args: ViewModelArgs<'model
             }
             return Set(value).Recursive(helper.Model, vmBinding)
           }
-        if success = Some false then
+        if success = ValueSome false then
           log.LogError("[{BindingNameChain}] Set FAILED: Binding {BindingName} is read-only", nameChain, memberName)
-        else if success = None then
+        else if success = ValueNone then
           log.LogError("[{BindingNameChain}] Set FAILED: Binding {BindingName} could not be constructed", nameChain, memberName)
       with e ->
         log.LogError(e, "[{BindingNameChain}] Set FAILED: Exception thrown while processing binding {BindingName}", nameChain, memberName)
         reraise ()
+
+  member vm.Set<'a> (binding: Binding<'model, 'msg, 'a>, value: 'a, [<Optional; CallerMemberName>] memberName: string) =
+    vm.Set<'a>(value, memberName) (fun _ -> binding)
 
   interface IViewModel<'model, 'msg> with
     member _.CurrentModel = helper.Model
