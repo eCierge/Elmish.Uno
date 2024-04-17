@@ -102,6 +102,7 @@ module Binding =
   /// <summary>
   ///   Strongly-typed bindings that update the view from the model.
   /// </summary>
+  [<RequireQualifiedAccess>]
   module OneWayT =
 
     /// Elemental instance of a one-way binding.
@@ -142,6 +143,7 @@ module Binding =
   /// <summary>
   ///   Strongly-typed bindings that update both ways
   /// </summary>
+  [<RequireQualifiedAccess>]
   module TwoWayT =
 
     /// Elemental instance of a two-way binding.
@@ -188,6 +190,7 @@ module Binding =
   ///   Exposes an <c>ObservableCollection</c> of child items for binding.
   ///   Allows a more efficient update than would be possible without using ids.
   /// </summary>
+  [<RequireQualifiedAccess>]
   module OneWaySeqT =
 
     /// <summary>
@@ -202,6 +205,7 @@ module Binding =
   /// <summary>
   ///   Strongly-typed bindings that dispatch messages from the view.
   /// </summary>
+  [<RequireQualifiedAccess>]
   module CmdT =
 
     /// <summary>

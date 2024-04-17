@@ -35,7 +35,7 @@
     <PackageVersion Include="Microsoft.Extensions.Logging" Version="$(MicrosoftExtensionsVersion)" />
     <PackageVersion Include="Microsoft.Extensions.Logging.Debug" Version="$(MicrosoftExtensionsVersion)" />
     <PackageVersion Include="Microsoft.Extensions.Logging.Console" Version="$(MicrosoftExtensionsVersion)" />
-    <PackageVersion Include="Microsoft.WindowsAppSDK" Version="1.5.240311000" />
+    <PackageVersion Include="Microsoft.WindowsAppSDK" Version="1.5.240404000" />
     <PackageVersion Include="Microsoft.Windows.Compatibility" Version="8.0.3" />
     <PackageVersion Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.22621.3233" />
     <PackageVersion Include="System.Collections.Immutable" Version="8.0.0" />
