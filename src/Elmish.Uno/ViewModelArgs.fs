@@ -32,6 +32,8 @@ type ViewModelArgs<'model, 'msg> =
     { initialModel: 'model
       dispatch: 'msg -> unit
       loggingArgs: LoggingViewModelArgs }
+  with
+    member this.InitialModel = this.initialModel
 
 module ViewModelArgs =
   let internal create initialModel dispatch nameChain loggingArgs =
