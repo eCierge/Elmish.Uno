@@ -202,6 +202,20 @@ module Binding =
       OneWaySeq.create itemEquals getId
       |> createBindingT
 
+    /// Creates a two-way binding to an optional value. The binding
+    /// automatically converts between a missing value in the model and
+    /// a <c>null</c> value in the view.
+    let opt<'a> : string -> Binding<'a option, 'a, 'a> =
+      id<'a>
+      >> mapModel (function Some v -> v | None -> Unchecked.defaultof<'a>)
+
+    /// Creates a two-way binding to an optional value. The binding
+    /// automatically converts between a missing value in the model and
+    /// a <c>null</c> value in the view.
+    let vopt<'a> : string -> Binding<'a voption, 'a, 'a> =
+      id<'a>
+      >> mapModel (function ValueSome v -> v | ValueNone -> Unchecked.defaultof<'a>)
+
   /// <summary>
   ///   Strongly-typed bindings that dispatch messages from the view.
   /// </summary>
