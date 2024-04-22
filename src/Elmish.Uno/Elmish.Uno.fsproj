@@ -72,6 +72,7 @@
     <Compile Include="DynamicCustomProperty.fs" />
     <Compile Include="ViewModels.fs" />
     <Compile Include="Binding.fs" />
+    <Compile Include="BindingT.fs" />
     <Compile Include="ViewModelModule.fs" />
     <Compile Include="UnoProgram.fs" />
   </ItemGroup>

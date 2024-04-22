@@ -211,16 +211,18 @@ module Binding =
     /// Creates a two-way binding to an optional value. The binding
     /// automatically converts between a missing value in the model and
     /// a <c>null</c> value in the view.
-    let opt<'a> : string -> Binding<'a option, 'a, 'a> =
+    let opt<'a> : string -> Binding<'a option, 'a option, 'a> =
       req<'a>
       >> mapModel (function Some v -> v | None -> Unchecked.defaultof<'a>)
+      >> mapMsg (fun msg -> if obj.Equals(msg, Unchecked.defaultof<'a>) then None else Some msg)
 
     /// Creates a two-way binding to an optional value. The binding
     /// automatically converts between a missing value in the model and
     /// a <c>null</c> value in the view.
-    let vopt<'a> : string -> Binding<'a voption, 'a, 'a> =
+    let vopt<'a> : string -> Binding<'a voption, 'a voption, 'a> =
       req<'a>
       >> mapModel (function ValueSome v -> v | ValueNone -> Unchecked.defaultof<'a>)
+      >> mapMsg (fun msg -> if obj.Equals(msg, Unchecked.defaultof<'a>) then ValueNone else ValueSome msg)
 
   /// <summary>
   ///   Strongly-typed bindings that dispatch messages from the view.
@@ -233,11 +235,9 @@ module Binding =
     ///   Creates a <c>Command</c> binding that only passes the <c>CommandParameter</c>)
     /// </summary>
     /// <param name="canExec">Indicates whether the command can execute.</param>
-    let id<'model> canExec
-        : string -> Binding<'model, obj, ICommand> =
-      Cmd.createWithParam
-        (fun p _ -> ValueSome p)
-        canExec
+    let id<'model, 'msg> exec canExec
+        : string -> Binding<'model, 'msg, ICommand> =
+      Cmd.createWithParam exec canExec
       |> createBindingT
 
     /// <summary>
@@ -248,10 +248,9 @@ module Binding =
     /// <param name="exec">Returns the message to dispatch.</param>
     let model
         canExec
-        (exec: 'model -> 'msg)
+        (exec: 'model -> 'msg voption)
         : string -> Binding<'model, 'msg, ICommand> =
-      id (fun _ m -> m |> canExec)
-      >> mapMsgWithModel (fun _ y -> y |> exec)
+      id (fun _ y -> y |> exec) (fun _ m -> m |> canExec)
       >> addLazy (fun m1 m2 -> canExec m1 = canExec m2)
 
     /// <summary>
@@ -263,8 +262,7 @@ module Binding =
         canExec
         (msg: 'msg)
         : string -> Binding<'model, 'msg, ICommand> =
-      id (fun _ m -> m |> canExec)
-      >> setMsg msg
+      id (fun _ _ -> ValueSome msg)  (fun _ m -> m |> canExec)
 
     /// <summary>
     ///   Creates a <c>Command</c> binding that depends only on the model (not the
@@ -272,7 +270,7 @@ module Binding =
     /// </summary>
     /// <param name="exec">Returns the message to dispatch.</param>
     let modelAlways
-        (exec: 'model -> 'msg)
+        (exec: 'model -> 'msg voption)
         : string -> Binding<'model, 'msg, ICommand> =
       model (fun _ -> true) exec
 
@@ -298,11 +296,10 @@ module Binding =
     /// <param name="canExec">Indicates whether the command can execute.</param>
     /// <param name="exec">Returns the message to dispatch.</param>
     let model
-        canExec
-        (exec: 'param -> 'model -> 'msg)
+        (canExec : 'param -> 'model -> bool)
+        (exec: 'param -> 'model -> 'msg voption)
         : string -> Binding<'model, 'msg, ICommand> =
-      CmdT.id (fun p model  -> canExec (unbox p) model)
-      >> mapMsgWithModel (fun p model -> exec (unbox p) model)
+      CmdT.id (fun p model -> exec (unbox p) model) (fun p model  -> canExec (unbox p) model)
 
     /// <summary>
     ///   Creates a <c>Command</c> binding that dispatches the specified message.
@@ -311,10 +308,9 @@ module Binding =
     /// <param name="msg">The message to dispatch.</param>
     let set
         canExec
-        (createMsg: 'param -> 'msg)
+        (createMsg: 'param -> 'msg voption)
         : string -> Binding<'model, 'msg, ICommand> =
-      CmdT.id (fun p model  -> canExec (unbox p) model)
-      >> mapMsgWithModel (fun p _ -> createMsg (unbox p))
+      CmdT.id (fun p _ -> createMsg (unbox p)) (fun p model  -> canExec (unbox p) model)
 
     /// <summary>
     ///   Creates a <c>Command</c> binding that depends on the model and the
@@ -322,7 +318,7 @@ module Binding =
     /// </summary>
     /// <param name="exec">Returns the message to dispatch.</param>
     let modelAlways
-        (exec: 'param -> 'model -> 'msg)
+        (exec: 'param -> 'model -> 'msg voption)
         : string -> Binding<'model, 'msg, ICommand> =
       model (fun _ _ -> true) exec
 
@@ -332,7 +328,7 @@ module Binding =
     /// </summary>
     /// <param name="msg">The message to dispatch.</param>
     let setAlways
-        (createMsg: 'param -> 'msg)
+        (createMsg: 'param -> 'msg voption)
         : string -> Binding<'model, 'msg, ICommand> =
       set (fun _ _ -> true) createMsg
 
@@ -380,6 +376,46 @@ module Binding =
       id<obj>
       >> mapModel Option.box
       >> mapMsg Option.unbox
+
+
+  module SubModelSelectedItemT =
+
+    /// Creates a two-way binding to a <c>SelectedItem</c>-like property where
+    /// the <c>ItemsSource</c>-like property is a <see cref="subModelSeq" />
+    /// binding. Automatically converts the dynamically created Elmish.Uno view
+    /// models to/from their corresponding IDs, so the Elmish user code only has
+    /// to work with the IDs.
+    ///
+    /// Only use this if you are unable to use some kind of <c>SelectedValue</c>
+    /// or <c>SelectedIndex</c> property with a normal <see cref="twoWay" />
+    /// binding. This binding is less type-safe. It will throw when initializing
+    /// the bindings if <paramref name="subModelSeqBindingName" />
+    /// does not correspond to a <see cref="subModelSeq" /> binding, and it will
+    /// throw at runtime if the inferred <c>'id</c> type does not match the
+    /// actual ID type used in that binding.
+    let vopt subModelSeqBindingName : string -> Binding<'id voption, 'id voption, 'id> =
+      SubModelSelectedItem.create subModelSeqBindingName
+      |> createBindingT
+      >> mapModel (ValueOption.map box)
+      >> mapMsg (ValueOption.map unbox)
+
+    /// Creates a two-way binding to a <c>SelectedItem</c>-like property where
+    /// the <c>ItemsSource</c>-like property is a <see cref="subModelSeq" />
+    /// binding. Automatically converts the dynamically created Elmish.Uno view
+    /// models to/from their corresponding IDs, so the Elmish user code only has
+    /// to work with the IDs.
+    ///
+    /// Only use this if you are unable to use some kind of <c>SelectedValue</c>
+    /// or <c>SelectedIndex</c> property with a normal <see cref="twoWay" />
+    /// binding. This binding is less type-safe. It will throw when initializing
+    /// the bindings if <paramref name="subModelSeqBindingName" />
+    /// does not correspond to a <see cref="subModelSeq" /> binding, and it will
+    /// throw at runtime if the inferred <c>'id</c> type does not match the
+    /// actual ID type used in that binding.
+    let opt subModelSeqBindingName : string -> Binding<'id option, 'id option, 'id> =
+      vopt subModelSeqBindingName
+      >> mapModel ValueOption.ofOption
+      >> mapMsg ValueOption.toOption
 
 
   module SubModelSelectedItem =
@@ -486,12 +522,20 @@ module Binding =
   module SubModelT =
 
     /// Exposes an optional view model member for binding.
-    let opt
+    let vopt
       (createVm: ViewModelArgs<'bindingModel, 'msg> -> #IViewModel<'bindingModel, 'msg>)
       : (string -> Binding<'bindingModel voption, 'msg, #IViewModel<'bindingModel, 'msg>>)
       =
       SubModel.create createVm IViewModel.updateModel
       |> createBindingT
+
+    /// Exposes an optional view model member for binding.
+    let opt
+      (createVm: ViewModelArgs<'bindingModel, 'msg> -> #IViewModel<'bindingModel, 'msg>)
+      : (string -> Binding<'bindingModel option, 'msg, #IViewModel<'bindingModel, 'msg>>)
+      =
+      vopt createVm
+      >> mapModel ValueOption.ofOption
 
     /// Exposes a non-optional view model member for binding.
     let req
@@ -532,7 +576,7 @@ module Binding =
     ///   The function applied to every element of the bound <c>ObservableCollection</c>
     ///   to create a child view model.
     /// </param>
-    let id
+    let create
       (createVm: ViewModelArgs<'bindingModel, 'msg> -> #IViewModel<'bindingModel, 'msg>)
       : (string -> Binding<'bindingModelCollection, int * 'msg, ObservableCollection<#IViewModel<'bindingModel, 'msg>>>)
       =
@@ -559,12 +603,13 @@ module Binding =
     ///   to get a key used to identify that element.
     ///   Should not return duplicate keys for different elements.
     /// </param>
-    let id
+    let create
       (createVm: ViewModelArgs<'bindingModel, 'msg> -> #IViewModel<'bindingModel, 'msg>)
       (getId: 'bindingModel -> 'id)
+      vmToId
       : (string -> Binding<'bindingModelCollection, 'id * 'msg, ObservableCollection<#IViewModel<'bindingModel, 'msg>>>)
       =
-      SubModelSeqKeyed.create createVm IViewModel.updateModel getId (IViewModel.currentModel >> getId)
+      SubModelSeqKeyed.create createVm IViewModel.updateModel getId vmToId
       |> createBindingT
 
   /// <summary>
@@ -606,12 +651,26 @@ module Binding =
     ///   The message to be dispatched on external close attempts (the Close/X
     ///   button, Alt+F4, or System Menu -> Close).
     /// </param>
-    let id
+    let create
       (getState: 'model -> WindowState<'bindingModel>)
       (createVM: ViewModelArgs<'bindingModel, 'bindingMsg> -> #IViewModel<'bindingModel, 'bindingMsg>)
-      getWindow onCloseRequested =
-      SubModelWin.create getState createVM IViewModel.updateModel Func2.id2 getWindow onCloseRequested
+      toMsg getWindow onCloseRequested =
+      SubModelWin.create getState createVM IViewModel.updateModel toMsg getWindow onCloseRequested
       |> createBindingT
+
+
+  module SelectedIndexT =
+    /// Prebuilt binding intended for use with <code>Selector.SelectedIndex</code>.
+    let vopt =
+      TwoWayT.id
+      >> mapModel (ValueOption.defaultValue -1)
+      >> mapMsg (fun i -> if i < 0 then ValueNone else ValueSome i)
+
+    /// Prebuilt binding intended for use with <code>Selector.SelectedIndex</code>.
+    let opt =
+      vopt
+      >> mapModel ValueOption.ofOption
+      >> mapMsg ValueOption.toOption
 
 
   module SelectedIndex =

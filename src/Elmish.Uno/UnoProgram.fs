@@ -306,7 +306,7 @@ module UnoProgram =
       elmishDispatcher.TryEnqueue(fun () -> dispatch msg) |> ignore // handle as a command message
 
     let args =
-      let initial, cmd = Program.init program.ElmishProgram arg
+      let initial, _ = Program.init program.ElmishProgram arg
       { initialModel = initial
         dispatch = dispatchFromViewModel
         loggingArgs =
