@@ -366,8 +366,7 @@ module BindingData =
           BindingData = recursiveCase d.BindingData
           Validate = d.Validate
         }
-      | LazyData d ->
-      LazyData {
+      | LazyData d -> LazyData {
           BindingData = d.BindingData
           Get = d.Get
           Set = fun a m -> f (d.Set a m) m
