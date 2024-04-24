@@ -83,11 +83,8 @@
     <PackageReference Include="FSharp.Collections.Immutable" />
     <PackageReference Include="FSharp.Core" />
     <PackageReference Include="FsToolkit.ErrorHandling" />
-    <PackageReference Include="System.Private.Uri" />
-    <PackageReference Include="Uno.WinUI" />
     <PackageReference Include="Microsoft.Extensions.Logging" />
-    <PackageReference Include="Microsoft.WindowsAppSDK" Condition="$(TargetFramework.Contains('windows10'))" />
-    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Condition="$(TargetFramework.Contains('windows10'))" />
+    <PackageReference Include="System.Private.Uri" />
   </ItemGroup>
 
   <Target Name="XamlPreCompile" Condition="$(TargetFramework.Contains('windows10'))" />
