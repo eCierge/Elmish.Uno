@@ -58,6 +58,22 @@ type internal ViewModelHelper<'model, 'msg> =
     PropertyChanged: Event<PropertyChangedEventHandler, PropertyChangedEventArgs>
     ErrorsChanged: DelegateEvent<EventHandler<DataErrorsChangedEventArgs>> }
 
+  member x.HasErrors =
+    // WPF calls this too often, so don't log https://github.com/elmish/Elmish.Uno/issues/354
+    x.ValidationErrors
+    |> Seq.map (fun (Kvp(_, errors)) -> errors.Value)
+    |> Seq.filter (not << List.isEmpty)
+    |> (not << Seq.isEmpty)
+
+  member x.GetErrors name =
+    let name = name |> Option.ofObj |> Option.defaultValue "<null>" // entity-level errors are being requested when given null or ""  https://docs.microsoft.com/en-us/dotnet/api/system.componentmodel.inotifydataerrorinfo.geterrors#:~:text=null%20or%20Empty%2C%20to%20retrieve%20entity-level%20errors
+    x.LoggingArgs.log.LogTrace("[{BindingNameChain}] GetErrors {BindingName}", x.LoggingArgs.nameChain, name)
+    x.ValidationErrors
+    |> IReadOnlyDictionary.tryFind name
+    |> ValueOption.map (fun errors -> errors.Value |> Seq.cast<obj>)
+    |> ValueOption.defaultValue Seq.empty
+    |> (fun x -> x)
+
   interface INotifyPropertyChanged with
     [<CLIEvent>]
     member x.PropertyChanged = x.PropertyChanged.Publish
@@ -65,20 +81,8 @@ type internal ViewModelHelper<'model, 'msg> =
   interface INotifyDataErrorInfo with
     [<CLIEvent>]
     member x.ErrorsChanged = x.ErrorsChanged.Publish
-    member x.HasErrors =
-      // WPF calls this too often, so don't log https://github.com/elmish/Elmish.WPF/issues/354
-      x.ValidationErrors
-      |> Seq.map (fun (Kvp(_, errors)) -> errors.Value)
-      |> Seq.filter (not << List.isEmpty)
-      |> (not << Seq.isEmpty)
-    member x.GetErrors name =
-      let name = name |> Option.ofObj |> Option.defaultValue "<null>" // entity-level errors are being requested when given null or ""  https://docs.microsoft.com/en-us/dotnet/api/system.componentmodel.inotifydataerrorinfo.geterrors#:~:text=null%20or%20Empty%2C%20to%20retrieve%20entity-level%20errors
-      x.LoggingArgs.log.LogTrace("[{BindingNameChain}] GetErrors {BindingName}", x.LoggingArgs.nameChain, name)
-      x.ValidationErrors
-      |> IReadOnlyDictionary.tryFind name
-      |> ValueOption.map (fun errors -> errors.Value |> Seq.cast<obj>)
-      |> ValueOption.defaultValue Seq.empty
-      |> (fun x -> x)
+    member x.HasErrors = x.HasErrors
+    member x.GetErrors name = x.GetErrors name
 
 module internal ViewModelHelper =
 
@@ -100,7 +104,7 @@ module internal ViewModelHelper =
       |> Seq.collect (fun (Kvp (name, binding)) -> Update(helper.LoggingArgs, name).Recursive(helper.Model, newModel, binding))
       |> Seq.toList
 
-  let raiseEvents eventsToRaise helper =
+  let raiseEvents hadErrors eventsToRaise helper =
     let {
       log = log
       nameChain = nameChain } = helper.LoggingArgs
@@ -119,6 +123,9 @@ module internal ViewModelHelper =
       | ErrorsChanged name -> raiseErrorsChanged name
       | PropertyChanged name -> raisePropertyChanged name
       | CanExecuteChanged cmd -> cmd |> raiseCanExecuteChanged)
+
+    if hadErrors <> helper.HasErrors then
+      raisePropertyChanged (nameof helper.HasErrors)
 
   let getFunctionsForSubModelSelectedItem loggingArgs initializedBindings (name: string) =
     let log = loggingArgs.log
@@ -190,11 +197,10 @@ type [<AllowNullLiteral>] DynamicViewModel<'model, 'msg>
     member _.CurrentModel : 'model = helper.Model
 
     member _.UpdateModel (newModel: 'model) : unit =
-      let prevHasErrors = (helper :> INotifyDataErrorInfo).HasErrors
+      let hadErrors = helper.HasErrors
       let eventsToRaise = ViewModelHelper.getEventsToRaise newModel helper
       helper <- { helper with Model = newModel }
-      let eventsToRaise = if prevHasErrors = (helper :> INotifyDataErrorInfo).HasErrors then eventsToRaise else (PropertyChanged "HasErrors") :: eventsToRaise
-      ViewModelHelper.raiseEvents eventsToRaise helper
+      ViewModelHelper.raiseEvents hadErrors eventsToRaise helper
 
   member internal _.TryGetMemberCore (name: string, binding: VmBinding<'model, 'msg, obj>, result: byref<_>) =
     try
@@ -342,7 +348,7 @@ type [<AllowNullLiteral>] ViewModelBase<'model, 'msg>(args: ViewModelArgs<'model
     Initialize(loggingArgs, binding.Name, ViewModelHelper.getFunctionsForSubModelSelectedItem loggingArgs initializedBindings)
       .Recursive(initialModel, dispatch, (fun () -> this |> IViewModel.currentModel), binding.Data)
 
-  member _.Get<'a> ([<Optional; CallerMemberName>] memberName: string) =
+  member vm.Get<'a> ([<Optional; CallerMemberName>] memberName: string) =
     fun (binding: string -> Binding<'model, 'msg, 'a>) ->
       let result =
         voption {
@@ -359,10 +365,16 @@ type [<AllowNullLiteral>] ViewModelBase<'model, 'msg>(args: ViewModelArgs<'model
                 FirstValidationErrors().Recursive(vmBinding)
                 |> ValueOption.map (fun errorList -> helper.ValidationErrors.Add (name, errorList))
                 |> ValueOption.defaultValue helper.ValidationErrors
+              let hadErrors = helper.HasErrors
               helper <-
                 { helper with
                     Bindings = newBindings
                     ValidationErrors = newValidationErrors }
+              let hasErrors = helper.HasErrors
+              if hasErrors <> hadErrors then
+                // We use hasErrors instead of hadErrors because
+                // we already raise the HasErrors property changed, so we don't need to raise it again
+                ViewModelHelper.raiseEvents hasErrors [PropertyChanged (nameof vm.HasErrors)] helper
               return vmBinding
           }
           return Get(nameChain).Recursive(helper.Model, vmBinding)
@@ -411,13 +423,17 @@ type [<AllowNullLiteral>] ViewModelBase<'model, 'msg>(args: ViewModelArgs<'model
   member vm.Set<'a> (binding: Binding<'model, 'msg, 'a>, value: 'a) =
     vm.Set<'a>(value, binding.Name) (fun _ -> binding)
 
+  member _.HasErrors = helper.HasErrors
+  member _.GetErrors name = helper.GetErrors name
+
   interface IViewModel<'model, 'msg> with
     member _.CurrentModel = helper.Model
 
     member _.UpdateModel(newModel: 'model) =
+      let hadErrors = helper.HasErrors
       let eventsToRaise = ViewModelHelper.getEventsToRaise newModel helper
       helper <- { helper with Model = newModel }
-      ViewModelHelper.raiseEvents eventsToRaise helper
+      ViewModelHelper.raiseEvents hadErrors eventsToRaise helper
 
   interface INotifyPropertyChanged with
     [<CLIEvent>]
@@ -426,5 +442,5 @@ type [<AllowNullLiteral>] ViewModelBase<'model, 'msg>(args: ViewModelArgs<'model
   interface INotifyDataErrorInfo with
     [<CLIEvent>]
     member _.ErrorsChanged = (helper :> INotifyDataErrorInfo).ErrorsChanged
-    member _.HasErrors = (helper :> INotifyDataErrorInfo).HasErrors
-    member _.GetErrors name = (helper :> INotifyDataErrorInfo).GetErrors name
+    member _.HasErrors = helper.HasErrors
+    member _.GetErrors name = helper.GetErrors name
