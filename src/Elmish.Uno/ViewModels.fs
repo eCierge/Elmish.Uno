@@ -357,8 +357,8 @@ type [<AllowNullLiteral>] ViewModelBase<'model, 'msg>(args: ViewModelArgs<'model
               let newBindings = helper.Bindings.Add (name, vmBinding |> MapOutputType.boxVm)
               let newValidationErrors =
                 FirstValidationErrors().Recursive(vmBinding)
-                |> Option.map (fun errorList -> helper.ValidationErrors.Add (name, errorList))
-                |> Option.defaultValue helper.ValidationErrors
+                |> ValueOption.map (fun errorList -> helper.ValidationErrors.Add (name, errorList))
+                |> ValueOption.defaultValue helper.ValidationErrors
               helper <-
                 { helper with
                     Bindings = newBindings

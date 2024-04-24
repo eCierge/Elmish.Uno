@@ -314,13 +314,13 @@ type FirstValidationErrors() =
 
   member this.Recursive<'model, 'msg, 't>
       (binding: VmBinding<'model, 'msg, 't>)
-      : string list ref option =
+      : string list ref voption =
     match binding with
-    | BaseVmBinding _ -> None
+    | BaseVmBinding _ -> ValueNone
     | Cached b -> this.Recursive b.Binding
     | Lazy b -> this.Recursive b.Binding
     | AlterMsgStream b -> this.Recursive b.Binding
-    | Validatation b -> b.Errors |> Some // TODO: what if there is more than one validation effect?
+    | Validatation b -> b.Errors |> ValueSome // TODO: what if there is more than one validation effect?
 
 
 type FuncsFromSubModelSeqKeyed() =
