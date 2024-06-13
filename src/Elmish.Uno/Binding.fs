@@ -1421,7 +1421,6 @@ type Binding private () =
   ///   (e.g. a parent message union case that wraps the child message type).
   /// </param>
   /// <param name="bindings">Returns the bindings for the sub-model.</param>
-  [<System.Obsolete("In version 5, this method will be removed.  Use \"Binding.SubModel.required\" followed by model and message mapping functions as needed.  For an example, see how this method is implemented.")>]
   static member subModel
       (getSubModel: 'model -> 'subModel,
        toBindingModel: 'model * 'subModel -> 'bindingModel,
@@ -1443,7 +1442,6 @@ type Binding private () =
   ///   (e.g. a parent message union case that wraps the child message type).
   /// </param>
   /// <param name="bindings">Returns the bindings for the sub-model.</param>
-  [<System.Obsolete("In version 5, this method will be removed.  Use \"Binding.SubModel.required\" followed by model and message mapping functions as needed.  For an example, see how this method is implemented.")>]
   static member subModel
       (getSubModel: 'model -> 'subModel,
        toMsg: 'subMsg -> 'msg,
@@ -1496,7 +1494,6 @@ type Binding private () =
   ///   If <c>true</c>, when the model is missing, the last non-<c>null</c>
   ///   model will be returned instead of <c>null</c>.
   /// </param>
-  [<System.Obsolete("In version 6, this method will be removed.  Its replacement method does not yet exist (because it will be one of the existing methods with a different type signature).  Either wait for version 5 when this message will change or replace this method with (a specialization of) the implementation of this method.")>]
   static member subModelOpt
       (getSubModel: 'model -> 'subModel voption,
        toBindingModel: 'model * 'subModel -> 'bindingModel,
@@ -1537,7 +1534,6 @@ type Binding private () =
   ///   If <c>true</c>, when the model is missing, the last non-<c>null</c>
   ///   model will be returned instead of <c>null</c>.
   /// </param>
-  [<System.Obsolete("In version 6, this method will be removed.  Its replacement method does not yet exist (because it will be one of the existing methods with a different type signature).  Either wait for version 5 when this message will change or replace this method with (a specialization of) the implementation of this method.")>]
   static member subModelOpt
       (getSubModel: 'model -> 'subModel option,
        toBindingModel: 'model * 'subModel -> 'bindingModel,
@@ -1574,7 +1570,6 @@ type Binding private () =
   ///   If <c>true</c>, when the model is missing, the last non-<c>null</c>
   ///   model will be returned instead of <c>null</c>.
   /// </param>
-  [<System.Obsolete("In version 6, this method will be removed.  Its replacement method does not yet exist (because it will be one of the existing methods with a different type signature).  Either wait for version 5 when this message will change or replace this method with (a specialization of) the implementation of this method.")>]
   static member subModelOpt
       (getSubModel: 'model -> 'subModel voption,
        toMsg: 'subMsg -> 'msg,
@@ -1611,7 +1606,6 @@ type Binding private () =
   ///   If <c>true</c>, when the model is missing, the last non-<c>null</c>
   ///   model will be returned instead of <c>null</c>.
   /// </param>
-  [<System.Obsolete("In version 6, this method will be removed.  Its replacement method does not yet exist (because it will be one of the existing methods with a different type signature).  Either wait for version 5 when this message will change or replace this method with (a specialization of) the implementation of this method.")>]
   static member subModelOpt
       (getSubModel: 'model -> 'subModel option,
        toMsg: 'subMsg -> 'msg,
@@ -2565,7 +2559,6 @@ module Extensions =
     ///   (e.g. a parent message union case that wraps the child message type).
     /// </param>
     /// <param name="bindings">Returns the bindings for the sub-model.</param>
-    [<System.Obsolete("In version 5, this method will be removed.  Use \"Binding.SubModel.required\" followed by model and message mapping functions as needed.  For an example, see how this method is implemented.")>]
     static member subModel
         (getSubModel: 'model -> 'subModel,
          toBindingModel: 'model * 'subModel -> 'bindingModel,
@@ -2587,7 +2580,6 @@ module Extensions =
     ///   (e.g. a parent message union case that wraps the child message type).
     /// </param>
     /// <param name="bindings">Returns the bindings for the sub-model.</param>
-    [<System.Obsolete("In version 5, this method will be removed.  Use \"Binding.SubModel.required\" followed by model and message mapping functions as needed.  For an example, see how this method is implemented.")>]
     static member subModel
         (getSubModel: 'model -> 'subModel,
          toMsg: 'subMsg -> 'msg,

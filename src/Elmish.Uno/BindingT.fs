@@ -997,7 +997,6 @@ type BindingT private () =
   ///   Converts the messages used in the bindings to parent model messages
   ///   (e.g. a parent message union case that wraps the child message type).
   /// </param>
-  [<System.Obsolete("In version 5, this method will be removed.  Use \"Binding.SubModelT.required\" followed by model and message mapping functions as needed.  For an example, see how this method is implemented.")>]
   static member subModel
       (createVm,
        getSubModel: 'model -> 'subModel,
@@ -1019,7 +1018,6 @@ type BindingT private () =
   ///   Converts the messages used in the bindings to parent model messages
   ///   (e.g. a parent message union case that wraps the child message type).
   /// </param>
-  [<System.Obsolete("In version 5, this method will be removed.  Use \"Binding.SubModelT.required\" followed by model and message mapping functions as needed.  For an example, see how this method is implemented.")>]
   static member subModelWithModel
       (createVm,
        getSubModel: 'model -> 'subModel,
@@ -1041,7 +1039,6 @@ type BindingT private () =
   ///   Converts the messages used in the bindings to parent model messages
   ///   (e.g. a parent message union case that wraps the child message type).
   /// </param>
-  [<System.Obsolete("In version 5, this method will be removed.  Use \"Binding.SubModelT.required\" followed by model and message mapping functions as needed.  For an example, see how this method is implemented.")>]
   static member subModel
       (createVm,
        getSubModel: 'model -> 'subModel,
@@ -1109,7 +1106,6 @@ type BindingT private () =
   ///   If <c>true</c>, when the model is missing, the last non-<c>null</c>
   ///   model will be returned instead of <c>null</c>.
   /// </param>
-  [<System.Obsolete("In version 6, this method will be removed.  Its replacement method does not yet exist (because it will be one of the existing methods with a different type signature).  Either wait for version 5 when this message will change or replace this method with (a specialization of) the implementation of this method.")>]
   static member subModelOpt
       (createVm,
        getSubModel: 'model -> 'subModel voption,
@@ -1150,7 +1146,6 @@ type BindingT private () =
   ///   If <c>true</c>, when the model is missing, the last non-<c>null</c>
   ///   model will be returned instead of <c>null</c>.
   /// </param>
-  [<System.Obsolete("In version 6, this method will be removed.  Its replacement method does not yet exist (because it will be one of the existing methods with a different type signature).  Either wait for version 5 when this message will change or replace this method with (a specialization of) the implementation of this method.")>]
   static member subModelOpt
       (createVm,
        getSubModel: 'model -> 'subModel option,
@@ -1187,7 +1182,6 @@ type BindingT private () =
   ///   If <c>true</c>, when the model is missing, the last non-<c>null</c>
   ///   model will be returned instead of <c>null</c>.
   /// </param>
-  [<System.Obsolete("In version 6, this method will be removed.  Its replacement method does not yet exist (because it will be one of the existing methods with a different type signature).  Either wait for version 5 when this message will change or replace this method with (a specialization of) the implementation of this method.")>]
   static member subModelOpt
       (createVm,
        getSubModel: 'model -> 'subModel voption,
@@ -1224,7 +1218,6 @@ type BindingT private () =
   ///   If <c>true</c>, when the model is missing, the last non-<c>null</c>
   ///   model will be returned instead of <c>null</c>.
   /// </param>
-  [<System.Obsolete("In version 6, this method will be removed.  Its replacement method does not yet exist (because it will be one of the existing methods with a different type signature).  Either wait for version 5 when this message will change or replace this method with (a specialization of) the implementation of this method.")>]
   static member subModelOpt
       (createVm,
        getSubModel: 'model -> 'subModel option,
@@ -1257,7 +1250,6 @@ type BindingT private () =
   ///   If <c>true</c>, when the model is missing, the last non-<c>null</c>
   ///   model will be returned instead of <c>null</c>.
   /// </param>
-  [<System.Obsolete("In version 5, the type of the argument \"bindings\" will be changed to \"unit -> Binding<'model, 'msg> list\".  To avoid a compile error when upgrading, replace this method call with (a specialization of) its implementation.")>]
   static member subModelOpt
       (createVm,
        getSubModel: 'model -> 'subModel voption,
@@ -1288,7 +1280,6 @@ type BindingT private () =
   ///   If <c>true</c>, when the model is missing, the last non-<c>null</c>
   ///   model will be returned instead of <c>null</c>.
   /// </param>
-  [<System.Obsolete("In version 5, the type of the argument \"bindings\" will be changed to \"unit -> Binding<'model, 'msg> list\".  To avoid a compile error when upgrading, replace this method call with (a specialization of) its implementation.")>]
   static member subModelOpt
       (createVm,
        getSubModel: 'model -> 'subModel option,
