@@ -72,22 +72,22 @@ module Helpers2 =
     else fun a -> measure logPerformance logLevel performanceLogThresholdMs name nameChain callName (f a)
 
 
-type OneWayBinding<'model, 'a> = {
-  OneWayData: OneWayData<'model, 'a>
+type OneWayBinding<'model, 'T> = {
+  OneWayData: OneWayData<'model, 'T>
 }
 
-type OneWayToSourceBinding<'model, 'a> = {
-  Set: 'a -> 'model -> unit
+type OneWayToSourceBinding<'model, 'T> = {
+  Set: 'T -> 'model -> unit
 }
 
-type OneWaySeqBinding<'model, 'a, 'aCollection, 'id when 'id : equality> = {
-  OneWaySeqData: OneWaySeqData<'model, 'a, 'aCollection, 'id>
-  Values: CollectionTarget<'a, 'aCollection>
+type OneWaySeqBinding<'model, 'T, 'aCollection, 'id when 'id : equality> = {
+  OneWaySeqData: OneWaySeqData<'model, 'T, 'aCollection, 'id>
+  Values: CollectionTarget<'T, 'aCollection>
 }
 
-type TwoWayBinding<'model, 'a> = {
-  Get: 'model -> 'a
-  Set: 'a -> 'model -> unit
+type TwoWayBinding<'model, 'T> = {
+  Get: 'model -> 'T
+  Set: 'T -> 'model -> unit
 }
 
 type SubModelBinding<'model, 'msg, 'bindingModel, 'bindingMsg, 'vm> = {
@@ -199,7 +199,7 @@ and VmBinding<'model, 'msg, 't> =
       |> Validatation
 
 module internal MapOutputType =
-  let private baseCase (fOut: 'a -> 'b) (fIn: 'b -> 'a) (data: BaseVmBinding<'model, 'msg, 'a>) : BaseVmBinding<'model, 'msg, 'b> =
+  let private baseCase (fOut: 'T -> 'b) (fIn: 'b -> 'T) (data: BaseVmBinding<'model, 'msg, 'T>) : BaseVmBinding<'model, 'msg, 'b> =
     match data with
     | OneWay b -> OneWay { OneWayData = { Get = b.OneWayData.Get >> fOut } }
     | Cmd b -> Cmd b
@@ -265,7 +265,7 @@ module internal MapOutputType =
           VmToId = fIn >> b.SelectedItemBinding.VmToId
           FromId = b.SelectedItemBinding.FromId >> Option.map fOut } }
 
-  let rec private recursiveCase<'model, 'msg, 'a, 'b> (fOut: 'a -> 'b) (fIn: 'b -> 'a) (data: VmBinding<'model, 'msg, 'a>) : VmBinding<'model, 'msg, 'b> =
+  let rec private recursiveCase<'model, 'msg, 'T, 'b> (fOut: 'T -> 'b) (fIn: 'b -> 'T) (data: VmBinding<'model, 'msg, 'T>) : VmBinding<'model, 'msg, 'b> =
     match data with
     | BaseVmBinding b -> baseCase fOut fIn b |> BaseVmBinding
     | Cached b -> Cached {
@@ -325,7 +325,7 @@ type FirstValidationErrors() =
 
 type FuncsFromSubModelSeqKeyed() =
 
-  member _.Base(binding: BaseVmBinding<'model, 'msg, 't>) : SelectedItemBinding<'a, 'b, 'c, obj> option =
+  member _.Base(binding: BaseVmBinding<'model, 'msg, 't>) : SelectedItemBinding<'T, 'b, 'c, obj> option =
     match binding with
     | SubModelSeqKeyed b ->
       { VmToId = box >> b.SubModelSeqKeyedData.VmToId

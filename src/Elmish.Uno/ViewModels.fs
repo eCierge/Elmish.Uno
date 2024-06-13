@@ -348,8 +348,8 @@ type [<AllowNullLiteral>] ViewModelBase<'model, 'msg>(args: ViewModelArgs<'model
     Initialize(loggingArgs, binding.Name, ViewModelHelper.getFunctionsForSubModelSelectedItem loggingArgs initializedBindings)
       .Recursive(initialModel, dispatch, (fun () -> this |> IViewModel.currentModel), binding.Data)
 
-  member vm.Get<'a> ([<Optional; CallerMemberName>] memberName: string) =
-    fun (binding: string -> Binding<'model, 'msg, 'a>) ->
+  member vm.Get<'T> ([<Optional; CallerMemberName>] memberName: string) =
+    fun (binding: string -> Binding<'model, 'msg, 'T>) ->
       let result =
         voption {
           let! name = memberName |> ValueOption.ofObj
@@ -391,11 +391,11 @@ type [<AllowNullLiteral>] ViewModelBase<'model, 'msg>(args: ViewModelArgs<'model
         failwithf $"[%s{nameChain}] Get FAILED: Binding {memberName} returned an error {e}"
       | ValueSome (Ok r) -> r
 
-  member vm.Get<'a> (binding: Binding<'model, 'msg, 'a>) =
-    vm.Get<'a>(binding.Name) (fun _ -> binding)
+  member vm.Get<'T> (binding: Binding<'model, 'msg, 'T>) =
+    vm.Get<'T>(binding.Name) (fun _ -> binding)
 
-  member _.Set<'a> (value: 'a, [<Optional; CallerMemberName>] memberName: string) =
-    fun (binding: string -> Binding<'model, 'msg, 'a>) ->
+  member _.Set<'T> (value: 'T, [<Optional; CallerMemberName>] memberName: string) =
+    fun (binding: string -> Binding<'model, 'msg, 'T>) ->
       try
         let success =
           voption {
@@ -420,8 +420,8 @@ type [<AllowNullLiteral>] ViewModelBase<'model, 'msg>(args: ViewModelArgs<'model
         log.LogError(e, "[{BindingNameChain}] Set FAILED: Exception thrown while processing binding {BindingName}", nameChain, memberName)
         reraise ()
 
-  member vm.Set<'a> (binding: Binding<'model, 'msg, 'a>, value: 'a) =
-    vm.Set<'a>(value, binding.Name) (fun _ -> binding)
+  member vm.Set<'T> (binding: Binding<'model, 'msg, 'T>, value: 'T) =
+    vm.Set<'T>(value, binding.Name) (fun _ -> binding)
 
   member _.HasErrors = helper.HasErrors
   member _.GetErrors name = helper.GetErrors name

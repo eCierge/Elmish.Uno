@@ -16,21 +16,21 @@ type DuplicateIdException (sourceOrTarget: SourceOrTarget, index1: int, index2: 
   member this.Index2 = index2
   member this.Id = id
 
-type CollectionTarget<'a, 'aCollection> =
+type CollectionTarget<'T, 'aCollection> =
   { GetLength: unit -> int
-    GetAt: int -> 'a
-    Append: 'a -> unit
-    InsertAt: int * 'a -> unit
-    SetAt: int * 'a -> unit
+    GetAt: int -> 'T
+    Append: 'T -> unit
+    InsertAt: int * 'T -> unit
+    SetAt: int * 'T -> unit
     RemoveAt: int -> unit
     Move: int * int -> unit
     Clear: unit -> unit
-    Enumerate: unit -> 'a seq
+    Enumerate: unit -> 'T seq
     GetCollection: unit -> 'aCollection }
 
 module CollectionTarget =
 
-  let create (oc: ObservableCollection<'a>) =
+  let create (oc: ObservableCollection<'T>) =
     { GetLength = fun () -> oc.Count
       GetAt = fun i -> oc.[i]
       Append = oc.Add
@@ -54,7 +54,7 @@ module CollectionTarget =
       Enumerate = ct.Enumerate >> Seq.map fOut
       GetCollection = ct.GetCollection }
 
-  let mapCollection (fOut: 'aCollection0 -> 'aCollection1) (ct: CollectionTarget<'a, 'aCollection0>) : CollectionTarget<'a, 'aCollection1> =
+  let mapCollection (fOut: 'aCollection0 -> 'aCollection1) (ct: CollectionTarget<'T, 'aCollection0>) : CollectionTarget<'T, 'aCollection1> =
     { GetLength = ct.GetLength
       GetAt = ct.GetAt
       Append = ct.Append

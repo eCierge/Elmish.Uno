@@ -27,10 +27,10 @@ let buildUntypedGetter (propertyInfo: PropertyInfo) : obj -> obj =
   fun target -> action.Invoke(target)
 
 
-type private ElmEq<'a>() =
+type private ElmEq<'T>() =
 
   static let gettersAndEq =
-    typeof<'a>.GetProperties()
+    typeof<'T>.GetProperties()
     |> Array.map (fun pi ->
         let getter = buildUntypedGetter pi
         let eq =
@@ -52,5 +52,5 @@ type private ElmEq<'a>() =
 /// normally immutable. For a direct reference equality check (not memberwise),
 /// see refEq (which should be used when passing a single non-string reference
 /// type from the model).
-let elmEq<'a> : 'a -> 'a -> bool =
-  ElmEq<'a>.Eq
+let elmEq<'T> : 'T -> 'T -> bool =
+  ElmEq<'T>.Eq

@@ -19,17 +19,17 @@ module Helper =
     fun bMsg -> getCurrentModel () |> set bMsg |> dispatch
 
 
-type OneWayData<'model, 'a> =
-  { Get: 'model -> 'a }
+type OneWayData<'model, 'T> =
+  { Get: 'model -> 'T }
 
 
-type OneWaySeqData<'model, 'a, 'aCollection, 'id when 'id : equality> =
-  { Get: 'model -> 'a seq
-    CreateCollection: 'a seq -> CollectionTarget<'a, 'aCollection>
-    GetId: 'a -> 'id
-    ItemEquals: 'a -> 'a -> bool }
+type OneWaySeqData<'model, 'T, 'aCollection, 'id when 'id : equality> =
+  { Get: 'model -> 'T seq
+    CreateCollection: 'T seq -> CollectionTarget<'T, 'aCollection>
+    GetId: 'T -> 'id
+    ItemEquals: 'T -> 'T -> bool }
 
-  member d.Merge(values: CollectionTarget<'a, 'aCollection>, newModel: 'model) =
+  member d.Merge(values: CollectionTarget<'T, 'aCollection>, newModel: 'model) =
     let create v _ = v
     let update oldVal newVal oldIdx =
       if not (d.ItemEquals newVal oldVal) then
@@ -38,9 +38,9 @@ type OneWaySeqData<'model, 'a, 'aCollection, 'id when 'id : equality> =
     Merge.keyed d.GetId d.GetId create update values newVals
 
 
-type TwoWayData<'model, 'msg, 'a> =
-  { Get: 'model -> 'a
-    Set: 'a -> 'model -> 'msg }
+type TwoWayData<'model, 'msg, 'T> =
+  { Get: 'model -> 'T
+    Set: 'T -> 'model -> 'msg }
 
 
 type CmdData<'model, 'msg> = {
@@ -312,7 +312,7 @@ module BindingData =
         }
     recursiveCase
 
-  let mapMsgWithModel (f: 'a -> 'model -> 'b) =
+  let mapMsgWithModel (f: 'T -> 'model -> 'b) =
     let baseCase = function
       | OneWayData d -> d |> OneWayData
       | OneWaySeqData d -> d |> OneWaySeqData
@@ -430,14 +430,14 @@ module BindingData =
 
   module OneWay =
 
-    let id<'a, 'msg> : BindingData<'a, 'msg, 'a> =
+    let id<'T, 'msg> : BindingData<'T, 'msg, 'T> =
       { Get = id }
       |> OneWayData
       |> BaseBindingData
 
     let private mapFunctions
         mGet
-        (d: OneWayData<'model, 'a>) =
+        (d: OneWayData<'model, 'T>) =
       { d with Get = mGet d.Get }
 
     let measureFunctions
@@ -449,10 +449,10 @@ module BindingData =
   module OneWaySeq =
 
     let mapMinorTypes
-        (outMapA: 'a -> 'a0)
+        (outMapA: 'T -> 'a0)
         (outMapId: 'id -> 'id0)
-        (inMapA: 'a0 -> 'a)
-        (d: OneWaySeqData<'model, 'a, 'aCollection, 'id>) = {
+        (inMapA: 'a0 -> 'T)
+        (d: OneWaySeqData<'model, 'T, 'aCollection, 'id>) = {
       Get = d.Get >> Seq.map outMapA
       CreateCollection = Seq.map inMapA >> d.CreateCollection >> CollectionTarget.mapA outMapA inMapA
       GetId = inMapA >> d.GetId >> outMapId
@@ -474,7 +474,7 @@ module BindingData =
         mGet
         mGetId
         mItemEquals
-        (d: OneWaySeqData<'model, 'a, 'aCollection, 'id>) =
+        (d: OneWaySeqData<'model, 'T, 'aCollection, 'id>) =
       { d with Get = mGet d.Get
                GetId = mGetId d.GetId
                ItemEquals = mItemEquals d.ItemEquals }
@@ -491,7 +491,7 @@ module BindingData =
 
   module TwoWay =
 
-    let id<'a> : BindingData<'a, 'a, 'a> =
+    let id<'T> : BindingData<'T, 'T, 'T> =
       { TwoWayData.Get = id
         Set = Func2.id1 }
       |> TwoWayData
@@ -500,7 +500,7 @@ module BindingData =
     let private mapFunctions
         mGet
         mSet
-        (d: TwoWayData<'model, 'msg, 'a>) =
+        (d: TwoWayData<'model, 'msg, 'T>) =
       { d with Get = mGet d.Get
                Set = mSet d.Set }
 

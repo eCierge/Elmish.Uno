@@ -72,19 +72,19 @@ module ValueOption =
   type ToNullError =
     | ValueCannotBeNull of string
 
-  let ofNull<'a> (x: 'a) =
+  let ofNull<'T> (x: 'T) =
     match box x with
     | null -> ValueNone
     | _ -> ValueSome x
 
-  let toNull<'a> = function
+  let toNull<'T> = function
     | ValueSome x -> Ok x
     | ValueNone ->
-      let default' = Unchecked.defaultof<'a>
+      let default' = Unchecked.defaultof<'T>
       if box default' = null then
         default' |> Ok
       else
-        typeof<'a>.Name |> ToNullError.ValueCannotBeNull |> Error
+        typeof<'T>.Name |> ToNullError.ValueCannotBeNull |> Error
 
 
 [<RequireQualifiedAccess>]
@@ -142,8 +142,8 @@ module PairOption =
 [<RequireQualifiedAccess>]
 module Func2 =
 
-  let id1<'a, 'b> (a: 'a) (_: 'b) = a
-  let id2<'a, 'b> (_: 'a) (b: 'b) = b
+  let id1<'T, 'b> (a: 'T) (_: 'b) = a
+  let id2<'T, 'b> (_: 'T) (b: 'b) = b
   let curry f a b = f (a, b)
 
 
