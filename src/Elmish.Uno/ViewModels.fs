@@ -348,6 +348,9 @@ type [<AllowNullLiteral>] ViewModelBase<'model, 'msg>(args: ViewModelArgs<'model
     Initialize(loggingArgs, binding.Name, ViewModelHelper.getFunctionsForSubModelSelectedItem loggingArgs initializedBindings)
       .Recursive(initialModel, dispatch, (fun () -> this |> IViewModel.currentModel), binding.Data)
 
+  member _.NotifyPropertyChanged (name: string) =
+    helper.PropertyChanged.Trigger(helper.GetSender (), PropertyChangedEventArgs name)
+
   member vm.Get<'T> ([<Optional; CallerMemberName>] memberName: string) =
     fun (binding: string -> Binding<'model, 'msg, 'T>) ->
       let result =
@@ -423,7 +426,8 @@ type [<AllowNullLiteral>] ViewModelBase<'model, 'msg>(args: ViewModelArgs<'model
   member vm.Set<'T> (binding: Binding<'model, 'msg, 'T>, value: 'T) =
     vm.Set<'T>(value, binding.Name) (fun _ -> binding)
 
-  member _.HasErrors = helper.HasErrors
+  abstract HasErrors : bool
+  default _.HasErrors = helper.HasErrors
   member _.GetErrors name = helper.GetErrors name
 
   interface IViewModel<'model, 'msg> with
