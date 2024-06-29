@@ -26,6 +26,7 @@ module Initialize =
     let vmBinding =
       Initialize(LoggingViewModelArgs.none, name, noGetSelectedItemCall)
         .Recursive("", ignore, (fun _ -> failwith "Should not call getCurrentModel on initialize"), binding)
+      |> ValueOption.toOption
 
     test <@ vmBinding.IsSome @>
 
@@ -66,7 +67,7 @@ module Get =
     let vmBinding =
       Initialize(LoggingViewModelArgs.none, "Nothing", (fun _ -> failwith "Should not call get selected item"))
         .Recursive((), dispatch, (fun () -> ()), binding.Data)
-      |> Option.defaultWith (fun () -> failwith $"Could not create VmBinding after passing in BindingData: {binding}")
+      |> ValueOption.defaultWith (fun () -> failwith $"Could not create VmBinding after passing in BindingData: {binding}")
 
     let vmBinding2 = vmBinding |> MapOutputType.unboxVm
 

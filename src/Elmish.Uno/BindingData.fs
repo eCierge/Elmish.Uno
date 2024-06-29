@@ -1,12 +1,15 @@
 ﻿[<AutoOpen>]
 module internal Elmish.Uno.BindingData
 
+open System
+open System.Collections.Generic
 open System.Collections.ObjectModel
 open System.Windows
 open System.Windows.Input
 open Microsoft.UI.Xaml
 
 open Elmish
+open Elmish.ObservableLookup
 
 
 module Helper =
@@ -43,16 +46,16 @@ type OneWaySeqGrouppedData<'model, 'T, 'aCollection, 'id, 'key when 'id : equali
     CreateCollection: 'T seq -> GrouppedCollectionTarget<'T, 'aCollection, 'key>
     GetId: 'T -> 'id
     GetKey: 'T -> 'key
+    KeyComparer: IComparer<'key>
     ItemEquals: 'T -> 'T -> bool }
 
-  // TODO: Implement
   member d.Merge(values: GrouppedCollectionTarget<'T, 'aCollection, 'key>, newModel: 'model) =
     let create v _ = v
-    let update oldVal newVal oldIdx =
+    let update (values : CollectionTarget<'T, ObservableCollection<'T>>) oldVal newVal oldIdx =
       if not (d.ItemEquals newVal oldVal) then
-        values.SetAt (oldIdx, newVal)
+          values.SetAt (oldIdx, newVal)
     let newVals = newModel |> d.Get |> Seq.toArray
-    Merge.groupped d.GetKey d.GetKey d.GetId d.GetId create update values newVals
+    Merge.groupped d.KeyComparer d.GetKey d.GetId d.GetId create update values newVals
 
 
 type TwoWayData<'model, 'msg, 'T> =
@@ -190,6 +193,7 @@ module BindingData =
           CreateCollection = d.CreateCollection >> GrouppedCollectionTarget.mapCollection fOut
           GetId = d.GetId
           GetKey = d.GetKey
+          KeyComparer = d.KeyComparer
           ItemEquals = d.ItemEquals
         }
       | TwoWayData d -> TwoWayData {
@@ -278,6 +282,7 @@ module BindingData =
           CreateCollection = d.CreateCollection
           GetId = d.GetId
           GetKey = d.GetKey
+          KeyComparer = d.KeyComparer
           ItemEquals = d.ItemEquals
         }
       | TwoWayData d -> TwoWayData {
@@ -527,27 +532,34 @@ module BindingData =
     let mapMinorTypes
         (outMapA: 'T -> 'a0)
         (outMapId: 'id -> 'id0)
-        (outMapKey: 'key -> 'GrouppingKey0)
+        (outMapKey: 'key -> 'key0)
         (inMapA: 'a0 -> 'T)
+        (inMapKey: 'key0 -> 'key)
         (d: OneWaySeqGrouppedData<'model, 'T, 'aCollection, 'id, 'key>) = {
       Get = d.Get >> Seq.map outMapA
-      CreateCollection = Seq.map inMapA >> d.CreateCollection >> GrouppedCollectionTarget.mapA outMapA inMapA outMapKey
+      CreateCollection = Seq.map inMapA >> d.CreateCollection >> GrouppedCollectionTarget.mapA outMapA inMapA outMapKey inMapKey
       GetId = inMapA >> d.GetId >> outMapId
       GetKey = inMapA >> d.GetKey >> outMapKey
+      KeyComparer = Comparer.Create (fun k1 k2 -> d.KeyComparer.Compare (inMapKey k1, inMapKey k2))
       ItemEquals = fun a1 a2 -> d.ItemEquals (inMapA a1) (inMapA a2)
     }
 
-    let boxMinorTypes d = d |> mapMinorTypes box box box unbox
+    let boxMinorTypes d = d |> mapMinorTypes box box box unbox unbox
 
-    let create itemEquals getId getGrouppingKey =
+    let createWithComparer itemEquals getId getGrouppingKey keyComparer =
       { Get = (fun x -> upcast x)
-        CreateCollection = ObservableCollection >> GrouppedCollectionTarget.create
+        CreateCollection =
+          fun items -> items.ToObservableLookup<'key,_>(keyComparer, Func<_,'key>(getGrouppingKey)) |> GrouppedCollectionTarget.create
         ItemEquals = itemEquals
         GetId = getId
-        GetKey = getGrouppingKey }
+        GetKey = getGrouppingKey
+        KeyComparer = keyComparer }
       |> boxMinorTypes
       |> OneWaySeqGrouppedData
       |> BaseBindingData
+
+    let create itemEquals getId getGrouppingKey compareGrouppingKeys =
+      createWithComparer itemEquals getId getGrouppingKey (Comparer.Create (Comparison compareGrouppingKeys))
 
     let private mapFunctions
         mGet

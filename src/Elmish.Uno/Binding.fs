@@ -5,6 +5,8 @@
 open System.Windows
 
 open Elmish
+open Elmish.ObservableLookup
+open System.Collections.Generic
 open System.Collections.ObjectModel
 open System.Runtime.InteropServices
 open System.Windows.Input
@@ -27,19 +29,19 @@ module Binding =
   let unboxT (binding: Binding<'b, 'msg>): Binding<'b, 'msg, 't> = BindingData.unboxT |> mapData <| binding
 
   /// Maps the model of a binding via a contravariant mapping.
-  let mapModel (f: 'T -> 'b) (binding: Binding<'b, 'msg, 't>) = f |> mapModel |> mapData <| binding
+  let mapModel (f: 'a -> 'b) (binding: Binding<'b, 'msg, 't>) = f |> mapModel |> mapData <| binding
 
   /// Maps the message of a binding with access to the model via a covariant mapping.
-  let mapMsgWithModel (f: 'T -> 'model -> 'b) (binding: Binding<'model, 'T, 't>) = f |> mapMsgWithModel |> mapData <| binding
+  let mapMsgWithModel (f: 'a -> 'model -> 'b) (binding: Binding<'model, 'a, 't>) = f |> mapMsgWithModel |> mapData <| binding
 
   /// Maps the message of a binding via a covariant mapping.
-  let mapMsg (f: 'T -> 'b) (binding: Binding<'model, 'T, 't>) = f |> mapMsg |> mapData <| binding
+  let mapMsg (f: 'a -> 'b) (binding: Binding<'model, 'a, 't>) = f |> mapMsg |> mapData <| binding
 
   /// Sets the message of a binding with access to the model.
-  let setMsgWithModel (f: 'model -> 'b) (binding: Binding<'model, 'T, 't>) = f |> setMsgWithModel |> mapData <| binding
+  let setMsgWithModel (f: 'model -> 'b) (binding: Binding<'model, 'a, 't>) = f |> setMsgWithModel |> mapData <| binding
 
   /// Sets the message of a binding.
-  let setMsg (msg: 'b) (binding: Binding<'model, 'T, 't>) = msg |> setMsg |> mapData <| binding
+  let setMsg (msg: 'b) (binding: Binding<'model, 'a, 't>) = msg |> setMsg |> mapData <| binding
 
 
   /// Restricts the binding to models that satisfy the predicate after some model satisfies the predicate.
@@ -95,7 +97,7 @@ module Binding =
   /// </summary>
   /// <param name="alteration">The function that can alter the message stream.</param>
   /// <param name="binding">The binding of the altered message stream.</param>
-  let alterMsgStream (alteration: ('b -> unit) -> 'T -> unit) (binding: Binding<'model, 'T, 't>) : Binding<'model, 'b, 't> =
+  let alterMsgStream (alteration: ('b -> unit) -> 'a -> unit) (binding: Binding<'model, 'a, 't>) : Binding<'model, 'b, 't> =
     binding
     |> mapData (alterMsgStream alteration)
 
@@ -107,7 +109,7 @@ module Binding =
   module OneWayT =
 
     /// Elemental instance of a one-way binding.
-    let id<'T, 'msg> : string -> Binding<'T, 'msg, 'T> =
+    let id<'a, 'msg> : string -> Binding<'a, 'msg, 'a> =
       OneWay.id
       |> createBindingT
 
@@ -202,20 +204,23 @@ module Binding =
     /// <param name="getId">Unique identifier for each item in the list (for efficient updates).</param>
     /// <param name="get">Returns the items to bind to.</param>
     /// <param name="getGrouppingKey">Returns the key to group the items by.</param>
-    let internal createCore<'T, 'item, 'id, 'GrouppingKey, 'msg when 'id : equality and 'GrouppingKey : equality> (get : 'T -> 'item seq) itemEquals (getId : 'item -> 'id) (getGrouppingKey : ('item -> 'GrouppingKey) voption) : string -> Binding<'T, 'msg, ObservableCollection<'item>> =
-      match getGrouppingKey with
-      | ValueNone -> OneWaySeq.create itemEquals getId
-      | ValueSome getGrouppingKey -> OneWaySeqGroupped.create itemEquals getId getGrouppingKey
+    let create<'a, 'item, 'id, 'msg when 'id : equality> get itemEquals (getId : 'item -> 'id) : string -> Binding<'a, 'msg, ObservableCollection<'item>> =
+      OneWaySeq.create itemEquals getId
       |> BindingData.mapModel get
       |> createBindingT
 
-    /// Elemental instance of a one-way-seq binding.
-    let create<'T, 'item, 'id, 'msg when 'id : equality> get itemEquals (getId : 'item -> 'id) : string -> Binding<'T, 'msg, ObservableCollection<'item>> =
-      createCore<'T, 'item, 'id, obj, 'msg> get itemEquals getId ValueNone
-
-    /// Elemental instance of a one-way-seq binding.
-    let createGroupped<'T, 'item, 'id, 'GrouppingKey, 'msg when 'id : equality and 'GrouppingKey : equality> get itemEquals (getId : 'item -> 'id) (getGrouppingKey : 'item -> 'GrouppingKey) : string -> Binding<'T, 'msg, ObservableCollection<'item>> =
-      createCore<'T, 'item, 'id, 'GrouppingKey, 'msg> get itemEquals getId (ValueSome getGrouppingKey)
+    /// Elemental instance of a one-way-seq groupped binding.
+    let createGroupped<'a, 'item, 'id, 'grouppingKey, 'msg when 'id : equality and 'grouppingKey : equality>
+      (get : 'a -> 'item seq)
+      itemEquals
+      (getId : 'item -> 'id)
+      (getGrouppingKey : 'item -> 'grouppingKey)
+      (compareGrouppingKeys : 'grouppingKey -> 'grouppingKey -> int)
+      : string -> Binding<'a, 'msg, ObservableLookup<'grouppingKey, 'item>>
+      =
+      OneWaySeqGroupped.create itemEquals getId getGrouppingKey compareGrouppingKeys
+      |> BindingData.mapModel get
+      |> createBindingT
 
     let id itemEquals (getId: 'a -> 'id) : string -> Binding<_, 'msg, _> =
       OneWaySeq.create itemEquals getId
@@ -332,21 +337,21 @@ module Binding =
   module OneWay =
 
     /// Elemental instance of a one-way binding.
-    let id<'T, 'msg> : string -> Binding<'T, 'msg> =
+    let id<'a, 'msg> : string -> Binding<'a, 'msg> =
       OneWay.id
       |> createBinding
 
     /// Creates a one-way binding to an optional value. The binding
     /// automatically converts between a missing value in the model and
     /// a <c>null</c> value in the view.
-    let opt<'T, 'msg> : string -> Binding<'T option, 'msg> =
+    let opt<'a, 'msg> : string -> Binding<'a option, 'msg> =
       id<obj, 'msg>
       >> mapModel Option.box
 
     /// Creates a one-way binding to an optional value. The binding
     /// automatically converts between a missing value in the model and
     /// a <c>null</c> value in the view.
-    let vopt<'T, 'msg> : string -> Binding<'T voption, 'msg> =
+    let vopt<'a, 'msg> : string -> Binding<'a voption, 'msg> =
       id<obj, 'msg>
       >> mapModel ValueOption.box
 
@@ -354,14 +359,14 @@ module Binding =
   module TwoWay =
 
     /// Elemental instance of a two-way binding.
-    let id<'T> : string -> Binding<'T, 'T> =
+    let id<'a> : string -> Binding<'a, 'a> =
       TwoWay.id
       |> createBinding
 
     /// Creates a two-way binding to an optional value. The binding
     /// automatically converts between a missing value in the model and
     /// a <c>null</c> value in the view.
-    let vopt<'T> : string -> Binding<'T voption, 'T voption> =
+    let vopt<'a> : string -> Binding<'a voption, 'a voption> =
       id<obj>
       >> mapModel ValueOption.box
       >> mapMsg ValueOption.unbox
@@ -369,7 +374,7 @@ module Binding =
     /// Creates a two-way binding to an optional value. The binding
     /// automatically converts between a missing value in the model and
     /// a <c>null</c> value in the view.
-    let opt<'T> : string -> Binding<'T option, 'T option> =
+    let opt<'a> : string -> Binding<'a option, 'a option> =
       id<obj>
       >> mapModel Option.box
       >> mapMsg Option.unbox
@@ -470,10 +475,13 @@ module Binding =
 
   module OneWaySeq =
 
-    let internal create get itemEquals getId getGrouppingKey =
-      match getGrouppingKey with
-      | ValueNone -> OneWaySeq.create itemEquals getId
-      | ValueSome getGrouppingKey -> OneWaySeqGroupped.create itemEquals getId getGrouppingKey
+    let internal create get itemEquals getId =
+      OneWaySeq.create itemEquals getId
+      |> BindingData.mapModel get
+      |> createBinding
+
+    let internal createGroupped get itemEquals getId getGrouppingKey compareGrouppingKeys =
+      OneWaySeqGroupped.create itemEquals getId getGrouppingKey compareGrouppingKeys
       |> BindingData.mapModel get
       |> createBinding
 
@@ -546,8 +554,8 @@ module Binding =
       >> mapModel ValueSome
 
     /// <summary>
-    ///   Exposes a <c>'T seq</c> (<c>IEnumerable&lt;'T&gt;</c>) view model member for binding.
-    ///   Used rarely; usually, you want to expose an <c>ObservableCollection&lt;'T&gt;</c>
+    ///   Exposes a <c>'a seq</c> (<c>IEnumerable&lt;'a&gt;</c>) view model member for binding.
+    ///   Used rarely; usually, you want to expose an <c>ObservableCollection&lt;'a&gt;</c>
     ///   using <c>SubModelSeqKeyedT</c> or <c>SubModelSeqUnkeyedT</c>.
     /// </summary>
     let seq
@@ -710,13 +718,13 @@ module Binding =
 module Bindings =
 
   /// Maps the model of a list of bindings via a contravariant mapping.
-  let mapModel (f: 'T -> 'b) (bindings: Binding<'b, 'msg> list) = f |> Binding.mapModel |> List.map <| bindings
+  let mapModel (f: 'a -> 'b) (bindings: Binding<'b, 'msg> list) = f |> Binding.mapModel |> List.map <| bindings
 
   /// Maps the message of a list of bindings with access to the model via a covariant mapping.
-  let mapMsgWithModel (f: 'T -> 'model -> 'b) (bindings: Binding<'model, 'T> list) = f |> Binding.mapMsgWithModel |> List.map <| bindings
+  let mapMsgWithModel (f: 'a -> 'model -> 'b) (bindings: Binding<'model, 'a> list) = f |> Binding.mapMsgWithModel |> List.map <| bindings
 
   /// Maps the message of a list of bindings via a covariant mapping.
-  let mapMsg (f: 'T -> 'b) (bindings: Binding<'model, 'T> list) = f |> Binding.mapMsg |> List.map <| bindings
+  let mapMsg (f: 'a -> 'b) (bindings: Binding<'model, 'a> list) = f |> Binding.mapMsg |> List.map <| bindings
 
 
 
@@ -751,9 +759,9 @@ type Binding private () =
   /// <summary>Creates a one-way binding.</summary>
   /// <param name="get">Gets the value from the model.</param>
   static member oneWay
-      (get: 'model -> 'T)
+      (get: 'model -> 'a)
       : string -> Binding<'model, 'msg> =
-    Binding.OneWay.id<'T, 'msg>
+    Binding.OneWay.id<'a, 'msg>
     >> Binding.addLazy (=)
     >> Binding.mapModel get
 
@@ -766,9 +774,9 @@ type Binding private () =
   /// </summary>
   /// <param name="get">Gets the value from the model.</param>
   static member oneWayOpt
-      (get: 'model -> 'T option)
+      (get: 'model -> 'a option)
       : string -> Binding<'model, 'msg> =
-    Binding.OneWay.opt<'T, 'msg>
+    Binding.OneWay.opt<'a, 'msg>
     >> Binding.addLazy (=)
     >> Binding.mapModel get
 
@@ -781,9 +789,9 @@ type Binding private () =
   /// </summary>
   /// <param name="get">Gets the value from the model.</param>
   static member oneWayOpt
-      (get: 'model -> 'T voption)
+      (get: 'model -> 'a voption)
       : string -> Binding<'model, 'msg> =
-    Binding.OneWay.vopt<'T, 'msg>
+    Binding.OneWay.vopt<'a, 'msg>
     >> Binding.addLazy (=)
     >> Binding.mapModel get
 
@@ -803,9 +811,9 @@ type Binding private () =
   /// </param>
   /// <param name="map">Transforms the value into the final type.</param>
   static member oneWayLazy
-      (get: 'model -> 'T,
-       equals: 'T -> 'T -> bool,
-       map: 'T -> 'b)
+      (get: 'model -> 'a,
+       equals: 'a -> 'a -> bool,
+       map: 'a -> 'b)
       : string -> Binding<'model, 'msg> =
     Binding.OneWay.id<'b, 'msg>
     >> Binding.mapModel map
@@ -833,9 +841,9 @@ type Binding private () =
   /// <param name="map">Transforms the intermediate value into the final
   /// type.</param>
   static member oneWayOptLazy
-      (get: 'model -> 'T,
-       equals: 'T -> 'T -> bool,
-       map: 'T -> 'b option)
+      (get: 'model -> 'a,
+       equals: 'a -> 'a -> bool,
+       map: 'a -> 'b option)
       : string -> Binding<'model, 'msg> =
     Binding.OneWay.opt<'b, 'msg>
     >> Binding.mapModel map
@@ -863,9 +871,9 @@ type Binding private () =
   /// <param name="map">Transforms the intermediate value into the final
   /// type.</param>
   static member oneWayOptLazy
-      (get: 'model -> 'T,
-       equals: 'T -> 'T -> bool,
-       map: 'T -> 'b voption)
+      (get: 'model -> 'a,
+       equals: 'a -> 'a -> bool,
+       map: 'a -> 'b voption)
       : string -> Binding<'model, 'msg> =
     Binding.OneWay.vopt<'b, 'msg>
     >> Binding.mapModel map
@@ -896,17 +904,50 @@ type Binding private () =
   ///   <c>elmEq</c>, <c>refEq</c>, or simply <c>(=)</c>.
   /// </param>
   /// <param name="getId">Gets a unique identifier for a collection item.</param>
-  /// <param name="getGrouppingKey">Gets a key used to group items.</param>
   static member oneWaySeqLazy
-      (get: 'model -> 'T,
-       equals: 'T -> 'T -> bool,
-       map: 'T -> #seq<'b>,
+      (get: 'model -> 'a,
+       equals: 'a -> 'a -> bool,
+       map: 'a -> #seq<'b>,
+       itemEquals: 'b -> 'b -> bool,
+       getId: 'b -> 'id)
+      : string -> Binding<'model, 'msg> =
+    Binding.OneWaySeq.create map itemEquals getId
+    >> Binding.addLazy equals
+    >> Binding.mapModel get
+
+  /// <summary>
+  ///   Creates a one-way binding to a sequence of items, each uniquely
+  ///   identified by the value returned by <paramref name="getId"/>. The
+  ///   binding will not be updated if the output of <paramref name="get"/>
+  ///   does not change, as determined by <paramref name="equals"/>.
+  ///   The binding is backed by a persistent <c>ObservableCollection</c>, so
+  ///   only changed items (as determined by <paramref name="itemEquals"/>)
+  ///   will be replaced. If the items are complex and you want them updated
+  ///   instead of replaced, consider using <see cref="subModelSeq"/>.
+  /// </summary>
+  /// <param name="get">Gets the intermediate value from the model.</param>
+  /// <param name="equals">
+  ///   Indicates whether two intermediate values are equal. Good candidates are
+  ///   <c>elmEq</c> and <c>refEq</c>.
+  /// </param>
+  /// <param name="map">Transforms the value into the final collection.</param>
+  /// <param name="itemEquals">
+  ///   Indicates whether two collection items are equal. Good candidates are
+  ///   <c>elmEq</c>, <c>refEq</c>, or simply <c>(=)</c>.
+  /// </param>
+  /// <param name="getId">Gets a unique identifier for a collection item.</param>
+  /// <param name="getGrouppingKey">Gets a key used to group items.</param>
+  /// <param name="compareGrouppingKeys">Compares two groupping keys.</param>
+  static member oneWaySeqLazy
+      (get: 'model -> 'a,
+       equals: 'a -> 'a -> bool,
+       map: 'a -> #seq<'b>,
        itemEquals: 'b -> 'b -> bool,
        getId: 'b -> 'id,
-       [<Optional>] getGrouppingKey: 'b -> 'key)
+       getGrouppingKey: 'b -> 'key,
+       compareGrouppingKeys: 'key -> 'key -> int)
       : string -> Binding<'model, 'msg> =
-    let getGrouppingKey = (if obj.ReferenceEquals(getGrouppingKey, null) then ValueNone else ValueSome getGrouppingKey)
-    Binding.OneWaySeq.create map itemEquals getId getGrouppingKey
+    Binding.OneWaySeq.createGroupped map itemEquals getId getGrouppingKey compareGrouppingKeys
     >> Binding.addLazy equals
     >> Binding.mapModel get
 
@@ -928,15 +969,41 @@ type Binding private () =
   ///   Indicates whether two collection items are equal. Good candidates are
   ///   <c>elmEq</c>, <c>refEq</c>, or simply <c>(=)</c>.
   /// </param>
+  static member oneWaySeq
+      (get: 'model -> #seq<'a>,
+       itemEquals: 'a -> 'a -> bool,
+       getId: 'a -> 'id)
+      : string -> Binding<'model, 'msg> =
+    Binding.OneWaySeq.create id itemEquals getId
+    >> Binding.addLazy refEq
+    >> Binding.mapModel get
+
+  /// <summary>
+  ///   Creates a one-way binding to a sequence of items, each uniquely
+  ///   identified by the value returned by <paramref name="getId"/>. The
+  ///   binding will not be updated if the output of <paramref name="get"/>
+  ///   is referentially equal. This is the same as calling
+  ///   <see cref="oneWaySeqLazy"/> with <c>equals = refEq</c> and
+  ///   <c>map = id</c>. The binding is backed by a persistent
+  ///   <c>ObservableCollection</c>, so only changed items (as determined by
+  ///   <paramref name="itemEquals"/>) will be replaced. If the items are
+  ///   complex and you want them updated instead of replaced, consider using
+  ///   <see cref="subModelSeq"/>.
+  /// </summary>
+  /// <param name="get">Gets the collection from the model.</param>
+  /// <param name="itemEquals">
+  ///   Indicates whether two collection items are equal. Good candidates are
+  ///   <c>elmEq</c>, <c>refEq</c>, or simply <c>(=)</c>.
+  /// </param>
   /// <param name="getId">Gets a unique identifier for a collection item.</param>
   static member oneWaySeq
-      (get: 'model -> #seq<'T>,
-       itemEquals: 'T -> 'T -> bool,
-       getId: 'T -> 'id,
-       [<Optional>] getGrouppingKey: 'T -> 'key)
+      (get: 'model -> #seq<'a>,
+       itemEquals: 'a -> 'a -> bool,
+       getId: 'a -> 'id,
+       getGrouppingKey: 'a -> 'key,
+       compareGrouppingKeys: 'key -> 'key -> int)
       : string -> Binding<'model, 'msg> =
-    let getGrouppingKey = (if obj.ReferenceEquals(getGrouppingKey, null) then ValueNone else ValueSome getGrouppingKey)
-    Binding.OneWaySeq.create id itemEquals getId getGrouppingKey
+    Binding.OneWaySeq.createGroupped id itemEquals getId getGrouppingKey compareGrouppingKeys
     >> Binding.addLazy refEq
     >> Binding.mapModel get
 
@@ -945,10 +1012,10 @@ type Binding private () =
   /// <param name="get">Gets the value from the model.</param>
   /// <param name="set">Returns the message to dispatch.</param>
   static member twoWay
-      (get: 'model -> 'T,
-       set: 'T -> 'model -> 'msg)
+      (get: 'model -> 'a,
+       set: 'a -> 'model -> 'msg)
       : string -> Binding<'model, 'msg> =
-    Binding.TwoWay.id<'T>
+    Binding.TwoWay.id<'a>
     >> Binding.addLazy (=)
     >> Binding.mapModel get
     >> Binding.mapMsgWithModel set
@@ -962,10 +1029,10 @@ type Binding private () =
   /// <param name="get">Gets the value from the model.</param>
   /// <param name="set">Returns the message to dispatch.</param>
   static member twoWayOpt
-      (get: 'model -> 'T option,
-       set: 'T option -> 'model -> 'msg)
+      (get: 'model -> 'a option,
+       set: 'a option -> 'model -> 'msg)
       : string -> Binding<'model, 'msg> =
-    Binding.TwoWay.opt<'T>
+    Binding.TwoWay.opt<'a>
     >> Binding.addLazy (=)
     >> Binding.mapModel get
     >> Binding.mapMsgWithModel set
@@ -981,7 +1048,7 @@ type Binding private () =
       (get: 'model -> 'a voption,
        set: 'a voption -> 'model -> 'msg)
       : string -> Binding<'model, 'msg> =
-    Binding.TwoWay.vopt<'T>
+    Binding.TwoWay.vopt<'a>
     >> Binding.addLazy (=)
     >> Binding.mapModel get
     >> Binding.mapMsgWithModel set
@@ -997,11 +1064,11 @@ type Binding private () =
   ///   Returns the validation messages from the updated model.
   /// </param>
   static member twoWayValidate
-      (get: 'model -> 'T,
-       set: 'T -> 'model -> 'msg,
+      (get: 'model -> 'a,
+       set: 'a -> 'model -> 'msg,
        validate: 'model -> string list)
       : string -> Binding<'model, 'msg> =
-    Binding.TwoWay.id<'T>
+    Binding.TwoWay.id<'a>
     >> Binding.addLazy (=)
     >> Binding.mapModel get
     >> Binding.mapMsgWithModel set
@@ -1017,11 +1084,11 @@ type Binding private () =
   ///   Returns the validation message from the updated model.
   /// </param>
   static member twoWayValidate
-      (get: 'model -> 'T,
-       set: 'T -> 'model -> 'msg,
+      (get: 'model -> 'a,
+       set: 'a -> 'model -> 'msg,
        validate: 'model -> string voption)
       : string -> Binding<'model, 'msg> =
-    Binding.TwoWay.id<'T>
+    Binding.TwoWay.id<'a>
     >> Binding.addLazy (=)
     >> Binding.mapModel get
     >> Binding.mapMsgWithModel set
@@ -1041,7 +1108,7 @@ type Binding private () =
        set: 'a -> 'model -> 'msg,
        validate: 'model -> string option)
       : string -> Binding<'model, 'msg> =
-    Binding.TwoWay.id<'T>
+    Binding.TwoWay.id<'a>
     >> Binding.addLazy (=)
     >> Binding.mapModel get
     >> Binding.mapMsgWithModel set
@@ -1061,7 +1128,7 @@ type Binding private () =
        set: 'a -> 'model -> 'msg,
        validate: 'model -> Result<'ignored, string>)
       : string -> Binding<'model, 'msg> =
-    Binding.TwoWay.id<'T>
+    Binding.TwoWay.id<'a>
     >> Binding.addLazy (=)
     >> Binding.mapModel get
     >> Binding.mapMsgWithModel set
@@ -1080,11 +1147,11 @@ type Binding private () =
   ///   Returns the validation messages from the updated model.
   /// </param>
   static member twoWayOptValidate
-      (get: 'model -> 'T voption,
-       set: 'T voption -> 'model -> 'msg,
+      (get: 'model -> 'a voption,
+       set: 'a voption -> 'model -> 'msg,
        validate: 'model -> string list)
       : string -> Binding<'model, 'msg> =
-    Binding.TwoWay.vopt<'T>
+    Binding.TwoWay.vopt<'a>
     >> Binding.addLazy (=)
     >> Binding.mapModel get
     >> Binding.mapMsgWithModel set
@@ -1102,11 +1169,11 @@ type Binding private () =
   ///   Returns the validation message from the updated model.
   /// </param>
   static member twoWayOptValidate
-      (get: 'model -> 'T voption,
-       set: 'T voption -> 'model -> 'msg,
+      (get: 'model -> 'a voption,
+       set: 'a voption -> 'model -> 'msg,
        validate: 'model -> string voption)
       : string -> Binding<'model, 'msg> =
-    Binding.TwoWay.vopt<'T>
+    Binding.TwoWay.vopt<'a>
     >> Binding.addLazy (=)
     >> Binding.mapModel get
     >> Binding.mapMsgWithModel set
@@ -1128,7 +1195,7 @@ type Binding private () =
        set: 'a voption -> 'model -> 'msg,
        validate: 'model -> string option)
       : string -> Binding<'model, 'msg> =
-    Binding.TwoWay.vopt<'T>
+    Binding.TwoWay.vopt<'a>
     >> Binding.addLazy (=)
     >> Binding.mapModel get
     >> Binding.mapMsgWithModel set
@@ -1150,7 +1217,7 @@ type Binding private () =
        set: 'a voption -> 'model -> 'msg,
        validate: 'model -> Result<'ignored, string>)
       : string -> Binding<'model, 'msg> =
-    Binding.TwoWay.vopt<'T>
+    Binding.TwoWay.vopt<'a>
     >> Binding.addLazy (=)
     >> Binding.mapModel get
     >> Binding.mapMsgWithModel set
@@ -1168,11 +1235,11 @@ type Binding private () =
   ///   Returns the validation messages from the updated model.
   /// </param>
   static member twoWayOptValidate
-      (get: 'model -> 'T option,
-       set: 'T option -> 'model -> 'msg,
+      (get: 'model -> 'a option,
+       set: 'a option -> 'model -> 'msg,
        validate: 'model -> string list)
       : string -> Binding<'model, 'msg> =
-    Binding.TwoWay.opt<'T>
+    Binding.TwoWay.opt<'a>
     >> Binding.addLazy (=)
     >> Binding.mapModel get
     >> Binding.mapMsgWithModel set
@@ -1190,11 +1257,11 @@ type Binding private () =
   ///   Returns the validation message from the updated model.
   /// </param>
   static member twoWayOptValidate
-      (get: 'model -> 'T option,
-       set: 'T option -> 'model -> 'msg,
+      (get: 'model -> 'a option,
+       set: 'a option -> 'model -> 'msg,
        validate: 'model -> string voption)
       : string -> Binding<'model, 'msg> =
-    Binding.TwoWay.opt<'T>
+    Binding.TwoWay.opt<'a>
     >> Binding.addLazy (=)
     >> Binding.mapModel get
     >> Binding.mapMsgWithModel set
@@ -1216,7 +1283,7 @@ type Binding private () =
        set: 'a option -> 'model -> 'msg,
        validate: 'model -> string option)
       : string -> Binding<'model, 'msg> =
-    Binding.TwoWay.opt<'T>
+    Binding.TwoWay.opt<'a>
     >> Binding.addLazy (=)
     >> Binding.mapModel get
     >> Binding.mapMsgWithModel set
@@ -1238,29 +1305,11 @@ type Binding private () =
        set: 'a option -> 'model -> 'msg,
        validate: 'model -> Result<'ignored, string>)
       : string -> Binding<'model, 'msg> =
-    Binding.TwoWay.opt<'T>
+    Binding.TwoWay.opt<'a>
     >> Binding.addLazy (=)
     >> Binding.mapModel get
     >> Binding.mapMsgWithModel set
     >> Binding.addValidation (validate >> ValueOption.ofError >> ValueOption.toList)
-
-  /// <summary>
-  ///   Creates a two-way binding to an optional value with validation using
-  ///   <c>INotifyDataErrorInfo</c>. The binding automatically converts between
-  ///   the optional source value and an unwrapped (possibly <c>null</c>) value
-  ///   on the view side.
-  /// </summary>
-  /// <param name="get">Gets the value from the model.</param>
-  /// <param name="set">Returns the message to dispatch.</param>
-  /// <param name="validate">
-  ///   Returns the validation message from the updated model.
-  /// </param>
-  static member twoWayOptValidate
-      (get: 'model -> 'a option,
-       set: 'a option -> 'msg,
-       validate: 'model -> Result<'ignored, string>)
-      : string -> Binding<'model, 'msg> =
-    Binding.twoWayOptValidate(get, (fun arg _ -> set arg), validate)
 
   /// <summary>
   ///   Creates a <c>Command</c> binding that depends only on the model (not the
@@ -2149,8 +2198,8 @@ module Extensions =
     /// <param name="get">Gets the value from the model.</param>
     /// <param name="set">Returns the message to dispatch.</param>
     static member twoWay
-        (get: 'model -> 'T,
-         set: 'T -> 'msg)
+        (get: 'model -> 'a,
+         set: 'a -> 'msg)
         : string -> Binding<'model, 'msg> =
       Binding.TwoWay.id<'a>
       >> Binding.addLazy (=)
@@ -2166,8 +2215,8 @@ module Extensions =
     /// <param name="get">Gets the value from the model.</param>
     /// <param name="set">Returns the message to dispatch.</param>
     static member twoWayOpt
-        (get: 'model -> 'T option,
-         set: 'T option -> 'msg)
+        (get: 'model -> 'a option,
+         set: 'a option -> 'msg)
         : string -> Binding<'model, 'msg> =
       Binding.TwoWay.opt<'a>
       >> Binding.addLazy (=)
@@ -2182,8 +2231,8 @@ module Extensions =
     /// <param name="get">Gets the value from the model.</param>
     /// <param name="set">Returns the message to dispatch.</param>
     static member twoWayOpt
-        (get: 'model -> 'T voption,
-         set: 'T voption -> 'msg)
+        (get: 'model -> 'a voption,
+         set: 'a voption -> 'msg)
         : string -> Binding<'model, 'msg> =
       Binding.TwoWay.vopt<'a>
       >> Binding.addLazy (=)
@@ -2201,8 +2250,8 @@ module Extensions =
     ///   Returns the validation messages from the updated model.
     /// </param>
     static member twoWayValidate
-        (get: 'model -> 'T,
-         set: 'T -> 'msg,
+        (get: 'model -> 'a,
+         set: 'a -> 'msg,
          validate: 'model -> string list)
         : string -> Binding<'model, 'msg> =
       Binding.TwoWay.id<'a>
@@ -2221,8 +2270,8 @@ module Extensions =
     ///   Returns the validation message from the updated model.
     /// </param>
     static member twoWayValidate
-        (get: 'model -> 'T,
-         set: 'T -> 'msg,
+        (get: 'model -> 'a,
+         set: 'a -> 'msg,
          validate: 'model -> string voption)
         : string -> Binding<'model, 'msg> =
       Binding.TwoWay.id<'a>
@@ -2242,8 +2291,8 @@ module Extensions =
     ///   Returns the validation message from the updated model.
     /// </param>
     static member twoWayValidate
-        (get: 'model -> 'T,
-         set: 'T -> 'msg,
+        (get: 'model -> 'a,
+         set: 'a -> 'msg,
          validate: 'model -> string option)
         : string -> Binding<'model, 'msg> =
       Binding.TwoWay.id<'a>
@@ -2262,8 +2311,8 @@ module Extensions =
     ///   Returns the validation message from the updated model.
     /// </param>
     static member twoWayValidate
-        (get: 'model -> 'T,
-         set: 'T -> 'msg,
+        (get: 'model -> 'a,
+         set: 'a -> 'msg,
          validate: 'model -> Result<'ignored, string>)
         : string -> Binding<'model, 'msg> =
       Binding.TwoWay.id<'a>
@@ -2284,8 +2333,8 @@ module Extensions =
     ///   Returns the validation messages from the updated model.
     /// </param>
     static member twoWayOptValidate
-        (get: 'model -> 'T voption,
-         set: 'T voption -> 'msg,
+        (get: 'model -> 'a voption,
+         set: 'a voption -> 'msg,
          validate: 'model -> string list)
         : string -> Binding<'model, 'msg> =
       Binding.TwoWay.vopt<'a>
@@ -2306,8 +2355,8 @@ module Extensions =
     ///   Returns the validation message from the updated model.
     /// </param>
     static member twoWayOptValidate
-        (get: 'model -> 'T voption,
-         set: 'T voption -> 'msg,
+        (get: 'model -> 'a voption,
+         set: 'a voption -> 'msg,
          validate: 'model -> string voption)
         : string -> Binding<'model, 'msg> =
       Binding.TwoWay.vopt<'a>
@@ -2328,8 +2377,8 @@ module Extensions =
     ///   Returns the validation message from the updated model.
     /// </param>
     static member twoWayOptValidate
-        (get: 'model -> 'T voption,
-         set: 'T voption -> 'msg,
+        (get: 'model -> 'a voption,
+         set: 'a voption -> 'msg,
          validate: 'model -> string option)
         : string -> Binding<'model, 'msg> =
       Binding.TwoWay.vopt<'a>
@@ -2350,8 +2399,8 @@ module Extensions =
     ///   Returns the validation message from the updated model.
     /// </param>
     static member twoWayOptValidate
-        (get: 'model -> 'T voption,
-         set: 'T voption -> 'msg,
+        (get: 'model -> 'a voption,
+         set: 'a voption -> 'msg,
          validate: 'model -> Result<'ignored, string>)
         : string -> Binding<'model, 'msg> =
       Binding.TwoWay.vopt<'a>
@@ -2372,8 +2421,8 @@ module Extensions =
     ///   Returns the validation messages from the updated model.
     /// </param>
     static member twoWayOptValidate
-        (get: 'model -> 'T option,
-         set: 'T option -> 'msg,
+        (get: 'model -> 'a option,
+         set: 'a option -> 'msg,
          validate: 'model -> string list)
         : string -> Binding<'model, 'msg> =
       Binding.TwoWay.opt<'a>
@@ -2394,8 +2443,8 @@ module Extensions =
     ///   Returns the validation message from the updated model.
     /// </param>
     static member twoWayOptValidate
-        (get: 'model -> 'T option,
-         set: 'T option -> 'msg,
+        (get: 'model -> 'a option,
+         set: 'a option -> 'msg,
          validate: 'model -> string voption)
         : string -> Binding<'model, 'msg> =
       Binding.TwoWay.opt<'a>
@@ -2416,8 +2465,8 @@ module Extensions =
     ///   Returns the validation message from the updated model.
     /// </param>
     static member twoWayOptValidate
-        (get: 'model -> 'T option,
-         set: 'T option -> 'msg,
+        (get: 'model -> 'a option,
+         set: 'a option -> 'msg,
          validate: 'model -> string option)
         : string -> Binding<'model, 'msg> =
       Binding.TwoWay.opt<'a>
@@ -2438,8 +2487,8 @@ module Extensions =
     ///   Returns the validation message from the updated model.
     /// </param>
     static member twoWayOptValidate
-        (get: 'model -> 'T option,
-         set: 'T option -> 'msg,
+        (get: 'model -> 'a option,
+         set: 'a option -> 'msg,
          validate: 'model -> Result<'ignored, string>)
         : string -> Binding<'model, 'msg> =
       Binding.TwoWay.opt<'a>

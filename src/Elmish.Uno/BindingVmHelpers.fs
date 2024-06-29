@@ -223,6 +223,7 @@ module internal MapOutputType =
           GetKey = b.OneWaySeqGrouppedData.GetKey
           CreateCollection = b.OneWaySeqGrouppedData.CreateCollection >> GrouppedCollectionTarget.mapCollection fOut
           GetId = b.OneWaySeqGrouppedData.GetId
+          KeyComparer = b.OneWaySeqGrouppedData.KeyComparer
           ItemEquals = b.OneWaySeqGrouppedData.ItemEquals }
         Values = b.Values |> GrouppedCollectionTarget.mapCollection fOut }
     | SubModel b -> SubModel {

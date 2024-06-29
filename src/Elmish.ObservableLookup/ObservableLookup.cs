@@ -40,6 +40,12 @@ public class ObservableLookup<TKey, TElement> : IMutableLookup<TKey, TElement>, 
         }
     }
 
+    public SortedDictionary<TKey, ObservableGrouping<TKey, TElement>>.KeyCollection Keys => groupings.Keys;
+
+    public IComparer<TKey> Comparer => groupings.Comparer;
+
+    private int CountIndex (TKey key) => this.groupings.Keys.Count(k => this.groupings.Comparer.Compare(k, key) > 0);
+
     /// <summary>
     /// Adds <paramref name="element"/> under the specified <paramref name="key"/>. <paramref name="key"/> does not need to exist.
     /// </summary>
@@ -53,7 +59,7 @@ public class ObservableLookup<TKey, TElement> : IMutableLookup<TKey, TElement>, 
                 grouping = new ObservableGrouping<TKey, TElement>(key);
 
             this.groupings.Add(key, grouping!);
-            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, (object?)grouping, this.groupings.Count - 1));
+            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, (object?)grouping, CountIndex(key)));
         }
 
         grouping!.Add(element);
@@ -78,7 +84,7 @@ public class ObservableLookup<TKey, TElement> : IMutableLookup<TKey, TElement>, 
             }
 
             this.groupings.Add(key, grouping);
-            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, (object)grouping, this.groupings.Count - 1));
+            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, (object)grouping, CountIndex(key)));
         }
     }
 
@@ -87,22 +93,23 @@ public class ObservableLookup<TKey, TElement> : IMutableLookup<TKey, TElement>, 
         grouping = grouping ?? throw new ArgumentNullException(nameof(grouping));
 
         ObservableGrouping<TKey, TElement>? og = null;
-        if (ReuseGroups && !this.oldGroups!.TryGetValueAndRemove(grouping.Key, out og))
+        var key = grouping.Key;
+        if (ReuseGroups && !this.oldGroups!.TryGetValueAndRemove(key, out og))
         {
-            og = new ObservableGrouping<TKey, TElement>(grouping.Key);
+            og = new ObservableGrouping<TKey, TElement>(key);
         }
 
         og!.AddRange(grouping);
         if (og!.Count == 0)
         {
             if (ReuseGroups)
-                this.oldGroups!.Add(grouping.Key, og);
+                this.oldGroups!.Add(key, og);
 
             return;
         }
 
-        this.groupings.Add(grouping.Key, og);
-        OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, (object)og, this.groupings.Count - 1));
+        this.groupings.Add(key, og);
+        OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, (object)og, CountIndex(key)));
     }
 
     //public void Insert(int index, IGrouping<TKey, TElement> grouping)
@@ -158,8 +165,7 @@ public class ObservableLookup<TKey, TElement> : IMutableLookup<TKey, TElement>, 
                 this.oldGroups!.Add(key, g);
             }
 
-            var index = this.groupings.Keys.Count(k => this.groupings.Comparer.Compare(k, key) > 0);
-            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, (object?)g, index));
+            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, (object?)g, CountIndex(key)));
             return true;
         }
 
@@ -197,6 +203,22 @@ public class ObservableLookup<TKey, TElement> : IMutableLookup<TKey, TElement>, 
         }
     }
 
+    /// <summary>
+    /// Gets the elements for <paramref name="key"/>.
+    /// </summary>
+    /// <param name="key">The key to get the elements for.</param>
+    /// <returns>The elements under <paramref name="key"/>.</returns>
+    public ObservableGrouping<TKey, TElement> this[TKey key]
+    {
+        get
+        {
+            if (this.groupings.TryGetValue(key, out var grouping))
+                return grouping;
+            else
+                throw new KeyNotFoundException();
+        }
+    }
+
     #region ILookup Members
     /// <summary>
     /// Gets the number of groupings.
@@ -210,7 +232,7 @@ public class ObservableLookup<TKey, TElement> : IMutableLookup<TKey, TElement>, 
             if (index < 0 || index >= Count)
                 throw new ArgumentOutOfRangeException(nameof(index));
 
-            return (IGroupingList<TKey, TElement>)this[index];
+            return (IGroupingList<TKey, TElement>)groupings.Skip(index).First().Value;
         }
     }
 
@@ -219,7 +241,7 @@ public class ObservableLookup<TKey, TElement> : IMutableLookup<TKey, TElement>, 
     /// </summary>
     /// <param name="key">The key to get the elements for.</param>
     /// <returns>The elements under <paramref name="key"/>.</returns>
-    public IEnumerable<TElement> this[TKey key]
+    IEnumerable<TElement> ILookup<TKey, TElement>.this[TKey key]
     {
         get
         {
@@ -227,16 +249,6 @@ public class ObservableLookup<TKey, TElement> : IMutableLookup<TKey, TElement>, 
                 return grouping;
 
             return Enumerable.Empty<TElement>();
-        }
-    }
-
-    public IEnumerable<TElement> this[int index]
-    {
-        get
-        {
-            if (index < 0 || index > this.groupings.Count)
-                throw new ArgumentOutOfRangeException(nameof(index));
-            return this.groupings.Skip(index).FirstOrDefault().Value;
         }
     }
 

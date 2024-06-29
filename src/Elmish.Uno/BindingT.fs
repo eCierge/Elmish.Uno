@@ -1,6 +1,8 @@
 ﻿namespace Elmish.Uno
 
 open Elmish
+open Elmish.ObservableLookup
+open System
 open System.Collections.ObjectModel
 open System.Runtime.InteropServices
 open System.Windows.Input
@@ -53,8 +55,22 @@ type BindingT private () =
   /// <param name="get">Gets the value from the model.</param>
   static member oneWayOpt
       (get: 'model -> 'a option)
-      : string -> Binding<'model, 'msg, 'a> =
+      : string -> Binding<'model, 'msg, Nullable<'a>> =
     Binding.OneWayT.opt<'a, 'msg>
+    >> Binding.addLazy (=)
+    >> Binding.mapModel get
+
+  /// <summary>
+  ///   Creates a one-way binding to an optional value. The binding
+  ///   automatically converts between the optional source value and an
+  ///   unwrapped (possibly
+  ///   <c>null</c>) value on the view side.
+  /// </summary>
+  /// <param name="get">Gets the value from the model.</param>
+  static member oneWayOpt
+      (get: 'model -> 'a voption)
+      : string -> Binding<'model, 'msg, Nullable<'a>> =
+    Binding.OneWayT.vopt<'a, 'msg>
     >> Binding.addLazy (=)
     >> Binding.mapModel get
 
@@ -66,10 +82,24 @@ type BindingT private () =
   ///   <c>null</c>) value on the view side.
   /// </summary>
   /// <param name="get">Gets the value from the model.</param>
-  static member oneWayOpt
+  static member oneWayOptObj
+      (get: 'model -> 'a option)
+      : string -> Binding<'model, 'msg, 'a> =
+    Binding.OneWayT.optobj<'a, 'msg>
+    >> Binding.addLazy (=)
+    >> Binding.mapModel get
+
+  /// <summary>
+  ///   Creates a one-way binding to an optional value. The binding
+  ///   automatically converts between the optional source value and an
+  ///   unwrapped (possibly
+  ///   <c>null</c>) value on the view side.
+  /// </summary>
+  /// <param name="get">Gets the value from the model.</param>
+  static member oneWayOptObj
       (get: 'model -> 'a voption)
       : string -> Binding<'model, 'msg, 'a> =
-    Binding.OneWayT.vopt<'a, 'msg>
+    Binding.OneWayT.voptobj<'a, 'msg>
     >> Binding.addLazy (=)
     >> Binding.mapModel get
 
@@ -122,13 +152,12 @@ type BindingT private () =
       (get: 'model -> 'a,
        equals: 'a -> 'a -> bool,
        map: 'a -> 'b option)
-      : string -> Binding<'model, 'msg, 'b> =
+      : string -> Binding<'model, 'msg, Nullable<'b>> =
     Binding.OneWayT.opt<'b, 'msg>
     >> Binding.mapModel map
     >> Binding.addLazy equals
     >> Binding.mapModel get
     >> Binding.addCaching
-
 
   /// <summary>
   ///   Creates a lazily evaluated one-way binding to an optional value. The
@@ -152,8 +181,67 @@ type BindingT private () =
       (get: 'model -> 'a,
        equals: 'a -> 'a -> bool,
        map: 'a -> 'b voption)
-      : string -> Binding<'model, 'msg, 'b> =
+      : string -> Binding<'model, 'msg, Nullable<'b>> =
     Binding.OneWayT.vopt<'b, 'msg>
+    >> Binding.mapModel map
+    >> Binding.addLazy equals
+    >> Binding.mapModel get
+    >> Binding.addCaching
+
+
+  /// <summary>
+  ///   Creates a lazily evaluated one-way binding to an optional value. The
+  ///   binding automatically converts between the optional source value and an
+  ///   unwrapped (possibly <c>null</c>) value on the view side. <paramref
+  ///   name="map" /> will be called only when the output of <paramref
+  ///   name="get" /> changes, as determined by <paramref name="equals" />.
+  ///
+  ///   This may have better performance than a non-lazy binding for expensive
+  ///   computations (but may be less performant for non-expensive functions due
+  ///   to additional overhead).
+  /// </summary>
+  /// <param name="get">Gets the intermediate value from the model.</param>
+  /// <param name="equals">
+  ///   Indicates whether two intermediate values are equal. Good candidates are
+  ///   <c>elmEq</c> and <c>refEq</c>.
+  /// </param>
+  /// <param name="map">Transforms the intermediate value into the final
+  /// type.</param>
+  static member oneWayOptObjLazy
+      (get: 'model -> 'a,
+       equals: 'a -> 'a -> bool,
+       map: 'a -> 'b option)
+      : string -> Binding<'model, 'msg, 'b> =
+    Binding.OneWayT.optobj<'b, 'msg>
+    >> Binding.mapModel map
+    >> Binding.addLazy equals
+    >> Binding.mapModel get
+    >> Binding.addCaching
+
+  /// <summary>
+  ///   Creates a lazily evaluated one-way binding to an optional value. The
+  ///   binding automatically converts between the optional source value and an
+  ///   unwrapped (possibly <c>null</c>) value on the view side. <paramref
+  ///   name="map" /> will be called only when the output of <paramref
+  ///   name="get" /> changes, as determined by <paramref name="equals" />.
+  ///
+  ///   This may have better performance than a non-lazy binding for expensive
+  ///   computations (but may be less performant for non-expensive functions due
+  ///   to additional overhead).
+  /// </summary>
+  /// <param name="get">Gets the value from the model.</param>
+  /// <param name="equals">
+  ///   Indicates whether two intermediate values are equal. Good candidates are
+  ///   <c>elmEq</c> and <c>refEq</c>.
+  /// </param>
+  /// <param name="map">Transforms the intermediate value into the final
+  /// type.</param>
+  static member oneWayOptObjLazy
+      (get: 'model -> 'a,
+       equals: 'a -> 'a -> bool,
+       map: 'a -> 'b voption)
+      : string -> Binding<'model, 'msg, 'b> =
+    Binding.OneWayT.voptobj<'b, 'msg>
     >> Binding.mapModel map
     >> Binding.addLazy equals
     >> Binding.mapModel get
@@ -181,17 +269,50 @@ type BindingT private () =
   ///   <c>elmEq</c>, <c>refEq</c>, or simply <c>(=)</c>.
   /// </param>
   /// <param name="getId">Gets a unique identifier for a collection item.</param>
+  static member oneWaySeqLazy
+      (get: 'model -> 'a,
+       equals: 'a -> 'a -> bool,
+       map: 'a -> seq<'b>,
+       itemEquals: 'b -> 'b -> bool,
+       getId: 'b -> 'id)
+      : string -> Binding<'model, 'msg, ObservableCollection<'b>> =
+    Binding.OneWaySeqT.create map itemEquals getId
+    >> Binding.addLazy equals
+    >> Binding.mapModel get
+
+  /// <summary>
+  ///   Creates a one-way binding to a sequence of items, each uniquely
+  ///   identified by the value returned by <paramref name="getId"/>. The
+  ///   binding will not be updated if the output of <paramref name="get"/>
+  ///   does not change, as determined by <paramref name="equals"/>.
+  ///   The binding is backed by a persistent <c>ObservableCollection</c>, so
+  ///   only changed items (as determined by <paramref name="itemEquals"/>)
+  ///   will be replaced. If the items are complex and you want them updated
+  ///   instead of replaced, consider using <see cref="subModelSeq"/>.
+  /// </summary>
+  /// <param name="get">Gets the intermediate value from the model.</param>
+  /// <param name="equals">
+  ///   Indicates whether two intermediate values are equal. Good candidates are
+  ///   <c>elmEq</c> and <c>refEq</c>.
+  /// </param>
+  /// <param name="map">Transforms the value into the final collection.</param>
+  /// <param name="itemEquals">
+  ///   Indicates whether two collection items are equal. Good candidates are
+  ///   <c>elmEq</c>, <c>refEq</c>, or simply <c>(=)</c>.
+  /// </param>
+  /// <param name="getId">Gets a unique identifier for a collection item.</param>
   /// <param name="getGrouppingKey">Gets a key used to group items.</param>
+  /// <param name="compareKeys">Compares two keys.</param>
   static member oneWaySeqLazy
       (get: 'model -> 'a,
        equals: 'a -> 'a -> bool,
        map: 'a -> seq<'b>,
        itemEquals: 'b -> 'b -> bool,
        getId: 'b -> 'id,
-       [<Optional>] getGrouppingKey: 'b -> 'key)
-      : string -> Binding<'model, 'msg, ObservableCollection<'b>> =
-    let getGrouppingKey = (if obj.ReferenceEquals(getGrouppingKey, null) then ValueNone else ValueSome getGrouppingKey)
-    Binding.OneWaySeqT.createCore map itemEquals getId getGrouppingKey
+       getGrouppingKey: 'b -> 'key,
+       compareKeys: 'key -> 'key -> int)
+      : string -> Binding<'model, 'msg, ObservableLookup<'key, 'b>> =
+    Binding.OneWaySeqT.createGroupped map itemEquals getId getGrouppingKey compareKeys
     >> Binding.addLazy equals
     >> Binding.mapModel get
 
@@ -214,15 +335,43 @@ type BindingT private () =
   ///   <c>elmEq</c>, <c>refEq</c>, or simply <c>(=)</c>.
   /// </param>
   /// <param name="getId">Gets a unique identifier for a collection item.</param>
+  static member oneWaySeq
+      (get: 'model -> seq<'a>,
+       itemEquals: 'a -> 'a -> bool,
+       getId: 'a -> 'id)
+      : string -> Binding<'model, 'msg, ObservableCollection<'a>> =
+    Binding.OneWaySeqT.create id itemEquals getId
+    >> Binding.addLazy refEq
+    >> Binding.mapModel get
+
+  /// <summary>
+  ///   Creates a one-way binding to a sequence of items, each uniquely
+  ///   identified by the value returned by <paramref name="getId"/>. The
+  ///   binding will not be updated if the output of <paramref name="get"/>
+  ///   is referentially equal. This is the same as calling
+  ///   <see cref="oneWaySeqLazy"/> with <c>equals = refEq</c> and
+  ///   <c>map = id</c>. The binding is backed by a persistent
+  ///   <c>ObservableCollection</c>, so only changed items (as determined by
+  ///   <paramref name="itemEquals"/>) will be replaced. If the items are
+  ///   complex and you want them updated instead of replaced, consider using
+  ///   <see cref="subModelSeq"/>.
+  /// </summary>
+  /// <param name="get">Gets the collection from the model.</param>
+  /// <param name="itemEquals">
+  ///   Indicates whether two collection items are equal. Good candidates are
+  ///   <c>elmEq</c>, <c>refEq</c>, or simply <c>(=)</c>.
+  /// </param>
+  /// <param name="getId">Gets a unique identifier for a collection item.</param>
   /// <param name="getGrouppingKey">Gets a key used to group items.</param>
+  /// <param name="compareKeys">Compares two keys.</param>
   static member oneWaySeq
       (get: 'model -> seq<'a>,
        itemEquals: 'a -> 'a -> bool,
        getId: 'a -> 'id,
-       [<Optional>] getGrouppingKey: 'a -> 'GrouppingKey)
-      : string -> Binding<'model, 'msg, ObservableCollection<'a>> =
-    let getGrouppingKey = (if obj.ReferenceEquals(getGrouppingKey, null) then ValueNone else ValueSome getGrouppingKey)
-    Binding.OneWaySeqT.createCore id itemEquals getId getGrouppingKey
+       getGrouppingKey: 'a -> 'key,
+       compareKeys: 'key -> 'key -> int)
+      : string -> Binding<'model, 'msg, ObservableLookup<'key, 'a>> =
+    Binding.OneWaySeqT.createGroupped id itemEquals getId getGrouppingKey compareKeys
     >> Binding.addLazy refEq
     >> Binding.mapModel get
 
@@ -239,16 +388,6 @@ type BindingT private () =
     >> Binding.mapModel get
     >> Binding.mapMsgWithModel setWithModel
 
-  /// <summary>Creates a two-way binding.</summary>
-  /// <param name="get">Gets the value from the model.</param>
-  /// <param name="set">Returns the message to dispatch.</param>
-  static member twoWay
-      (get: 'model -> 'a,
-       set: 'a -> 'msg)
-      : string -> Binding<'model, 'msg, 'a> =
-    BindingT.twoWay (get, (fun arg _ -> set arg))
-
-
   /// <summary>
   ///   Creates a two-way binding to an optional value. The binding
   ///   automatically converts between the optional source value and an
@@ -259,24 +398,11 @@ type BindingT private () =
   static member twoWayOpt
       (getOpt: 'model -> 'a option,
        setWithModel: 'a option -> 'model -> 'msg)
-      : string -> Binding<'model, 'msg, 'a> =
+      : string -> Binding<'model, 'msg, Nullable<'a>> =
     Binding.TwoWayT.opt<'a>
     >> Binding.addLazy (=)
     >> Binding.mapModel getOpt
     >> Binding.mapMsgWithModel setWithModel
-
-  /// <summary>
-  ///   Creates a two-way binding to an optional value. The binding
-  ///   automatically converts between the optional source value and an
-  ///   unwrapped (possibly <c>null</c>) value on the view side.
-  /// </summary>
-  /// <param name="get">Gets the value from the model.</param>
-  /// <param name="set">Returns the message to dispatch.</param>
-  static member twoWayOpt
-      (get: 'model -> 'a option,
-       set: 'a option -> 'msg)
-      : string -> Binding<'model, 'msg, 'a> =
-    BindingT.twoWayOpt (get, (fun arg _ -> set arg))
 
 
   /// <summary>
@@ -289,7 +415,7 @@ type BindingT private () =
   static member twoWayOpt
       (getVOpt: 'model -> 'a voption,
        setWithModel: 'a voption -> 'model -> 'msg)
-      : string -> Binding<'model, 'msg, 'a> =
+      : string -> Binding<'model, 'msg, Nullable<'a>> =
     Binding.TwoWayT.vopt<'a>
     >> Binding.addLazy (=)
     >> Binding.mapModel getVOpt
@@ -301,13 +427,31 @@ type BindingT private () =
   ///   unwrapped (possibly <c>null</c>) value on the view side.
   /// </summary>
   /// <param name="get">Gets the value from the model.</param>
-  /// <param name="set">Returns the message to dispatch.</param>
-  static member twoWayOpt
-      (get: 'model -> 'a voption,
-       set: 'a voption -> 'msg)
+  /// <param name="setWithModel">Returns the message to dispatch.</param>
+  static member twoWayOptObj
+      (getOpt: 'model -> 'a option,
+       setWithModel: 'a option -> 'model -> 'msg)
       : string -> Binding<'model, 'msg, 'a> =
-    BindingT.twoWayOpt (get, (fun arg _ -> set arg))
+    Binding.TwoWayT.optobj<'a>
+    >> Binding.addLazy (=)
+    >> Binding.mapModel getOpt
+    >> Binding.mapMsgWithModel setWithModel
 
+  /// <summary>
+  ///   Creates a two-way binding to an optional value. The binding
+  ///   automatically converts between the optional source value and an
+  ///   unwrapped (possibly <c>null</c>) value on the view side.
+  /// </summary>
+  /// <param name="get">Gets the value from the model.</param>
+  /// <param name="set">Returns the message to dispatch.</param>
+  static member twoWayOptObj
+      (getVOpt: 'model -> 'a voption,
+       setWithModel: 'a voption -> 'model -> 'msg)
+      : string -> Binding<'model, 'msg, 'a> =
+    Binding.TwoWayT.voptobj<'a>
+    >> Binding.addLazy (=)
+    >> Binding.mapModel getVOpt
+    >> Binding.mapMsgWithModel setWithModel
 
   /// <summary>
   ///   Creates a two-way binding with validation using
@@ -334,22 +478,6 @@ type BindingT private () =
   ///   <c>INotifyDataErrorInfo</c>.
   /// </summary>
   /// <param name="get">Gets the value from the model.</param>
-  /// <param name="set">Returns the message to dispatch.</param>
-  /// <param name="validate">
-  ///   Returns the validation messages from the updated model.
-  /// </param>
-  static member twoWayValidate
-      (get: 'model -> 'a,
-       set: 'a -> 'msg,
-       validate: 'model -> string list)
-      : string -> Binding<'model, 'msg, 'a> =
-    BindingT.twoWayValidate(get, (fun arg _ -> set arg), validate)
-
-  /// <summary>
-  ///   Creates a two-way binding with validation using
-  ///   <c>INotifyDataErrorInfo</c>.
-  /// </summary>
-  /// <param name="get">Gets the value from the model.</param>
   /// <param name="setWithModel">Returns the message to dispatch.</param>
   /// <param name="validate">
   ///   Returns the validation message from the updated model.
@@ -364,23 +492,6 @@ type BindingT private () =
     >> Binding.mapModel get
     >> Binding.mapMsgWithModel setWithModel
     >> Binding.addValidation (validate >> ValueOption.toList)
-
-  /// <summary>
-  ///   Creates a two-way binding with validation using
-  ///   <c>INotifyDataErrorInfo</c>.
-  /// </summary>
-  /// <param name="get">Gets the value from the model.</param>
-  /// <param name="set">Returns the message to dispatch.</param>
-  /// <param name="validate">
-  ///   Returns the validation message from the updated model.
-  /// </param>
-  static member twoWayValidate
-      (get: 'model -> 'a,
-       set: 'a -> 'msg,
-       validate: 'model -> string voption)
-      : string -> Binding<'model, 'msg, 'a> =
-    BindingT.twoWayValidate(get, (fun arg _ -> set arg), validate)
-
 
   /// <summary>
   ///   Creates a two-way binding with validation using
@@ -407,23 +518,6 @@ type BindingT private () =
   ///   <c>INotifyDataErrorInfo</c>.
   /// </summary>
   /// <param name="get">Gets the value from the model.</param>
-  /// <param name="set">Returns the message to dispatch.</param>
-  /// <param name="validate">
-  ///   Returns the validation message from the updated model.
-  /// </param>
-  static member twoWayValidate
-      (get: 'model -> 'a,
-       set: 'a -> 'msg,
-       validate: 'model -> string option)
-      : string -> Binding<'model, 'msg, 'a> =
-    BindingT.twoWayValidate(get, (fun arg _ -> set arg), validate)
-
-
-  /// <summary>
-  ///   Creates a two-way binding with validation using
-  ///   <c>INotifyDataErrorInfo</c>.
-  /// </summary>
-  /// <param name="get">Gets the value from the model.</param>
   /// <param name="setWithModel">Returns the message to dispatch.</param>
   /// <param name="validate">
   ///   Returns the validation message from the updated model.
@@ -438,22 +532,6 @@ type BindingT private () =
     >> Binding.mapModel get
     >> Binding.mapMsgWithModel setWithModel
     >> Binding.addValidation (validate >> ValueOption.ofError >> ValueOption.toList)
-
-  /// <summary>
-  ///   Creates a two-way binding with validation using
-  ///   <c>INotifyDataErrorInfo</c>.
-  /// </summary>
-  /// <param name="get">Gets the value from the model.</param>
-  /// <param name="set">Returns the message to dispatch.</param>
-  /// <param name="validate">
-  ///   Returns the validation message from the updated model.
-  /// </param>
-  static member twoWayValidate
-      (get: 'model -> 'a,
-       set: 'a -> 'msg,
-       validate: 'model -> Result<'ignored, string>)
-      : string -> Binding<'model, 'msg, 'a> =
-    BindingT.twoWayValidate(get, (fun arg _ -> set arg), validate)
 
 
   /// <summary>
@@ -471,7 +549,7 @@ type BindingT private () =
       (getVOpt: 'model -> 'a voption,
        setWithModel: 'a voption -> 'model -> 'msg,
        validate: 'model -> string list)
-      : string -> Binding<'model, 'msg, 'a> =
+      : string -> Binding<'model, 'msg, Nullable<'a>> =
     Binding.TwoWayT.vopt<'a>
     >> Binding.addLazy (=)
     >> Binding.mapModel getVOpt
@@ -485,25 +563,6 @@ type BindingT private () =
   ///   on the view side.
   /// </summary>
   /// <param name="get">Gets the value from the model.</param>
-  /// <param name="set">Returns the message to dispatch.</param>
-  /// <param name="validate">
-  ///   Returns the validation messages from the updated model.
-  /// </param>
-  static member twoWayOptValidate
-      (get: 'model -> 'a voption,
-       set: 'a voption -> 'msg,
-       validate: 'model -> string list)
-      : string -> Binding<'model, 'msg, 'a> =
-    BindingT.twoWayOptValidate(get, (fun arg _ -> set arg), validate)
-
-
-  /// <summary>
-  ///   Creates a two-way binding to an optional value with validation using
-  ///   <c>INotifyDataErrorInfo</c>. The binding automatically converts between
-  ///   the optional source value and an unwrapped (possibly <c>null</c>) value
-  ///   on the view side.
-  /// </summary>
-  /// <param name="get">Gets the value from the model.</param>
   /// <param name="setWithModel">Returns the message to dispatch.</param>
   /// <param name="validate">
   ///   Returns the validation message from the updated model.
@@ -512,7 +571,7 @@ type BindingT private () =
       (get: 'model -> 'a voption,
        setWithModel: 'a voption -> 'model -> 'msg,
        validate: 'model -> string voption)
-      : string -> Binding<'model, 'msg, 'a> =
+      : string -> Binding<'model, 'msg, Nullable<'a>> =
     Binding.TwoWayT.vopt<'a>
     >> Binding.addLazy (=)
     >> Binding.mapModel get
@@ -526,25 +585,6 @@ type BindingT private () =
   ///   on the view side.
   /// </summary>
   /// <param name="get">Gets the value from the model.</param>
-  /// <param name="set">Returns the message to dispatch.</param>
-  /// <param name="validate">
-  ///   Returns the validation message from the updated model.
-  /// </param>
-  static member twoWayOptValidate
-      (get: 'model -> 'a voption,
-       set: 'a voption -> 'msg,
-       validate: 'model -> string voption)
-      : string -> Binding<'model, 'msg, 'a> =
-    BindingT.twoWayOptValidate(get, (fun arg _ -> set arg), validate)
-
-
-  /// <summary>
-  ///   Creates a two-way binding to an optional value with validation using
-  ///   <c>INotifyDataErrorInfo</c>. The binding automatically converts between
-  ///   the optional source value and an unwrapped (possibly <c>null</c>) value
-  ///   on the view side.
-  /// </summary>
-  /// <param name="get">Gets the value from the model.</param>
   /// <param name="setWithModel">Returns the message to dispatch.</param>
   /// <param name="validate">
   ///   Returns the validation message from the updated model.
@@ -553,7 +593,7 @@ type BindingT private () =
       (get: 'model -> 'a voption,
        setWithModel: 'a voption -> 'model -> 'msg,
        validate: 'model -> string option)
-      : string -> Binding<'model, 'msg, 'a> =
+      : string -> Binding<'model, 'msg, Nullable<'a>> =
     Binding.TwoWayT.vopt<'a>
     >> Binding.addLazy (=)
     >> Binding.mapModel get
@@ -567,25 +607,6 @@ type BindingT private () =
   ///   on the view side.
   /// </summary>
   /// <param name="get">Gets the value from the model.</param>
-  /// <param name="set">Returns the message to dispatch.</param>
-  /// <param name="validate">
-  ///   Returns the validation message from the updated model.
-  /// </param>
-  static member twoWayOptValidate
-      (get: 'model -> 'a voption,
-       set: 'a voption -> 'msg,
-       validate: 'model -> string option)
-      : string -> Binding<'model, 'msg, 'a> =
-    BindingT.twoWayOptValidate(get, (fun arg _ -> set arg), validate)
-
-
-  /// <summary>
-  ///   Creates a two-way binding to an optional value with validation using
-  ///   <c>INotifyDataErrorInfo</c>. The binding automatically converts between
-  ///   the optional source value and an unwrapped (possibly <c>null</c>) value
-  ///   on the view side.
-  /// </summary>
-  /// <param name="get">Gets the value from the model.</param>
   /// <param name="setWithModel">Returns the message to dispatch.</param>
   /// <param name="validate">
   ///   Returns the validation message from the updated model.
@@ -594,31 +615,12 @@ type BindingT private () =
       (get: 'model -> 'a voption,
        setWithModel: 'a voption -> 'model -> 'msg,
        validate: 'model -> Result<'ignored, string>)
-      : string -> Binding<'model, 'msg, 'a> =
+      : string -> Binding<'model, 'msg, Nullable<'a>> =
     Binding.TwoWayT.vopt<'a>
     >> Binding.addLazy (=)
     >> Binding.mapModel get
     >> Binding.mapMsgWithModel setWithModel
     >> Binding.addValidation (validate >> ValueOption.ofError >> ValueOption.toList)
-
-  /// <summary>
-  ///   Creates a two-way binding to an optional value with validation using
-  ///   <c>INotifyDataErrorInfo</c>. The binding automatically converts between
-  ///   the optional source value and an unwrapped (possibly <c>null</c>) value
-  ///   on the view side.
-  /// </summary>
-  /// <param name="get">Gets the value from the model.</param>
-  /// <param name="set">Returns the message to dispatch.</param>
-  /// <param name="validate">
-  ///   Returns the validation message from the updated model.
-  /// </param>
-  static member twoWayOptValidate
-      (get: 'model -> 'a voption,
-       set: 'a voption -> 'msg,
-       validate: 'model -> Result<'ignored, string>)
-      : string -> Binding<'model, 'msg, 'a> =
-    BindingT.twoWayOptValidate(get, (fun arg _ -> set arg), validate)
-
 
   /// <summary>
   ///   Creates a two-way binding to an optional value with validation using
@@ -635,7 +637,7 @@ type BindingT private () =
       (get: 'model -> 'a option,
        setWithModel: 'a option -> 'model -> 'msg,
        validate: 'model -> string list)
-      : string -> Binding<'model, 'msg, 'a> =
+      : string -> Binding<'model, 'msg, Nullable<'a>> =
     Binding.TwoWayT.opt<'a>
     >> Binding.addLazy (=)
     >> Binding.mapModel get
@@ -649,25 +651,6 @@ type BindingT private () =
   ///   on the view side.
   /// </summary>
   /// <param name="get">Gets the value from the model.</param>
-  /// <param name="set">Returns the message to dispatch.</param>
-  /// <param name="validate">
-  ///   Returns the validation messages from the updated model.
-  /// </param>
-  static member twoWayOptValidate
-      (get: 'model -> 'a option,
-       set: 'a option -> 'msg,
-       validate: 'model -> string list)
-      : string -> Binding<'model, 'msg, 'a> =
-    BindingT.twoWayOptValidate(get, (fun arg _ -> set arg), validate)
-
-
-  /// <summary>
-  ///   Creates a two-way binding to an optional value with validation using
-  ///   <c>INotifyDataErrorInfo</c>. The binding automatically converts between
-  ///   the optional source value and an unwrapped (possibly <c>null</c>) value
-  ///   on the view side.
-  /// </summary>
-  /// <param name="get">Gets the value from the model.</param>
   /// <param name="setWithModel">Returns the message to dispatch.</param>
   /// <param name="validate">
   ///   Returns the validation message from the updated model.
@@ -676,7 +659,7 @@ type BindingT private () =
       (get: 'model -> 'a option,
        setWithModel: 'a option -> 'model -> 'msg,
        validate: 'model -> string voption)
-      : string -> Binding<'model, 'msg, 'a> =
+      : string -> Binding<'model, 'msg, Nullable<'a>> =
     Binding.TwoWayT.opt<'a>
     >> Binding.addLazy (=)
     >> Binding.mapModel get
@@ -690,25 +673,6 @@ type BindingT private () =
   ///   on the view side.
   /// </summary>
   /// <param name="get">Gets the value from the model.</param>
-  /// <param name="set">Returns the message to dispatch.</param>
-  /// <param name="validate">
-  ///   Returns the validation message from the updated model.
-  /// </param>
-  static member twoWayOptValidate
-      (get: 'model -> 'a option,
-       set: 'a option -> 'msg,
-       validate: 'model -> string voption)
-      : string -> Binding<'model, 'msg, 'a> =
-    BindingT.twoWayOptValidate(get, (fun arg _ -> set arg), validate)
-
-
-  /// <summary>
-  ///   Creates a two-way binding to an optional value with validation using
-  ///   <c>INotifyDataErrorInfo</c>. The binding automatically converts between
-  ///   the optional source value and an unwrapped (possibly <c>null</c>) value
-  ///   on the view side.
-  /// </summary>
-  /// <param name="get">Gets the value from the model.</param>
   /// <param name="setWithModel">Returns the message to dispatch.</param>
   /// <param name="validate">
   ///   Returns the validation message from the updated model.
@@ -717,7 +681,7 @@ type BindingT private () =
       (get: 'model -> 'a option,
        setWithModel: 'a option -> 'model -> 'msg,
        validate: 'model -> string option)
-      : string -> Binding<'model, 'msg, 'a> =
+      : string -> Binding<'model, 'msg, Nullable<'a>> =
     Binding.TwoWayT.opt<'a>
     >> Binding.addLazy (=)
     >> Binding.mapModel get
@@ -731,17 +695,43 @@ type BindingT private () =
   ///   on the view side.
   /// </summary>
   /// <param name="get">Gets the value from the model.</param>
-  /// <param name="set">Returns the message to dispatch.</param>
+  /// <param name="setWithModel">Returns the message to dispatch.</param>
   /// <param name="validate">
   ///   Returns the validation message from the updated model.
   /// </param>
   static member twoWayOptValidate
       (get: 'model -> 'a option,
-       set: 'a option -> 'msg,
-       validate: 'model -> string option)
-      : string -> Binding<'model, 'msg, 'a> =
-    BindingT.twoWayOptValidate(get, (fun arg _ -> set arg), validate)
+       setWithModel: 'a option -> 'model -> 'msg,
+       validate: 'model -> Result<'ignored, string>)
+      : string -> Binding<'model, 'msg, Nullable<'a>> =
+    Binding.TwoWayT.opt<'a>
+    >> Binding.addLazy (=)
+    >> Binding.mapModel get
+    >> Binding.mapMsgWithModel setWithModel
+    >> Binding.addValidation (validate >> ValueOption.ofError >> ValueOption.toList)
 
+
+  /// <summary>
+  ///   Creates a two-way binding to an optional value with validation using
+  ///   <c>INotifyDataErrorInfo</c>. The binding automatically converts between
+  ///   the optional source value and an unwrapped (possibly <c>null</c>) value
+  ///   on the view side.
+  /// </summary>
+  /// <param name="get">Gets the value from the model.</param>
+  /// <param name="setWithModel">Returns the message to dispatch.</param>
+  /// <param name="validate">
+  ///   Returns the validation messages from the updated model.
+  /// </param>
+  static member twoWayOptObjValidate
+      (getVOpt: 'model -> 'a voption,
+       setWithModel: 'a voption -> 'model -> 'msg,
+       validate: 'model -> string list)
+      : string -> Binding<'model, 'msg, 'a> =
+    Binding.TwoWayT.voptobj<'a>
+    >> Binding.addLazy (=)
+    >> Binding.mapModel getVOpt
+    >> Binding.mapMsgWithModel setWithModel
+    >> Binding.addValidation validate
 
   /// <summary>
   ///   Creates a two-way binding to an optional value with validation using
@@ -754,12 +744,56 @@ type BindingT private () =
   /// <param name="validate">
   ///   Returns the validation message from the updated model.
   /// </param>
-  static member twoWayOptValidate
-      (get: 'model -> 'a option,
-       setWithModel: 'a option -> 'model -> 'msg,
+  static member twoWayOptObjValidate
+      (get: 'model -> 'a voption,
+       setWithModel: 'a voption -> 'model -> 'msg,
+       validate: 'model -> string voption)
+      : string -> Binding<'model, 'msg, 'a> =
+    Binding.TwoWayT.voptobj<'a>
+    >> Binding.addLazy (=)
+    >> Binding.mapModel get
+    >> Binding.mapMsgWithModel setWithModel
+    >> Binding.addValidation (validate >> ValueOption.toList)
+
+  /// <summary>
+  ///   Creates a two-way binding to an optional value with validation using
+  ///   <c>INotifyDataErrorInfo</c>. The binding automatically converts between
+  ///   the optional source value and an unwrapped (possibly <c>null</c>) value
+  ///   on the view side.
+  /// </summary>
+  /// <param name="get">Gets the value from the model.</param>
+  /// <param name="setWithModel">Returns the message to dispatch.</param>
+  /// <param name="validate">
+  ///   Returns the validation message from the updated model.
+  /// </param>
+  static member twoWayOptObjValidate
+      (get: 'model -> 'a voption,
+       setWithModel: 'a voption -> 'model -> 'msg,
+       validate: 'model -> string option)
+      : string -> Binding<'model, 'msg, 'a> =
+    Binding.TwoWayT.voptobj<'a>
+    >> Binding.addLazy (=)
+    >> Binding.mapModel get
+    >> Binding.mapMsgWithModel setWithModel
+    >> Binding.addValidation (validate >> Option.toList)
+
+  /// <summary>
+  ///   Creates a two-way binding to an optional value with validation using
+  ///   <c>INotifyDataErrorInfo</c>. The binding automatically converts between
+  ///   the optional source value and an unwrapped (possibly <c>null</c>) value
+  ///   on the view side.
+  /// </summary>
+  /// <param name="get">Gets the value from the model.</param>
+  /// <param name="setWithModel">Returns the message to dispatch.</param>
+  /// <param name="validate">
+  ///   Returns the validation message from the updated model.
+  /// </param>
+  static member twoWayOptObjValidate
+      (get: 'model -> 'a voption,
+       setWithModel: 'a voption -> 'model -> 'msg,
        validate: 'model -> Result<'ignored, string>)
       : string -> Binding<'model, 'msg, 'a> =
-    Binding.TwoWayT.opt<'a>
+    Binding.TwoWayT.voptobj<'a>
     >> Binding.addLazy (=)
     >> Binding.mapModel get
     >> Binding.mapMsgWithModel setWithModel
@@ -772,16 +806,86 @@ type BindingT private () =
   ///   on the view side.
   /// </summary>
   /// <param name="get">Gets the value from the model.</param>
-  /// <param name="set">Returns the message to dispatch.</param>
+  /// <param name="setWithModel">Returns the message to dispatch.</param>
+  /// <param name="validate">
+  ///   Returns the validation messages from the updated model.
+  /// </param>
+  static member twoWayOptObjValidate
+      (get: 'model -> 'a option,
+       setWithModel: 'a option -> 'model -> 'msg,
+       validate: 'model -> string list)
+      : string -> Binding<'model, 'msg, 'a> =
+    Binding.TwoWayT.optobj<'a>
+    >> Binding.addLazy (=)
+    >> Binding.mapModel get
+    >> Binding.mapMsgWithModel setWithModel
+    >> Binding.addValidation validate
+
+  /// <summary>
+  ///   Creates a two-way binding to an optional value with validation using
+  ///   <c>INotifyDataErrorInfo</c>. The binding automatically converts between
+  ///   the optional source value and an unwrapped (possibly <c>null</c>) value
+  ///   on the view side.
+  /// </summary>
+  /// <param name="get">Gets the value from the model.</param>
+  /// <param name="setWithModel">Returns the message to dispatch.</param>
   /// <param name="validate">
   ///   Returns the validation message from the updated model.
   /// </param>
-  static member twoWayOptValidate
+  static member twoWayOptObjValidate
       (get: 'model -> 'a option,
-       set: 'a option -> 'msg,
+       setWithModel: 'a option -> 'model -> 'msg,
+       validate: 'model -> string voption)
+      : string -> Binding<'model, 'msg, 'a> =
+    Binding.TwoWayT.optobj<'a>
+    >> Binding.addLazy (=)
+    >> Binding.mapModel get
+    >> Binding.mapMsgWithModel setWithModel
+    >> Binding.addValidation (validate >> ValueOption.toList)
+
+  /// <summary>
+  ///   Creates a two-way binding to an optional value with validation using
+  ///   <c>INotifyDataErrorInfo</c>. The binding automatically converts between
+  ///   the optional source value and an unwrapped (possibly <c>null</c>) value
+  ///   on the view side.
+  /// </summary>
+  /// <param name="get">Gets the value from the model.</param>
+  /// <param name="setWithModel">Returns the message to dispatch.</param>
+  /// <param name="validate">
+  ///   Returns the validation message from the updated model.
+  /// </param>
+  static member twoWayOptObjValidate
+      (get: 'model -> 'a option,
+       setWithModel: 'a option -> 'model -> 'msg,
+       validate: 'model -> string option)
+      : string -> Binding<'model, 'msg, 'a> =
+    Binding.TwoWayT.optobj<'a>
+    >> Binding.addLazy (=)
+    >> Binding.mapModel get
+    >> Binding.mapMsgWithModel setWithModel
+    >> Binding.addValidation (validate >> Option.toList)
+
+  /// <summary>
+  ///   Creates a two-way binding to an optional value with validation using
+  ///   <c>INotifyDataErrorInfo</c>. The binding automatically converts between
+  ///   the optional source value and an unwrapped (possibly <c>null</c>) value
+  ///   on the view side.
+  /// </summary>
+  /// <param name="get">Gets the value from the model.</param>
+  /// <param name="setWithModel">Returns the message to dispatch.</param>
+  /// <param name="validate">
+  ///   Returns the validation message from the updated model.
+  /// </param>
+  static member twoWayOptObjValidate
+      (get: 'model -> 'a option,
+       setWithModel: 'a option -> 'model -> 'msg,
        validate: 'model -> Result<'ignored, string>)
       : string -> Binding<'model, 'msg, 'a> =
-    BindingT.twoWayOptValidate(get, (fun arg _ -> set arg), validate)
+    Binding.TwoWayT.optobj<'a>
+    >> Binding.addLazy (=)
+    >> Binding.mapModel get
+    >> Binding.mapMsgWithModel setWithModel
+    >> Binding.addValidation (validate >> ValueOption.ofError >> ValueOption.toList)
 
 
   /// <summary>
@@ -1803,7 +1907,7 @@ module ExtensionsT =
     static member twoWayOpt
         (get: 'model -> 'a option,
          set: 'a option -> 'msg)
-        : string -> Binding<'model, 'msg, 'a> =
+        : string -> Binding<'model, 'msg, Nullable<'a>> =
       Binding.TwoWayT.opt<'a>
       >> Binding.addLazy (=)
       >> Binding.mapModel get
@@ -1819,8 +1923,40 @@ module ExtensionsT =
     static member twoWayOpt
         (get: 'model -> 'a voption,
          set: 'a voption -> 'msg)
-        : string -> Binding<'model, 'msg, 'a> =
+        : string -> Binding<'model, 'msg, Nullable<'a>> =
       Binding.TwoWayT.vopt<'a>
+      >> Binding.addLazy (=)
+      >> Binding.mapModel get
+      >> Binding.mapMsg set
+
+    /// <summary>
+    ///   Creates a two-way binding to an optional value. The binding
+    ///   automatically converts between the optional source value and an
+    ///   unwrapped (possibly <c>null</c>) value on the view side.
+    /// </summary>
+    /// <param name="get">Gets the value from the model.</param>
+    /// <param name="set">Returns the message to dispatch.</param>
+    static member twoWayOptObj
+        (get: 'model -> 'a option,
+         set: 'a option -> 'msg)
+        : string -> Binding<'model, 'msg, 'a> =
+      Binding.TwoWayT.optobj<'a>
+      >> Binding.addLazy (=)
+      >> Binding.mapModel get
+      >> Binding.mapMsg set
+
+    /// <summary>
+    ///   Creates a two-way binding to an optional value. The binding
+    ///   automatically converts between the optional source value and an
+    ///   unwrapped (possibly <c>null</c>) value on the view side.
+    /// </summary>
+    /// <param name="get">Gets the value from the model.</param>
+    /// <param name="set">Returns the message to dispatch.</param>
+    static member twoWayOptObj
+        (get: 'model -> 'a voption,
+         set: 'a voption -> 'msg)
+        : string -> Binding<'model, 'msg, 'a> =
+      Binding.TwoWayT.voptobj<'a>
       >> Binding.addLazy (=)
       >> Binding.mapModel get
       >> Binding.mapMsg set
@@ -1920,7 +2056,7 @@ module ExtensionsT =
         (get: 'model -> 'a voption,
          set: 'a voption -> 'msg,
          validate: 'model -> string list)
-        : string -> Binding<'model, 'msg, 'a> =
+        : string -> Binding<'model, 'msg, Nullable<'a>> =
       Binding.TwoWayT.vopt<'a>
       >> Binding.addLazy (=)
       >> Binding.mapModel get
@@ -1942,7 +2078,7 @@ module ExtensionsT =
         (get: 'model -> 'a voption,
          set: 'a voption -> 'msg,
          validate: 'model -> string voption)
-        : string -> Binding<'model, 'msg, 'a> =
+        : string -> Binding<'model, 'msg, Nullable<'a>> =
       Binding.TwoWayT.vopt<'a>
       >> Binding.addLazy (=)
       >> Binding.mapModel get
@@ -1964,7 +2100,7 @@ module ExtensionsT =
         (get: 'model -> 'a voption,
          set: 'a voption -> 'msg,
          validate: 'model -> string option)
-        : string -> Binding<'model, 'msg, 'a> =
+        : string -> Binding<'model, 'msg, Nullable<'a>> =
       Binding.TwoWayT.vopt<'a>
       >> Binding.addLazy (=)
       >> Binding.mapModel get
@@ -1986,12 +2122,13 @@ module ExtensionsT =
         (get: 'model -> 'a voption,
          set: 'a voption -> 'msg,
          validate: 'model -> Result<'ignored, string>)
-        : string -> Binding<'model, 'msg, 'a> =
+        : string -> Binding<'model, 'msg, Nullable<'a>> =
       Binding.TwoWayT.vopt<'a>
       >> Binding.addLazy (=)
       >> Binding.mapModel get
       >> Binding.mapMsg set
       >> Binding.addValidation (validate >> ValueOption.ofError >> ValueOption.toList)
+
 
     /// <summary>
     ///   Creates a two-way binding to an optional value with validation using
@@ -2008,7 +2145,7 @@ module ExtensionsT =
         (get: 'model -> 'a option,
          set: 'a option -> 'msg,
          validate: 'model -> string list)
-        : string -> Binding<'model, 'msg, 'a> =
+        : string -> Binding<'model, 'msg, Nullable<'a>> =
       Binding.TwoWayT.opt<'a>
       >> Binding.addLazy (=)
       >> Binding.mapModel get
@@ -2030,7 +2167,7 @@ module ExtensionsT =
         (get: 'model -> 'a option,
          set: 'a option -> 'msg,
          validate: 'model -> string voption)
-        : string -> Binding<'model, 'msg, 'a> =
+        : string -> Binding<'model, 'msg, Nullable<'a>> =
       Binding.TwoWayT.opt<'a>
       >> Binding.addLazy (=)
       >> Binding.mapModel get
@@ -2052,7 +2189,7 @@ module ExtensionsT =
         (get: 'model -> 'a option,
          set: 'a option -> 'msg,
          validate: 'model -> string option)
-        : string -> Binding<'model, 'msg, 'a> =
+        : string -> Binding<'model, 'msg, Nullable<'a>> =
       Binding.TwoWayT.opt<'a>
       >> Binding.addLazy (=)
       >> Binding.mapModel get
@@ -2074,8 +2211,184 @@ module ExtensionsT =
         (get: 'model -> 'a option,
          set: 'a option -> 'msg,
          validate: 'model -> Result<'ignored, string>)
-        : string -> Binding<'model, 'msg, 'a> =
+        : string -> Binding<'model, 'msg, Nullable<'a>> =
       Binding.TwoWayT.opt<'a>
+      >> Binding.addLazy (=)
+      >> Binding.mapModel get
+      >> Binding.mapMsg set
+      >> Binding.addValidation (validate >> ValueOption.ofError >> ValueOption.toList)
+
+    /// <summary>
+    ///   Creates a two-way binding to an optional value with validation using
+    ///   <c>INotifyDataErrorInfo</c>. The binding automatically converts
+    ///   between the optional source value and an unwrapped (possibly
+    ///   <c>null</c>) value on the view side.
+    /// </summary>
+    /// <param name="get">Gets the value from the model.</param>
+    /// <param name="set">Returns the message to dispatch.</param>
+    /// <param name="validate">
+    ///   Returns the validation messages from the updated model.
+    /// </param>
+    static member twoWayOptObjValidate
+        (get: 'model -> 'a voption,
+         set: 'a voption -> 'msg,
+         validate: 'model -> string list)
+        : string -> Binding<'model, 'msg, 'a> =
+      Binding.TwoWayT.voptobj<'a>
+      >> Binding.addLazy (=)
+      >> Binding.mapModel get
+      >> Binding.mapMsg set
+      >> Binding.addValidation validate
+
+    /// <summary>
+    ///   Creates a two-way binding to an optional value with validation using
+    ///   <c>INotifyDataErrorInfo</c>. The binding automatically converts
+    ///   between the optional source value and an unwrapped (possibly
+    ///   <c>null</c>) value on the view side.
+    /// </summary>
+    /// <param name="get">Gets the value from the model.</param>
+    /// <param name="set">Returns the message to dispatch.</param>
+    /// <param name="validate">
+    ///   Returns the validation message from the updated model.
+    /// </param>
+    static member twoWayOptObjValidate
+        (get: 'model -> 'a voption,
+         set: 'a voption -> 'msg,
+         validate: 'model -> string voption)
+        : string -> Binding<'model, 'msg, 'a> =
+      Binding.TwoWayT.voptobj<'a>
+      >> Binding.addLazy (=)
+      >> Binding.mapModel get
+      >> Binding.mapMsg set
+      >> Binding.addValidation (validate >> ValueOption.toList)
+
+    /// <summary>
+    ///   Creates a two-way binding to an optional value with validation using
+    ///   <c>INotifyDataErrorInfo</c>. The binding automatically converts
+    ///   between the optional source value and an unwrapped (possibly
+    ///   <c>null</c>) value on the view side.
+    /// </summary>
+    /// <param name="get">Gets the value from the model.</param>
+    /// <param name="set">Returns the message to dispatch.</param>
+    /// <param name="validate">
+    ///   Returns the validation message from the updated model.
+    /// </param>
+    static member twoWayOptObjValidate
+        (get: 'model -> 'a voption,
+         set: 'a voption -> 'msg,
+         validate: 'model -> string option)
+        : string -> Binding<'model, 'msg, 'a> =
+      Binding.TwoWayT.voptobj<'a>
+      >> Binding.addLazy (=)
+      >> Binding.mapModel get
+      >> Binding.mapMsg set
+      >> Binding.addValidation (validate >> Option.toList)
+
+    /// <summary>
+    ///   Creates a two-way binding to an optional value with validation using
+    ///   <c>INotifyDataErrorInfo</c>. The binding automatically converts
+    ///   between the optional source value and an unwrapped (possibly
+    ///   <c>null</c>) value on the view side.
+    /// </summary>
+    /// <param name="get">Gets the value from the model.</param>
+    /// <param name="set">Returns the message to dispatch.</param>
+    /// <param name="validate">
+    ///   Returns the validation message from the updated model.
+    /// </param>
+    static member twoWayOptObjValidate
+        (get: 'model -> 'a voption,
+         set: 'a voption -> 'msg,
+         validate: 'model -> Result<'ignored, string>)
+        : string -> Binding<'model, 'msg, 'a> =
+      Binding.TwoWayT.voptobj<'a>
+      >> Binding.addLazy (=)
+      >> Binding.mapModel get
+      >> Binding.mapMsg set
+      >> Binding.addValidation (validate >> ValueOption.ofError >> ValueOption.toList)
+
+    /// <summary>
+    ///   Creates a two-way binding to an optional value with validation using
+    ///   <c>INotifyDataErrorInfo</c>. The binding automatically converts
+    ///   between the optional source value and an unwrapped (possibly
+    ///   <c>null</c>) value on the view side.
+    /// </summary>
+    /// <param name="get">Gets the value from the model.</param>
+    /// <param name="set">Returns the message to dispatch.</param>
+    /// <param name="validate">
+    ///   Returns the validation messages from the updated model.
+    /// </param>
+    static member twoWayOptObjValidate
+        (get: 'model -> 'a option,
+         set: 'a option -> 'msg,
+         validate: 'model -> string list)
+        : string -> Binding<'model, 'msg, 'a> =
+      Binding.TwoWayT.optobj<'a>
+      >> Binding.addLazy (=)
+      >> Binding.mapModel get
+      >> Binding.mapMsg set
+      >> Binding.addValidation validate
+
+    /// <summary>
+    ///   Creates a two-way binding to an optional value with validation using
+    ///   <c>INotifyDataErrorInfo</c>. The binding automatically converts
+    ///   between the optional source value and an unwrapped (possibly
+    ///   <c>null</c>) value on the view side.
+    /// </summary>
+    /// <param name="get">Gets the value from the model.</param>
+    /// <param name="set">Returns the message to dispatch.</param>
+    /// <param name="validate">
+    ///   Returns the validation message from the updated model.
+    /// </param>
+    static member twoWayOptObjValidate
+        (get: 'model -> 'a option,
+         set: 'a option -> 'msg,
+         validate: 'model -> string voption)
+        : string -> Binding<'model, 'msg, 'a> =
+      Binding.TwoWayT.optobj<'a>
+      >> Binding.addLazy (=)
+      >> Binding.mapModel get
+      >> Binding.mapMsg set
+      >> Binding.addValidation (validate >> ValueOption.toList)
+
+    /// <summary>
+    ///   Creates a two-way binding to an optional value with validation using
+    ///   <c>INotifyDataErrorInfo</c>. The binding automatically converts
+    ///   between the optional source value and an unwrapped (possibly
+    ///   <c>null</c>) value on the view side.
+    /// </summary>
+    /// <param name="get">Gets the value from the model.</param>
+    /// <param name="set">Returns the message to dispatch.</param>
+    /// <param name="validate">
+    ///   Returns the validation message from the updated model.
+    /// </param>
+    static member twoWayOptObjValidate
+        (get: 'model -> 'a option,
+         set: 'a option -> 'msg,
+         validate: 'model -> string option)
+        : string -> Binding<'model, 'msg, 'a> =
+      Binding.TwoWayT.optobj<'a>
+      >> Binding.addLazy (=)
+      >> Binding.mapModel get
+      >> Binding.mapMsg set
+      >> Binding.addValidation (validate >> Option.toList)
+
+    /// <summary>
+    ///   Creates a two-way binding to an optional value with validation using
+    ///   <c>INotifyDataErrorInfo</c>. The binding automatically converts
+    ///   between the optional source value and an unwrapped (possibly
+    ///   <c>null</c>) value on the view side.
+    /// </summary>
+    /// <param name="get">Gets the value from the model.</param>
+    /// <param name="set">Returns the message to dispatch.</param>
+    /// <param name="validate">
+    ///   Returns the validation message from the updated model.
+    /// </param>
+    static member twoWayOptObjValidate
+        (get: 'model -> 'a option,
+         set: 'a option -> 'msg,
+         validate: 'model -> Result<'ignored, string>)
+        : string -> Binding<'model, 'msg, 'a> =
+      Binding.TwoWayT.optobj<'a>
       >> Binding.addLazy (=)
       >> Binding.mapModel get
       >> Binding.mapMsg set
