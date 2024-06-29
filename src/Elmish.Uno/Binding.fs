@@ -5,8 +5,9 @@
 open System.Windows
 
 open Elmish
-open System.Windows.Input
 open System.Collections.ObjectModel
+open System.Runtime.InteropServices
+open System.Windows.Input
 open Microsoft.UI.Xaml
 
 
@@ -160,6 +161,7 @@ module Binding =
       |> mapMsg Option.ofNullable
       |> mapModel Option.toNullable
 
+
     /// Creates a two-way binding to an optional value. The binding
     /// automatically converts between a missing value in the model and
     /// a <c>null</c> value in the view.
@@ -174,7 +176,7 @@ module Binding =
     /// a <c>null</c> value in the view.
     let optobj<'a when 'a : null> : string -> Binding<'a option, 'a option, 'a> =
       id<'a>
-      >> mapModel Option.toObj
+      >> mapModel (function Some v -> v | None -> Unchecked.defaultof<'a>)
       >> mapMsg Option.ofObj
 
     /// Creates a two-way binding to an optional value. The binding
@@ -182,8 +184,8 @@ module Binding =
     /// a <c>null</c> value in the view.
     let voptobj<'a when 'a : null> : string -> Binding<'a voption, 'a voption, 'a> =
       id<'a>
+      >> mapModel (function ValueSome v -> v | ValueNone -> Unchecked.defaultof<'a>)
       >> mapMsg ValueOption.ofObj
-      >> mapModel ValueOption.toObj
 
   /// <summary>
   ///   The strongly-typed counterpart of <c>Binding.oneWaySeq</c> with parameter <c>getId</c>.
@@ -198,31 +200,26 @@ module Binding =
     /// </summary>
     /// <param name="itemEquals">Defines whether an item is "equal" and needs to be updated if the ids are the same</param>
     /// <param name="getId">Unique identifier for each item in the list (for efficient updates).</param>
+    /// <param name="get">Returns the items to bind to.</param>
+    /// <param name="getGrouppingKey">Returns the key to group the items by.</param>
+    let internal createCore<'T, 'item, 'id, 'GrouppingKey, 'msg when 'id : equality and 'GrouppingKey : equality> (get : 'T -> 'item seq) itemEquals (getId : 'item -> 'id) (getGrouppingKey : ('item -> 'GrouppingKey) voption) : string -> Binding<'T, 'msg, ObservableCollection<'item>> =
+      match getGrouppingKey with
+      | ValueNone -> OneWaySeq.create itemEquals getId
+      | ValueSome getGrouppingKey -> OneWaySeqGroupped.create itemEquals getId getGrouppingKey
+      |> BindingData.mapModel get
+      |> createBindingT
+
+    /// Elemental instance of a one-way-seq binding.
+    let create<'T, 'item, 'id, 'msg when 'id : equality> get itemEquals (getId : 'item -> 'id) : string -> Binding<'T, 'msg, ObservableCollection<'item>> =
+      createCore<'T, 'item, 'id, obj, 'msg> get itemEquals getId ValueNone
+
+    /// Elemental instance of a one-way-seq binding.
+    let createGroupped<'T, 'item, 'id, 'GrouppingKey, 'msg when 'id : equality and 'GrouppingKey : equality> get itemEquals (getId : 'item -> 'id) (getGrouppingKey : 'item -> 'GrouppingKey) : string -> Binding<'T, 'msg, ObservableCollection<'item>> =
+      createCore<'T, 'item, 'id, 'GrouppingKey, 'msg> get itemEquals getId (ValueSome getGrouppingKey)
+
     let id itemEquals (getId: 'a -> 'id) : string -> Binding<_, 'msg, _> =
       OneWaySeq.create itemEquals getId
       |> createBindingT
-
-    /// Elemental instance of a two-way binding.
-    let req<'T> : string -> Binding<'T, 'T, 'T> =
-      TwoWay.id
-      |> BindingData.addLazy (=)
-      |> createBindingT
-
-    /// Creates a two-way binding to an optional value. The binding
-    /// automatically converts between a missing value in the model and
-    /// a <c>null</c> value in the view.
-    let opt<'T> : string -> Binding<'T option, 'T option, 'T> =
-      req<'T>
-      >> mapModel (function Some v -> v | None -> Unchecked.defaultof<'T>)
-      >> mapMsg (fun msg -> if obj.Equals(msg, Unchecked.defaultof<'T>) then None else Some msg)
-
-    /// Creates a two-way binding to an optional value. The binding
-    /// automatically converts between a missing value in the model and
-    /// a <c>null</c> value in the view.
-    let vopt<'T> : string -> Binding<'T voption, 'T voption, 'T> =
-      req<'T>
-      >> mapModel (function ValueSome v -> v | ValueNone -> Unchecked.defaultof<'T>)
-      >> mapMsg (fun msg -> if obj.Equals(msg, Unchecked.defaultof<'T>) then ValueNone else ValueSome msg)
 
   /// <summary>
   ///   Strongly-typed bindings that dispatch messages from the view.
@@ -473,8 +470,10 @@ module Binding =
 
   module OneWaySeq =
 
-    let internal create get itemEquals getId =
-      OneWaySeq.create itemEquals getId
+    let internal create get itemEquals getId getGrouppingKey =
+      match getGrouppingKey with
+      | ValueNone -> OneWaySeq.create itemEquals getId
+      | ValueSome getGrouppingKey -> OneWaySeqGroupped.create itemEquals getId getGrouppingKey
       |> BindingData.mapModel get
       |> createBinding
 
@@ -896,16 +895,18 @@ type Binding private () =
   ///   Indicates whether two collection items are equal. Good candidates are
   ///   <c>elmEq</c>, <c>refEq</c>, or simply <c>(=)</c>.
   /// </param>
-  /// <param name="getId">Gets a unique identifier for a collection
-  /// item.</param>
+  /// <param name="getId">Gets a unique identifier for a collection item.</param>
+  /// <param name="getGrouppingKey">Gets a key used to group items.</param>
   static member oneWaySeqLazy
       (get: 'model -> 'T,
        equals: 'T -> 'T -> bool,
        map: 'T -> #seq<'b>,
        itemEquals: 'b -> 'b -> bool,
-       getId: 'b -> 'id)
+       getId: 'b -> 'id,
+       [<Optional>] getGrouppingKey: 'b -> 'key)
       : string -> Binding<'model, 'msg> =
-    Binding.OneWaySeq.create map itemEquals getId
+    let getGrouppingKey = (if obj.ReferenceEquals(getGrouppingKey, null) then ValueNone else ValueSome getGrouppingKey)
+    Binding.OneWaySeq.create map itemEquals getId getGrouppingKey
     >> Binding.addLazy equals
     >> Binding.mapModel get
 
@@ -927,14 +928,15 @@ type Binding private () =
   ///   Indicates whether two collection items are equal. Good candidates are
   ///   <c>elmEq</c>, <c>refEq</c>, or simply <c>(=)</c>.
   /// </param>
-  /// <param name="getId">Gets a unique identifier for a collection
-  /// item.</param>
+  /// <param name="getId">Gets a unique identifier for a collection item.</param>
   static member oneWaySeq
       (get: 'model -> #seq<'T>,
        itemEquals: 'T -> 'T -> bool,
-       getId: 'T -> 'id)
+       getId: 'T -> 'id,
+       [<Optional>] getGrouppingKey: 'T -> 'key)
       : string -> Binding<'model, 'msg> =
-    Binding.OneWaySeq.create id itemEquals getId
+    let getGrouppingKey = (if obj.ReferenceEquals(getGrouppingKey, null) then ValueNone else ValueSome getGrouppingKey)
+    Binding.OneWaySeq.create id itemEquals getId getGrouppingKey
     >> Binding.addLazy refEq
     >> Binding.mapModel get
 

@@ -302,6 +302,9 @@ and GetCustomProperty(name: string) =
     | OneWaySeq _ ->
       DynamicCustomProperty<DynamicViewModel<'model,'msg>, System.Collections.IList>(name,
         fun vm -> vm.TryGetMemberCore(name, rootBinding) :?> _) :> _
+    | OneWaySeqGroupped _ ->
+      DynamicCustomProperty<DynamicViewModel<'model,'msg>, System.Collections.IList>(name,
+        fun vm -> vm.TryGetMemberCore(name, rootBinding) :?> _) :> _
     | Cmd _ ->
       DynamicCustomProperty<DynamicViewModel<'model,'msg>, System.Windows.Input.ICommand>(name,
         fun vm -> vm.TryGetMemberCore(name, rootBinding) :?> _) :> _

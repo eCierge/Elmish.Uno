@@ -36,6 +36,8 @@ Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Elmish.Uno", "src\Elmish.Un
 EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Elmish.Uno.Benchmarks", "src\Elmish.Uno.Benchmarks\Elmish.Uno.Benchmarks.fsproj", "{C93125F9-42BF-468F-9F31-B493C7916FD0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elmish.ObservableLookup", "src\Elmish.ObservableLookup\Elmish.ObservableLookup.csproj", "{8D4C0FBF-8FBB-4A1B-8495-C6C9D1BD382B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -54,6 +56,10 @@ Global
 		{C93125F9-42BF-468F-9F31-B493C7916FD0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C93125F9-42BF-468F-9F31-B493C7916FD0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C93125F9-42BF-468F-9F31-B493C7916FD0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8D4C0FBF-8FBB-4A1B-8495-C6C9D1BD382B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8D4C0FBF-8FBB-4A1B-8495-C6C9D1BD382B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8D4C0FBF-8FBB-4A1B-8495-C6C9D1BD382B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8D4C0FBF-8FBB-4A1B-8495-C6C9D1BD382B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

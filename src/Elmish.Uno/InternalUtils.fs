@@ -14,6 +14,8 @@ let ignore2 _ _ = ()
 let (|Kvp|) (kvp: KeyValuePair<_,_>) =
   Kvp (kvp.Key, kvp.Value)
 
+let fstv struct (fst, _) = fst
+let sndv struct (_, snd) = snd
 
 [<Struct>]
 type OptionalBuilder =

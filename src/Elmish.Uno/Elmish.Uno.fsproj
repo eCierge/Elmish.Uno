@@ -1,9 +1,8 @@
 ﻿<Project Sdk="Uno.Sdk">
   <PropertyGroup>
-    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows')) or '$(EnableWindowsTargeting)' == 'true'">$(DotNetVersion)-windows10.0.22621;$(TargetFrameworks)</TargetFrameworks>
-    <TargetFrameworks>$(DotNetVersion);$(TargetFrameworks)</TargetFrameworks>
-    <TargetFrameworks Condition="'$(OverrideTargetFramework)'!=''">$(OverrideTargetFramework)</TargetFrameworks>
-
+    <TargetFrameworks>$(DotNetVersion);$(DotNetVersion)-windows10.0.22621</TargetFrameworks>
+    <UnoSingleProject>true</UnoSingleProject>
+    <OutputType>Library</OutputType>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
 
     <!-- Ensures the .xr.xml files are generated in a proper layout folder -->
@@ -18,7 +17,7 @@
       the "Microsoft.Windows.SDK.BuildTools" package above, and the "revision" version number
       must be the highest found in https://www.nuget.org/packages/Microsoft.Windows.SDK.NET.Ref.
     -->
-    <!-- <WindowsSdkPackageVersion>10.0.22621.31</WindowsSdkPackageVersion> -->
+    <!-- <WindowsSdkPackageVersion>10.0.26100.31</WindowsSdkPackageVersion> -->
 
     <Description>Elmish implementation for WInUI and Uno Platform</Description>
 
@@ -85,6 +84,10 @@
     <PackageReference Include="FsToolkit.ErrorHandling" />
     <PackageReference Include="Microsoft.Extensions.Logging" />
     <PackageReference Include="System.Private.Uri" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Elmish.ObservableLookup\Elmish.ObservableLookup.csproj" />
   </ItemGroup>
 
   <Target Name="XamlPreCompile" Condition="$(TargetFramework.Contains('windows10'))" />

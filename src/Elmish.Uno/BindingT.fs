@@ -1,9 +1,10 @@
 ﻿namespace Elmish.Uno
 
 open Elmish
+open System.Collections.ObjectModel
+open System.Runtime.InteropServices
 open System.Windows.Input
 open Microsoft.UI.Xaml
-open System.Collections.ObjectModel
 
 [<AbstractClass; Sealed>]
 type BindingT private () =
@@ -179,16 +180,18 @@ type BindingT private () =
   ///   Indicates whether two collection items are equal. Good candidates are
   ///   <c>elmEq</c>, <c>refEq</c>, or simply <c>(=)</c>.
   /// </param>
-  /// <param name="getId">Gets a unique identifier for a collection
-  /// item.</param>
+  /// <param name="getId">Gets a unique identifier for a collection item.</param>
+  /// <param name="getGrouppingKey">Gets a key used to group items.</param>
   static member oneWaySeqLazy
       (get: 'model -> 'a,
        equals: 'a -> 'a -> bool,
        map: 'a -> seq<'b>,
        itemEquals: 'b -> 'b -> bool,
-       getId: 'b -> 'id)
+       getId: 'b -> 'id,
+       [<Optional>] getGrouppingKey: 'b -> 'key)
       : string -> Binding<'model, 'msg, ObservableCollection<'b>> =
-    Binding.OneWaySeqT.create map itemEquals getId
+    let getGrouppingKey = (if obj.ReferenceEquals(getGrouppingKey, null) then ValueNone else ValueSome getGrouppingKey)
+    Binding.OneWaySeqT.createCore map itemEquals getId getGrouppingKey
     >> Binding.addLazy equals
     >> Binding.mapModel get
 
@@ -210,14 +213,16 @@ type BindingT private () =
   ///   Indicates whether two collection items are equal. Good candidates are
   ///   <c>elmEq</c>, <c>refEq</c>, or simply <c>(=)</c>.
   /// </param>
-  /// <param name="getId">Gets a unique identifier for a collection
-  /// item.</param>
+  /// <param name="getId">Gets a unique identifier for a collection item.</param>
+  /// <param name="getGrouppingKey">Gets a key used to group items.</param>
   static member oneWaySeq
       (get: 'model -> seq<'a>,
        itemEquals: 'a -> 'a -> bool,
-       getId: 'a -> 'id)
+       getId: 'a -> 'id,
+       [<Optional>] getGrouppingKey: 'a -> 'GrouppingKey)
       : string -> Binding<'model, 'msg, ObservableCollection<'a>> =
-    Binding.OneWaySeqT.create id itemEquals getId
+    let getGrouppingKey = (if obj.ReferenceEquals(getGrouppingKey, null) then ValueNone else ValueSome getGrouppingKey)
+    Binding.OneWaySeqT.createCore id itemEquals getId getGrouppingKey
     >> Binding.addLazy refEq
     >> Binding.mapModel get
 

@@ -38,6 +38,23 @@ type OneWaySeqData<'model, 'T, 'aCollection, 'id when 'id : equality> =
     Merge.keyed d.GetId d.GetId create update values newVals
 
 
+type OneWaySeqGrouppedData<'model, 'T, 'aCollection, 'id, 'key when 'id : equality and 'key : equality> =
+  { Get: 'model -> 'T seq
+    CreateCollection: 'T seq -> GrouppedCollectionTarget<'T, 'aCollection, 'key>
+    GetId: 'T -> 'id
+    GetKey: 'T -> 'key
+    ItemEquals: 'T -> 'T -> bool }
+
+  // TODO: Implement
+  member d.Merge(values: GrouppedCollectionTarget<'T, 'aCollection, 'key>, newModel: 'model) =
+    let create v _ = v
+    let update oldVal newVal oldIdx =
+      if not (d.ItemEquals newVal oldVal) then
+        values.SetAt (oldIdx, newVal)
+    let newVals = newModel |> d.Get |> Seq.toArray
+    Merge.groupped d.GetKey d.GetKey d.GetId d.GetId create update values newVals
+
+
 type TwoWayData<'model, 'msg, 'T> =
   { Get: 'model -> 'T
     Set: 'T -> 'model -> 'msg }
@@ -134,6 +151,7 @@ and AlterMsgStreamData<'model, 'msg, 'bindingModel, 'bindingMsg, 'dispatchMsg, '
 and BaseBindingData<'model, 'msg, 't> =
   | OneWayData of OneWayData<'model, 't>
   | OneWaySeqData of OneWaySeqData<'model, obj, 't, obj>
+  | OneWaySeqGrouppedData of OneWaySeqGrouppedData<'model, obj, 't, obj, obj>
   | TwoWayData of TwoWayData<'model, 'msg, 't>
   | CmdData of CmdData<'model, 'msg>
   | SubModelData of SubModelData<'model, 'msg, obj, obj, 't>
@@ -165,6 +183,13 @@ module BindingData =
           Get = d.Get
           CreateCollection = d.CreateCollection >> CollectionTarget.mapCollection fOut
           GetId = d.GetId
+          ItemEquals = d.ItemEquals
+        }
+      | OneWaySeqGrouppedData d -> OneWaySeqGrouppedData {
+          Get = d.Get
+          CreateCollection = d.CreateCollection >> GrouppedCollectionTarget.mapCollection fOut
+          GetId = d.GetId
+          GetKey = d.GetKey
           ItemEquals = d.ItemEquals
         }
       | TwoWayData d -> TwoWayData {
@@ -248,6 +273,13 @@ module BindingData =
           GetId = d.GetId
           ItemEquals = d.ItemEquals
         }
+      | OneWaySeqGrouppedData d -> OneWaySeqGrouppedData {
+          Get = f >> d.Get
+          CreateCollection = d.CreateCollection
+          GetId = d.GetId
+          GetKey = d.GetKey
+          ItemEquals = d.ItemEquals
+        }
       | TwoWayData d -> TwoWayData {
           Get = f >> d.Get
           Set = binaryHelper d.Set
@@ -316,6 +348,7 @@ module BindingData =
     let baseCase = function
       | OneWayData d -> d |> OneWayData
       | OneWaySeqData d -> d |> OneWaySeqData
+      | OneWaySeqGrouppedData d -> d |> OneWaySeqGrouppedData
       | TwoWayData d -> TwoWayData {
           Get = d.Get
           Set = fun v m -> f (d.Set v m) m
@@ -475,6 +508,52 @@ module BindingData =
         mGetId
         mItemEquals
         (d: OneWaySeqData<'model, 'T, 'aCollection, 'id>) =
+      { d with Get = mGet d.Get
+               GetId = mGetId d.GetId
+               ItemEquals = mItemEquals d.ItemEquals }
+
+    let measureFunctions
+        mGet
+        mGetId
+        mItemEquals =
+      mapFunctions
+        (mGet "get")
+        (mGetId "getId")
+        (mItemEquals "itemEquals")
+
+
+  module OneWaySeqGroupped =
+
+    let mapMinorTypes
+        (outMapA: 'T -> 'a0)
+        (outMapId: 'id -> 'id0)
+        (outMapKey: 'key -> 'GrouppingKey0)
+        (inMapA: 'a0 -> 'T)
+        (d: OneWaySeqGrouppedData<'model, 'T, 'aCollection, 'id, 'key>) = {
+      Get = d.Get >> Seq.map outMapA
+      CreateCollection = Seq.map inMapA >> d.CreateCollection >> GrouppedCollectionTarget.mapA outMapA inMapA outMapKey
+      GetId = inMapA >> d.GetId >> outMapId
+      GetKey = inMapA >> d.GetKey >> outMapKey
+      ItemEquals = fun a1 a2 -> d.ItemEquals (inMapA a1) (inMapA a2)
+    }
+
+    let boxMinorTypes d = d |> mapMinorTypes box box box unbox
+
+    let create itemEquals getId getGrouppingKey =
+      { Get = (fun x -> upcast x)
+        CreateCollection = ObservableCollection >> GrouppedCollectionTarget.create
+        ItemEquals = itemEquals
+        GetId = getId
+        GetKey = getGrouppingKey }
+      |> boxMinorTypes
+      |> OneWaySeqGrouppedData
+      |> BaseBindingData
+
+    let private mapFunctions
+        mGet
+        mGetId
+        mItemEquals
+        (d: OneWaySeqGrouppedData<'model, 'T, 'aCollection, 'id, 'GrouppingKey>) =
       { d with Get = mGet d.Get
                GetId = mGetId d.GetId
                ItemEquals = mItemEquals d.ItemEquals }
