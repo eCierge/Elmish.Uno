@@ -3,6 +3,7 @@
 open Elmish
 open Elmish.ObservableLookup
 open System
+open System.Collections.Generic
 open System.Collections.ObjectModel
 open System.Runtime.InteropServices
 open System.Windows.Input
@@ -310,9 +311,9 @@ type BindingT private () =
        itemEquals: 'b -> 'b -> bool,
        getId: 'b -> 'id,
        getGrouppingKey: 'b -> 'key,
-       compareKeys: 'key -> 'key -> int)
+       [<Optional>] compareKeys: 'key -> 'key -> int)
       : string -> Binding<'model, 'msg, ObservableLookup<'key, 'b>> =
-    Binding.OneWaySeqT.createGroupped map itemEquals getId getGrouppingKey compareKeys
+    Binding.OneWaySeqT.createGrouped map itemEquals getId getGrouppingKey compareKeys
     >> Binding.addLazy equals
     >> Binding.mapModel get
 
@@ -369,9 +370,9 @@ type BindingT private () =
        itemEquals: 'a -> 'a -> bool,
        getId: 'a -> 'id,
        getGrouppingKey: 'a -> 'key,
-       compareKeys: 'key -> 'key -> int)
+       [<Optional>] compareKeys: 'key -> 'key -> int)
       : string -> Binding<'model, 'msg, ObservableLookup<'key, 'a>> =
-    Binding.OneWaySeqT.createGroupped id itemEquals getId getGrouppingKey compareKeys
+    Binding.OneWaySeqT.createGrouped id itemEquals getId getGrouppingKey compareKeys
     >> Binding.addLazy refEq
     >> Binding.mapModel get
 

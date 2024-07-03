@@ -85,9 +85,9 @@ type OneWaySeqBinding<'model, 'T, 'aCollection, 'id when 'id : equality> = {
   Values: CollectionTarget<'T, 'aCollection>
 }
 
-type OneWaySeqGrouppedBinding<'model, 'T, 'aCollection, 'id, 'key when 'id : equality and 'key : equality> = {
-  OneWaySeqGrouppedData: OneWaySeqGrouppedData<'model, 'T, 'aCollection, 'id, 'key>
-  Values: GrouppedCollectionTarget<'T, 'aCollection, 'key>
+type OneWaySeqGroupedBinding<'model, 'T, 'aCollection, 'id, 'key when 'id : equality and 'key : equality> = {
+  OneWaySeqGroupedData: OneWaySeqGroupedData<'model, 'T, 'aCollection, 'id, 'key>
+  Values: GroupedCollectionTarget<'T, 'aCollection, 'key>
 }
 
 type TwoWayBinding<'model, 'T> = {
@@ -129,6 +129,7 @@ type SubModelSeqKeyedBinding<'model, 'msg, 'bindingModel, 'bindingMsg, 'vm, 'vmC
 
   member b.FromId(id: 'id) =
     b.Vms.Enumerate ()
+    |> Seq.cast
     |> Seq.tryFind (fun vm -> vm |> b.SubModelSeqKeyedData.VmToId |> (=) id)
 
 type SelectedItemBinding<'bindingModel, 'bindingMsg, 'vm, 'id> = {
@@ -154,7 +155,7 @@ type SubModelSelectedItemBinding<'model, 'msg, 'bindingModel, 'bindingMsg, 'vm, 
 type BaseVmBinding<'model, 'msg, 't> =
   | OneWay of OneWayBinding<'model, 't>
   | OneWaySeq of OneWaySeqBinding<'model, obj, 't, obj>
-  | OneWaySeqGroupped of OneWaySeqGrouppedBinding<'model, obj, 't, obj, obj>
+  | OneWaySeqGrouped of OneWaySeqGroupedBinding<'model, obj, 't, obj, obj>
   | TwoWay of TwoWayBinding<'model, 't>
   | Cmd of cmd: Command
   | SubModel of SubModelBinding<'model, 'msg, obj, obj, 't>
@@ -217,15 +218,15 @@ module internal MapOutputType =
           GetId = b.OneWaySeqData.GetId
           ItemEquals = b.OneWaySeqData.ItemEquals }
         Values = b.Values |> CollectionTarget.mapCollection fOut }
-    | OneWaySeqGroupped b -> OneWaySeqGroupped {
-        OneWaySeqGrouppedData = {
-          Get = b.OneWaySeqGrouppedData.Get
-          GetKey = b.OneWaySeqGrouppedData.GetKey
-          CreateCollection = b.OneWaySeqGrouppedData.CreateCollection >> GrouppedCollectionTarget.mapCollection fOut
-          GetId = b.OneWaySeqGrouppedData.GetId
-          KeyComparer = b.OneWaySeqGrouppedData.KeyComparer
-          ItemEquals = b.OneWaySeqGrouppedData.ItemEquals }
-        Values = b.Values |> GrouppedCollectionTarget.mapCollection fOut }
+    | OneWaySeqGrouped b -> OneWaySeqGrouped {
+        OneWaySeqGroupedData = {
+          Get = b.OneWaySeqGroupedData.Get
+          GetKey = b.OneWaySeqGroupedData.GetKey
+          CreateCollection = b.OneWaySeqGroupedData.CreateCollection >> GroupedCollectionTarget.mapCollection fOut
+          GetId = b.OneWaySeqGroupedData.GetId
+          KeyComparer = b.OneWaySeqGroupedData.KeyComparer
+          ItemEquals = b.OneWaySeqGroupedData.ItemEquals }
+        Values = b.Values |> GroupedCollectionTarget.mapCollection fOut }
     | SubModel b -> SubModel {
         SubModelData = {
           GetModel = b.SubModelData.GetModel
@@ -389,10 +390,10 @@ type Initialize<'t>
             Values = d.CreateCollection (initialModel |> d.Get) }
           |> OneWaySeq
           |> Some
-      | OneWaySeqGrouppedData d ->
-          { OneWaySeqGrouppedData = d |> BindingData.OneWaySeqGroupped.measureFunctions measure measure measure2
+      | OneWaySeqGroupedData d ->
+          { OneWaySeqGroupedData = d |> BindingData.OneWaySeqGrouped.measureFunctions measure measure measure2
             Values = d.CreateCollection (initialModel |> d.Get) }
-          |> OneWaySeqGroupped
+          |> OneWaySeqGrouped
           |> Some
       | TwoWayData d ->
           let d = d |> BindingData.TwoWay.measureFunctions measure measure
@@ -562,8 +563,8 @@ type Update<'t>
       | OneWaySeq b ->
           b.OneWaySeqData.Merge(b.Values, newModel)
           []
-      | OneWaySeqGroupped b ->
-          b.OneWaySeqGrouppedData.Merge(b.Values, newModel)
+      | OneWaySeqGrouped b ->
+          b.OneWaySeqGroupedData.Merge(b.Values, newModel)
           []
       | Cmd cmd -> cmd |> CanExecuteChanged |> List.singleton
       | SubModel b ->
@@ -694,7 +695,7 @@ type [<Struct>] Get<'t>(nameChain: string) =
     | OneWay { OneWayData = d } -> d.Get model |> Ok
     | TwoWay b -> b.Get model |> Ok
     | OneWaySeq { Values = vals } -> vals.GetCollection () |> Ok
-    | OneWaySeqGroupped { Values = vals } -> vals.GetCollection () |> Ok
+    | OneWaySeqGrouped { Values = vals } -> vals.GetCollection () |> Ok
     | Cmd cmd -> cmd |> unbox |> Ok
     | SubModel { GetVm = getvm } -> getvm() |> ValueOption.toNull |> Result.mapError GetError.ToNullError
     | SubModelWin { GetVmWinState = getvm } ->
@@ -751,7 +752,7 @@ type [<Struct>] Set<'t>(value: 't) =
         true
     | OneWay _
     | OneWaySeq _
-    | OneWaySeqGroupped _
+    | OneWaySeqGrouped _
     | Cmd _
     | SubModel _
     | SubModelWin _

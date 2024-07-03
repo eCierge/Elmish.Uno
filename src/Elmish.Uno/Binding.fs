@@ -209,7 +209,7 @@ module Binding =
       |> BindingData.mapModel get
       |> createBindingT
 
-    /// Elemental instance of a one-way-seq groupped binding.
+    /// Elemental instance of a one-way-seq grouped binding.
     let createGroupped<'a, 'item, 'id, 'grouppingKey, 'msg when 'id : equality and 'grouppingKey : equality>
       (get : 'a -> 'item seq)
       itemEquals
@@ -218,7 +218,7 @@ module Binding =
       (compareGrouppingKeys : 'grouppingKey -> 'grouppingKey -> int)
       : string -> Binding<'a, 'msg, ObservableLookup<'grouppingKey, 'item>>
       =
-      OneWaySeqGroupped.create itemEquals getId getGrouppingKey compareGrouppingKeys
+      OneWaySeqGrouped.create itemEquals getId getGrouppingKey compareGrouppingKeys
       |> BindingData.mapModel get
       |> createBindingT
 
@@ -480,8 +480,16 @@ module Binding =
       |> BindingData.mapModel get
       |> createBinding
 
-    let internal createGroupped get itemEquals getId getGrouppingKey compareGrouppingKeys =
-      OneWaySeqGroupped.create itemEquals getId getGrouppingKey compareGrouppingKeys
+
+    let internal createGrouped get itemEquals getId getGrouppingKey compareKeys =
+      let compareKeys =
+        if obj.ReferenceEquals(compareKeys, Unchecked.defaultof<_>) then
+          let comparer = Comparer<'key>.Default
+          let compareKeys x y = comparer.Compare (x, y)
+          compareKeys
+        else
+          compareKeys
+      OneWaySeqGrouped.create itemEquals getId getGrouppingKey compareKeys
       |> BindingData.mapModel get
       |> createBinding
 
@@ -945,9 +953,9 @@ type Binding private () =
        itemEquals: 'b -> 'b -> bool,
        getId: 'b -> 'id,
        getGrouppingKey: 'b -> 'key,
-       compareGrouppingKeys: 'key -> 'key -> int)
+       [<Optional>] compareKeys: 'key -> 'key -> int)
       : string -> Binding<'model, 'msg> =
-    Binding.OneWaySeq.createGroupped map itemEquals getId getGrouppingKey compareGrouppingKeys
+    Binding.OneWaySeq.createGrouped map itemEquals getId getGrouppingKey compareKeys
     >> Binding.addLazy equals
     >> Binding.mapModel get
 
@@ -1001,9 +1009,9 @@ type Binding private () =
        itemEquals: 'a -> 'a -> bool,
        getId: 'a -> 'id,
        getGrouppingKey: 'a -> 'key,
-       compareGrouppingKeys: 'key -> 'key -> int)
+       [<Optional>] compareKeys: 'key -> 'key -> int)
       : string -> Binding<'model, 'msg> =
-    Binding.OneWaySeq.createGroupped id itemEquals getId getGrouppingKey compareGrouppingKeys
+    Binding.OneWaySeq.createGrouped id itemEquals getId getGrouppingKey compareKeys
     >> Binding.addLazy refEq
     >> Binding.mapModel get
 

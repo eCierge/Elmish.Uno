@@ -2,6 +2,7 @@
 module internal Elmish.Uno.Merge
 
 open System
+open System.Collections
 open System.Collections.Generic
 open System.Collections.ObjectModel
 open System.Linq
@@ -27,13 +28,13 @@ type CollectionTarget<'T, 'aCollection> =
     RemoveAt: int -> unit
     Move: int * int -> unit
     Clear: unit -> unit
-    Enumerate: unit -> 'T seq
+    Enumerate: unit -> IEnumerable
     GetCollection: unit -> 'aCollection }
 
-type GrouppedCollectionTarget<'T, 'aCollection, 'key> =
+type GroupedCollectionTarget<'T, 'aCollection, 'key> =
   { CompareKeys: 'key -> 'key -> int
     GetKeys: unit -> 'key seq
-    Get: 'key -> ObservableCollection<'T>
+    Get: 'key -> IList
     Add: 'key -> 'T seq -> unit
     Remove: 'key -> unit
     Clear: unit -> unit
@@ -53,6 +54,19 @@ module CollectionTarget =
       Enumerate = fun () -> upcast oc
       GetCollection = fun () -> oc }
 
+  let wrap (oc: IList) =
+    let moveMethodInfo = oc.GetType().GetMethod("Move")
+    { GetLength = fun () -> oc.Count
+      GetAt = fun i -> oc.[i]
+      Append = oc.Add >> ignore
+      InsertAt = (fun i -> oc.Insert i)
+      SetAt = fun (i, a) -> oc.[i] <- a
+      RemoveAt = oc.RemoveAt
+      Move = (fun (oldIndex, newIndex) -> moveMethodInfo.Invoke(oc, [| oldIndex; newIndex |]) |> ignore)
+      Clear = oc.Clear
+      Enumerate = fun () -> oc
+      GetCollection = fun () -> oc }
+
   let mapA (fOut: 'a0 -> 'a1) (fIn: 'a1 -> 'a0) (ct: CollectionTarget<'a0, 'aCollection>) : CollectionTarget<'a1, 'aCollection> =
     { GetLength = ct.GetLength
       GetAt = ct.GetAt >> fOut
@@ -62,7 +76,7 @@ module CollectionTarget =
       RemoveAt = ct.RemoveAt
       Move = ct.Move
       Clear = ct.Clear
-      Enumerate = ct.Enumerate >> Seq.map fOut
+      Enumerate = ct.Enumerate
       GetCollection = ct.GetCollection }
 
   let mapCollection (fOut: 'aCollection0 -> 'aCollection1) (ct: CollectionTarget<'T, 'aCollection0>) : CollectionTarget<'T, 'aCollection1> =
@@ -78,7 +92,7 @@ module CollectionTarget =
       GetCollection = ct.GetCollection >> fOut }
 
 
-module GrouppedCollectionTarget =
+module GroupedCollectionTarget =
 
   let create (oc: ObservableLookup<'TKey, 'TValue>) =
     { CompareKeys = fun x y -> oc.Comparer.Compare (x, y)
@@ -90,16 +104,16 @@ module GrouppedCollectionTarget =
       GetCollection = fun () -> oc
     }
 
-  let mapA (fOut: 'a0 -> 'a1) (fIn: 'a1 -> 'a0) (kOut: 'key0 -> 'key1) (kIn: 'key1 -> 'key0) (ct: GrouppedCollectionTarget<'a0, 'aCollection, 'key0>) : GrouppedCollectionTarget<'a1, 'aCollection, 'key1> =
+  let mapA (fIn: 'a1 -> 'a0) (kOut: 'key0 -> 'key1) (kIn: 'key1 -> 'key0) (ct: GroupedCollectionTarget<'a0, 'aCollection, 'key0>) : GroupedCollectionTarget<'a1, 'aCollection, 'key1> =
     { CompareKeys = fun x y -> ct.CompareKeys (kIn x) (kIn y)
       GetKeys = ct.GetKeys >> Seq.map kOut
-      Get = kIn >> ct.Get >> Seq.map fOut >> ObservableCollection
+      Get = kIn >> ct.Get
       Add = fun key items -> ct.Add (kIn key) (items |> Seq.map fIn)
       Remove = kIn >> ct.Remove
       Clear = ct.Clear
       GetCollection = ct.GetCollection}
 
-  let mapCollection (fOut: 'aCollection0 -> 'aCollection1) (ct: GrouppedCollectionTarget<'T, 'aCollection0, 'key>) : GrouppedCollectionTarget<'T, 'aCollection1, 'key> =
+  let mapCollection (fOut: 'aCollection0 -> 'aCollection1) (ct: GroupedCollectionTarget<'T, 'aCollection0, 'key>) : GroupedCollectionTarget<'T, 'aCollection1, 'key> =
     { CompareKeys = ct.CompareKeys
       GetKeys = ct.GetKeys
       Get = ct.Get
@@ -108,7 +122,7 @@ module GrouppedCollectionTarget =
       Clear = ct.Clear
       GetCollection = ct.GetCollection >> fOut }
 
-  //let mapKey (kOut: 'key0 -> 'key1) (kIn: 'key1 -> 'key0) (ct: GrouppedCollectionTarget<'T, 'aCollection0, 'key0>) : GrouppedCollectionTarget<'T, 'aCollection0, 'key1> =
+  //let mapKey (kOut: 'key0 -> 'key1) (kIn: 'key1 -> 'key0) (ct: GroupedCollectionTarget<'T, 'aCollection0, 'key0>) : GroupedCollectionTarget<'T, 'aCollection0, 'key1> =
   //  { KeysComparer = fun (x, y) -> ct.KeysComparer (kIn x, kIn y)
   //    GetKeys = ct.GetKeys >> Seq.map kOut
   //    Get = kIn >> ct.Get
@@ -313,19 +327,19 @@ module Merge =
     // update moved elements
     moves |> Seq.iter (fun (_, sIdx, t, s) -> update t s sIdx)
 
-  let groupped
+  let grouped
       (keyComparer: IComparer<'key>)
       (getSourceKey: 's -> 'key)
       (getSourceId: 's -> 'id)
       (getTargetId: 't -> 'id)
       (create: 's -> 'id -> 't)
-      (update: CollectionTarget<'t, ObservableCollection<'t>> -> 't -> 's -> int -> unit)
-      (target: GrouppedCollectionTarget<'t, 'tCollection, 'key>)
+      (update: CollectionTarget<'t, IList> -> 't -> 's -> int -> unit)
+      (target: GroupedCollectionTarget<'t, 'tCollection, 'key>)
       (source: 's array) =
 
     let targetKeys = SortedSet<'key>(target.GetKeys(), keyComparer)
-    let grouppedSource = source.ToLookup(getSourceKey)
-    let sourceKeys = SortedSet<'key>(grouppedSource.Select _.Key, keyComparer)
+    let groupedSource = source.ToLookup(getSourceKey)
+    let sourceKeys = SortedSet<'key>(groupedSource.Select _.Key, keyComparer)
     let removals =
       let removals = SortedSet<'key>(targetKeys, keyComparer)
       removals.ExceptWith sourceKeys
@@ -344,14 +358,14 @@ module Merge =
     additions
     |> Seq.iter (
       fun key ->
-        let items = grouppedSource[key] |> Seq.map (fun s -> create s (getSourceId s))
+        let items = groupedSource[key] |> Seq.map (fun s -> create s (getSourceId s))
         target.Add key items
       )
 
     updates
     |> Seq.iter (
       fun key ->
-        let targetItems = target.Get key |> CollectionTarget.create
-        let sourceItems = grouppedSource[key] |> Seq.toArray
+        let targetItems = target.Get key |> CollectionTarget.wrap |> CollectionTarget.mapA unbox box
+        let sourceItems = groupedSource[key] |> Seq.toArray
         keyed getSourceId getTargetId create (update targetItems) targetItems sourceItems
     )
