@@ -16,6 +16,7 @@ using NewWindow1Program = Elmish.Uno.Samples.NewWindow.Program.Win1;
 using NewWindow2Program = Elmish.Uno.Samples.NewWindow.Program.Win2;
 using NewWindowProgram = Elmish.Uno.Samples.NewWindow.Program;
 using OneWaySeqProgram = Elmish.Uno.Samples.OneWaySeq.Program;
+using OneWaySeqGroupedProgram = Elmish.Uno.Samples.OneWaySeqGrouped.Program;
 using SingleCounterProgram = Elmish.Uno.Samples.SingleCounter.Program;
 using SubModelClockProgram = Elmish.Uno.Samples.SubModel.Program.Clock;
 using SubModelCounterWithClockProgram = Elmish.Uno.Samples.SubModel.Program.CounterWithClock;
@@ -32,6 +33,7 @@ internal class DesignData
 {
     public object SingleCounter => SingleCounterProgram.DesignInstance;
     public object OneWaySeq => OneWaySeqProgram.DesignInstance;
+    public object OneWaySeqGrouped => OneWaySeqGroupedProgram.DesignInstance;
     public object SubModel => SubModelProgram.DesignInstance;
     public object SubModelClock => SubModelClockProgram.DesignInstance;
     public object SubModelCounterWithClock => SubModelCounterWithClockProgram.DesignInstance;
