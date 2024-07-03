@@ -1,16 +1,22 @@
 ﻿namespace Elmish.ObservableLookup;
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Linq;
+using System.Reflection;
 
 /// <summary>
 /// A mutable lookup implementing <see cref="ILookup{TKey,TElement}"/>
 /// </summary>
 /// <typeparam name="TKey">The lookup key.</typeparam>
 /// <typeparam name="TElement">The elements under each <typeparamref name="TKey"/>.</typeparam>
-public class ObservableLookup<TKey, TElement> : IMutableLookup<TKey, TElement>, INotifyCollectionChanged, IReadOnlyList<IGroupingList<TKey, TElement>>
+public class ObservableLookup<TKey, TElement> :
+    IMutableLookup<TKey, TElement>, INotifyCollectionChanged,
+    IReadOnlyList<IGroupingList<TKey, TElement>>,
+    INotifyPropertyChanged
     where TKey : notnull
 {
     public ObservableLookup() : this(Comparer<TKey>.Default) { }
@@ -22,6 +28,7 @@ public class ObservableLookup<TKey, TElement> : IMutableLookup<TKey, TElement>, 
         this.groupings = new SortedDictionary<TKey, ObservableGrouping<TKey, TElement>>(comparer);
     }
 
+    public event PropertyChangedEventHandler? PropertyChanged;
     public event NotifyCollectionChangedEventHandler? CollectionChanged;
 
     public bool ReuseGroups
@@ -46,6 +53,23 @@ public class ObservableLookup<TKey, TElement> : IMutableLookup<TKey, TElement>, 
 
     private int CountIndex (TKey key) => this.groupings.Keys.Count(k => this.groupings.Comparer.Compare(k, key) > 0);
 
+    private void OnGroupChanged(object sender, NotifyCollectionChangedEventArgs e)
+    {
+        if (sender is ObservableGrouping<TKey, TElement> group)
+        {
+            var key = group.Key;
+            var index = CountIndex(key);
+            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+        }
+    }
+
+    private static ObservableGrouping<TKey, TElement> CreateGrouping(TKey key)
+    {
+        var grouping = new ObservableGrouping<TKey, TElement>(key);
+        //grouping.CollectionChanged += OnGroupChanged;
+        return grouping;
+    }
+
     /// <summary>
     /// Adds <paramref name="element"/> under the specified <paramref name="key"/>. <paramref name="key"/> does not need to exist.
     /// </summary>
@@ -55,10 +79,12 @@ public class ObservableLookup<TKey, TElement> : IMutableLookup<TKey, TElement>, 
     {
         if (!this.groupings.TryGetValue(key, out var grouping))
         {
-            if (ReuseGroups && !this.oldGroups!.TryGetValueAndRemove(key, out grouping))
-                grouping = new ObservableGrouping<TKey, TElement>(key);
+            if (!ReuseGroups || !this.oldGroups!.TryGetValueAndRemove(key, out grouping))
+                grouping = CreateGrouping(key);
 
             this.groupings.Add(key, grouping!);
+            OnPropertyChanged(EventArgsCache.CountPropertyChanged);
+            OnPropertyChanged(EventArgsCache.IndexerPropertyChanged);
             OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, (object?)grouping, CountIndex(key)));
         }
 
@@ -71,8 +97,8 @@ public class ObservableLookup<TKey, TElement> : IMutableLookup<TKey, TElement>, 
 
         if (!this.groupings.TryGetValue(key, out var grouping))
         {
-            if (ReuseGroups && !this.oldGroups!.TryGetValueAndRemove(key, out grouping))
-                grouping = new ObservableGrouping<TKey, TElement>(key);
+            if (!ReuseGroups || !this.oldGroups!.TryGetValueAndRemove(key, out grouping))
+                grouping = CreateGrouping(key);
 
             grouping!.AddRange(elements);
             if (grouping!.Count == 0)
@@ -84,7 +110,13 @@ public class ObservableLookup<TKey, TElement> : IMutableLookup<TKey, TElement>, 
             }
 
             this.groupings.Add(key, grouping);
+            OnPropertyChanged(EventArgsCache.CountPropertyChanged);
+            OnPropertyChanged(EventArgsCache.IndexerPropertyChanged);
             OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, (object)grouping, CountIndex(key)));
+        }
+        else
+        {
+            grouping.AddRange(elements);
         }
     }
 
@@ -92,11 +124,10 @@ public class ObservableLookup<TKey, TElement> : IMutableLookup<TKey, TElement>, 
     {
         grouping = grouping ?? throw new ArgumentNullException(nameof(grouping));
 
-        ObservableGrouping<TKey, TElement>? og = null;
         var key = grouping.Key;
-        if (ReuseGroups && !this.oldGroups!.TryGetValueAndRemove(key, out og))
+        if (!ReuseGroups || !this.oldGroups!.TryGetValueAndRemove(key, out var og))
         {
-            og = new ObservableGrouping<TKey, TElement>(key);
+            og = CreateGrouping(key);
         }
 
         og!.AddRange(grouping);
@@ -109,15 +140,17 @@ public class ObservableLookup<TKey, TElement> : IMutableLookup<TKey, TElement>, 
         }
 
         this.groupings.Add(key, og);
+        OnPropertyChanged(EventArgsCache.CountPropertyChanged);
+        OnPropertyChanged(EventArgsCache.IndexerPropertyChanged);
         OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, (object)og, CountIndex(key)));
     }
 
     //public void Insert(int index, IGrouping<TKey, TElement> grouping)
     //{
     //    ObservableGrouping<TKey, TElement>? og = null;
-    //    if (ReuseGroups && !this.oldGroups!.TryGetValueAndRemove(grouping.Key, out og))
+    //    if (!ReuseGroups || !this.oldGroups!.TryGetValueAndRemove(grouping.Key, out og))
     //    {
-    //        og = new ObservableGrouping<TKey, TElement>(grouping.Key);
+    //        og = CreateGroupping(grouping.Key);
     //    }
 
     //    og!.AddRange(grouping);
@@ -159,12 +192,15 @@ public class ObservableLookup<TKey, TElement> : IMutableLookup<TKey, TElement>, 
     {
         if (this.groupings.TryGetValueAndRemove(key, out var g))
         {
+            //g!.CollectionChanged -= OnGroupChanged;
             if (ReuseGroups)
             {
                 g!.Clear();
                 this.oldGroups!.Add(key, g);
             }
 
+            OnPropertyChanged(EventArgsCache.CountPropertyChanged);
+            OnPropertyChanged(EventArgsCache.IndexerPropertyChanged);
             OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, (object?)g, CountIndex(key)));
             return true;
         }
@@ -183,8 +219,11 @@ public class ObservableLookup<TKey, TElement> : IMutableLookup<TKey, TElement>, 
             }
         }
 
+        //foreach (var grouping in groupings)
+        //    grouping.Value.CollectionChanged -= OnGroupChanged;
         this.groupings.Clear();
-        OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+        OnPropertyChanged(EventArgsCache.CountPropertyChanged);
+        OnCollectionChanged(EventArgsCache.ResetCollectionChanged);
     }
 
     public bool TryGetValues(TKey key, out IEnumerable<TElement> values)
@@ -273,11 +312,19 @@ public class ObservableLookup<TKey, TElement> : IMutableLookup<TKey, TElement>, 
     private bool reuseGroups;
     private Dictionary<TKey, ObservableGrouping<TKey, TElement>>? oldGroups;
 
+    private void OnPropertyChanged(PropertyChangedEventArgs e) => PropertyChanged?.Invoke(this, e);
     private void OnCollectionChanged(NotifyCollectionChangedEventArgs e) => CollectionChanged?.Invoke(this, e);
 
     IEnumerator<IGroupingList<TKey, TElement>> IEnumerable<IGroupingList<TKey, TElement>>.GetEnumerator()
     {
         foreach (var g in this.groupings.Values)
             yield return g;
+    }
+
+    internal static class EventArgsCache
+    {
+        internal static readonly PropertyChangedEventArgs CountPropertyChanged = new PropertyChangedEventArgs("Count");
+        internal static readonly PropertyChangedEventArgs IndexerPropertyChanged = new PropertyChangedEventArgs("Item[]");
+        internal static readonly NotifyCollectionChangedEventArgs ResetCollectionChanged = new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset);
     }
 }
