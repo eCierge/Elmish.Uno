@@ -304,6 +304,16 @@ module Binding =
       CmdT.id (fun p model -> exec (unbox p) model) (fun p model  -> canExec (unbox p) model)
 
     /// <summary>
+    ///   Creates a <c>Command</c> binding that depends on the model and the
+    ///   <c>CommandParameter</c> and always executes.
+    /// </summary>
+    /// <param name="exec">Returns the message to dispatch.</param>
+    let modelAlways
+        (exec: 'param -> 'model -> 'msg voption)
+        : string -> Binding<'model, 'msg, ICommand> =
+      CmdT.id (fun p model -> exec (unbox p) model) (fun _ _ -> true)
+
+    /// <summary>
     ///   Creates a <c>Command</c> binding that dispatches the specified message.
     /// </summary>
     /// <param name="canExec">Indicates whether the command can execute.</param>
@@ -313,16 +323,6 @@ module Binding =
         (createMsg: 'param -> 'msg voption)
         : string -> Binding<'model, 'msg, ICommand> =
       CmdT.id (fun p _ -> createMsg (unbox p)) (fun p model  -> canExec (unbox p) model)
-
-    /// <summary>
-    ///   Creates a <c>Command</c> binding that depends on the model and the
-    ///   <c>CommandParameter</c> and always executes.
-    /// </summary>
-    /// <param name="exec">Returns the message to dispatch.</param>
-    let modelAlways
-        (exec: 'param -> 'model -> 'msg voption)
-        : string -> Binding<'model, 'msg, ICommand> =
-      model (fun _ _ -> true) exec
 
     /// <summary>
     ///   Creates a <c>Command</c> binding that dispatches the specified message

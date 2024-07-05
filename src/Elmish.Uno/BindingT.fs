@@ -897,9 +897,7 @@ type BindingT private () =
   static member cmd
       (msg: 'msg)
       : string -> Binding<'model, 'msg, ICommand> =
-    Binding.CmdT.model
-      (fun _ -> true)
-      (fun _ -> ValueSome msg)
+    Binding.CmdT.modelAlways (fun _ -> ValueSome msg)
 
   /// <summary>
   ///   Creates a <c>Command</c> binding that depends only on the model (not the
@@ -909,9 +907,7 @@ type BindingT private () =
   static member cmd
       (exec: 'model -> 'msg)
       : string -> Binding<'model, 'msg, ICommand> =
-    Binding.CmdT.model
-      (fun _ -> true)
-      (exec >> ValueSome)
+    Binding.CmdT.modelAlways (exec >> ValueSome)
 
 
   /// <summary>
@@ -1017,9 +1013,7 @@ type BindingT private () =
   static member cmdParam
       (exec: 'param -> 'msg)
       : string -> Binding<'model, 'msg, ICommand> =
-    Binding.CmdParamT.model
-      (fun _ _ -> true)
-      (fun p _ -> exec p |> ValueSome)
+    Binding.CmdParamT.modelAlways (fun p _ -> exec p |> ValueSome)
 
   /// <summary>
   ///   Creates a <c>Command</c> binding that depends on the
