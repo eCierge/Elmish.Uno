@@ -35,6 +35,7 @@
       <samples:SampleItem Title="SingleCounter" Parameter="{x:Bind SingleCounterParameter}" />
       <samples:SampleItem Title="OneWaySeq" />
       <samples:SampleItem Title="OneWaySeqGrouped" />
+      <samples:SampleItem Title="TwoWaySeq" />
       <samples:SampleItem Title="SubModel" />
       <samples:SampleItem Title="SubModelOpt" />
       <samples:SampleItem Title="SubModelSelectedItem" />
