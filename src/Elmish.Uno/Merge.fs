@@ -101,8 +101,7 @@ module GroupedCollectionTarget =
       Add = fun key items -> oc.Add(key, items)
       Remove = oc.Remove >> ignore
       Clear = oc.Clear
-      GetCollection = fun () -> oc
-    }
+      GetCollection = fun () -> oc }
 
   let mapA (fIn: 'a1 -> 'a0) (kOut: 'key0 -> 'key1) (kIn: 'key1 -> 'key0) (ct: GroupedCollectionTarget<'a0, 'aCollection, 'key0>) : GroupedCollectionTarget<'a1, 'aCollection, 'key1> =
     { CompareKeys = fun x y -> ct.CompareKeys (kIn x) (kIn y)

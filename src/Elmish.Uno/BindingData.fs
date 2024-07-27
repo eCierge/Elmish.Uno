@@ -5,7 +5,7 @@ open System
 open System.Collections
 open System.Collections.Generic
 open System.Collections.ObjectModel
-open System.Windows
+open System.Collections.Specialized
 open System.Windows.Input
 open Microsoft.UI.Xaml
 
@@ -62,6 +62,22 @@ type OneWaySeqGroupedData<'model, 'T, 'aCollection, 'id, 'key when 'id : equalit
 type TwoWayData<'model, 'msg, 'T> =
   { Get: 'model -> 'T
     Set: 'T -> 'model -> 'msg }
+
+
+type TwoWaySeqData<'model, 'msg, 'T, 'aCollection, 'id when 'id : equality> =
+  { Get: 'model -> 'T seq
+    CreateCollection: 'T seq -> CollectionTarget<'T, 'aCollection>
+    GetId: 'T -> 'id
+    ItemEquals: 'T -> 'T -> bool
+    Update: NotifyCollectionChangedEventArgs -> 'model -> 'msg }
+
+  member d.Merge(values: CollectionTarget<'T, 'aCollection>, newModel: 'model) =
+    let create v _ = v
+    let update oldVal newVal oldIdx =
+      if not (d.ItemEquals newVal oldVal) then
+        values.SetAt (oldIdx, newVal)
+    let newVals = newModel |> d.Get |> Seq.toArray
+    Merge.keyed d.GetId d.GetId create update values newVals
 
 
 type CmdData<'model, 'msg> = {
@@ -157,6 +173,7 @@ and BaseBindingData<'model, 'msg, 't> =
   | OneWaySeqData of OneWaySeqData<'model, obj, 't, obj>
   | OneWaySeqGroupedData of OneWaySeqGroupedData<'model, obj, 't, obj, obj>
   | TwoWayData of TwoWayData<'model, 'msg, 't>
+  | TwoWaySeqData of TwoWaySeqData<'model, 'msg, obj, 't, obj>
   | CmdData of CmdData<'model, 'msg>
   | SubModelData of SubModelData<'model, 'msg, obj, obj, 't>
   | SubModelWinData of SubModelWinData<'model, 'msg, obj, obj, 't>
@@ -200,6 +217,13 @@ module BindingData =
       | TwoWayData d -> TwoWayData {
           Get = d.Get >> fOut
           Set = fIn >> d.Set
+        }
+      | TwoWaySeqData d -> TwoWaySeqData {
+          Get = d.Get
+          CreateCollection = d.CreateCollection >> CollectionTarget.mapCollection fOut
+          GetId = d.GetId
+          ItemEquals = d.ItemEquals
+          Update = d.Update
         }
       | CmdData d -> CmdData {
           Exec = d.Exec
@@ -290,6 +314,13 @@ module BindingData =
           Get = f >> d.Get
           Set = binaryHelper d.Set
         }
+      | TwoWaySeqData d -> TwoWaySeqData {
+          Get = f >> d.Get
+          CreateCollection = d.CreateCollection
+          GetId = d.GetId
+          ItemEquals = d.ItemEquals
+          Update = fun args m -> d.Update args (f m)
+        }
       | CmdData d -> CmdData {
           Exec = binaryHelper d.Exec
           CanExec = binaryHelper d.CanExec
@@ -358,6 +389,13 @@ module BindingData =
       | TwoWayData d -> TwoWayData {
           Get = d.Get
           Set = fun v m -> f (d.Set v m) m
+        }
+      | TwoWaySeqData d -> TwoWaySeqData {
+          Get = d.Get
+          CreateCollection = d.CreateCollection
+          GetId = d.GetId
+          ItemEquals = d.ItemEquals
+          Update = fun args m -> f (d.Update args m) m
         }
       | CmdData d -> CmdData {
           Exec = fun p m -> d.Exec p m |> ValueOption.map (fun msg -> f msg m)
@@ -607,6 +645,51 @@ module BindingData =
       mapFunctions
         (mGet "get")
         (mSet "set")
+
+
+  module TwoWaySeq =
+
+    let mapMinorTypes
+        (outMapA: 'T -> 'a0)
+        (outMapId: 'id -> 'id0)
+        (inMapA: 'a0 -> 'T)
+        (d: TwoWaySeqData<'model, 'msg, 'T, 'aCollection, 'id>) = {
+      Get = d.Get >> Seq.map outMapA
+      CreateCollection = Seq.map inMapA >> d.CreateCollection >> CollectionTarget.mapA outMapA inMapA
+      GetId = inMapA >> d.GetId >> outMapId
+      ItemEquals = fun a1 a2 -> d.ItemEquals (inMapA a1) (inMapA a2)
+      Update = d.Update
+    }
+
+    let boxMinorTypes d = d |> mapMinorTypes box box unbox
+
+    let create itemEquals getId update =
+      { Get = (fun x -> upcast x)
+        CreateCollection = ObservableCollection >> CollectionTarget.create
+        ItemEquals = itemEquals
+        GetId = getId
+        Update = update }
+      |> boxMinorTypes
+      |> TwoWaySeqData
+      |> BaseBindingData
+
+    let private mapFunctions
+        mGet
+        mGetId
+        mItemEquals
+        (d: TwoWaySeqData<'model, 'msg, 'T, 'aCollection, 'id>) =
+      { d with Get = mGet d.Get
+               GetId = mGetId d.GetId
+               ItemEquals = mItemEquals d.ItemEquals }
+
+    let measureFunctions
+        mGet
+        mGetId
+        mItemEquals =
+      mapFunctions
+        (mGet "get")
+        (mGetId "getId")
+        (mItemEquals "itemEquals")
 
 
   module Cmd =

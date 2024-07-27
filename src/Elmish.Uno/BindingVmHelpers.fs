@@ -1,6 +1,7 @@
 ﻿module internal Elmish.Uno.BindingVmHelpers
 
 open System
+open System.Collections.Specialized
 open System.Windows.Input
 open Microsoft.Extensions.Logging
 open Microsoft.UI.Xaml
@@ -95,6 +96,16 @@ type TwoWayBinding<'model, 'T> = {
   Set: 'T -> 'model -> unit
 }
 
+type TwoWaySeqBinding<'model, 'msg, 'T, 'aCollection, 'id when 'id : equality> = {
+  TwoWaySeqData: TwoWaySeqData<'model, 'msg, 'T, 'aCollection, 'id>
+  Values: CollectionTarget<'T, 'aCollection>
+  Update: NotifyCollectionChangedEventArgs -> 'model -> unit
+  mutable SuspendUpdates: bool
+} with
+  member this.ExecuteUpdate args model =
+    if not this.SuspendUpdates then
+      this.Update args model
+
 type SubModelBinding<'model, 'msg, 'bindingModel, 'bindingMsg, 'vm> = {
   SubModelData: SubModelData<'model, 'msg, 'bindingModel, 'bindingMsg, 'vm>
   Dispatch: 'msg -> unit
@@ -157,6 +168,7 @@ type BaseVmBinding<'model, 'msg, 't> =
   | OneWaySeq of OneWaySeqBinding<'model, obj, 't, obj>
   | OneWaySeqGrouped of OneWaySeqGroupedBinding<'model, obj, 't, obj, obj>
   | TwoWay of TwoWayBinding<'model, 't>
+  | TwoWaySeq of TwoWaySeqBinding<'model, 'msg, obj, 't, obj>
   | Cmd of cmd: Command
   | SubModel of SubModelBinding<'model, 'msg, obj, obj, 't>
   | SubModelWin of SubModelWinBinding<'model, 'msg, obj, obj, 't>
@@ -227,6 +239,16 @@ module internal MapOutputType =
           KeyComparer = b.OneWaySeqGroupedData.KeyComparer
           ItemEquals = b.OneWaySeqGroupedData.ItemEquals }
         Values = b.Values |> GroupedCollectionTarget.mapCollection fOut }
+    | TwoWaySeq b -> TwoWaySeq {
+        TwoWaySeqData = {
+          Get = b.TwoWaySeqData.Get
+          CreateCollection = b.TwoWaySeqData.CreateCollection >> CollectionTarget.mapCollection fOut
+          GetId = b.TwoWaySeqData.GetId
+          ItemEquals = b.TwoWaySeqData.ItemEquals
+          Update = b.TwoWaySeqData.Update }
+        Values = b.Values |> CollectionTarget.mapCollection fOut
+        Update = b.Update
+        SuspendUpdates = b.SuspendUpdates }
     | SubModel b -> SubModel {
         SubModelData = {
           GetModel = b.SubModelData.GetModel
@@ -401,6 +423,19 @@ type Initialize<'t>
             Set = fun obj m -> d.Set obj m |> dispatch }
           |> TwoWay
           |> Some
+      | TwoWaySeqData d ->
+          let collectionTarget = d.CreateCollection (initialModel |> d.Get)
+          let collection = collectionTarget.GetCollection() |> box :?> INotifyCollectionChanged
+          let bindingData =
+            { TwoWaySeqData = d |> BindingData.TwoWaySeq.measureFunctions measure measure measure2
+              Values = collectionTarget
+              Update = fun args m -> d.Update args m |> dispatch
+              SuspendUpdates = false }
+          let onCollectionChanged _ args : unit = bindingData.ExecuteUpdate args (getCurrentModel ())
+          collection.CollectionChanged.AddHandler (NotifyCollectionChangedEventHandler(onCollectionChanged))
+          bindingData
+          |> TwoWaySeq
+          |> Some
       | CmdData d ->
           let d = d |> BindingData.Cmd.measureFunctions measure2 measure2
           let execute param = d.Exec param (getCurrentModel ()) |> ValueOption.iter dispatch
@@ -563,6 +598,11 @@ type Update<'t>
       | OneWaySeq b ->
           b.OneWaySeqData.Merge(b.Values, newModel)
           []
+      | TwoWaySeq b ->
+          b.SuspendUpdates <- true
+          b.TwoWaySeqData.Merge(b.Values, newModel)
+          b.SuspendUpdates <- false
+          []
       | OneWaySeqGrouped b ->
           b.OneWaySeqGroupedData.Merge(b.Values, newModel)
           []
@@ -696,6 +736,7 @@ type [<Struct>] Get<'t>(nameChain: string) =
     | TwoWay b -> b.Get model |> Ok
     | OneWaySeq { Values = vals } -> vals.GetCollection () |> Ok
     | OneWaySeqGrouped { Values = vals } -> vals.GetCollection () |> Ok
+    | TwoWaySeq { Values = vals } -> vals.GetCollection () |> Ok
     | Cmd cmd -> cmd |> unbox |> Ok
     | SubModel { GetVm = getvm } -> getvm() |> ValueOption.toNull |> Result.mapError GetError.ToNullError
     | SubModelWin { GetVmWinState = getvm } ->
@@ -752,6 +793,7 @@ type [<Struct>] Set<'t>(value: 't) =
         true
     | OneWay _
     | OneWaySeq _
+    | TwoWaySeq _
     | OneWaySeqGrouped _
     | Cmd _
     | SubModel _

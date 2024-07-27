@@ -8,6 +8,7 @@ open Elmish
 open Elmish.ObservableLookup
 open System.Collections.Generic
 open System.Collections.ObjectModel
+open System.Collections.Specialized
 open System.Runtime.InteropServices
 open System.Windows.Input
 open Microsoft.UI.Xaml
@@ -210,7 +211,7 @@ module Binding =
       |> createBindingT
 
     /// Elemental instance of a one-way-seq grouped binding.
-    let createGroupped<'a, 'item, 'id, 'grouppingKey, 'msg when 'id : equality and 'grouppingKey : equality>
+    let createGrouped<'a, 'item, 'id, 'grouppingKey, 'msg when 'id : equality and 'grouppingKey : equality>
       (get : 'a -> 'item seq)
       itemEquals
       (getId : 'item -> 'id)
@@ -224,6 +225,15 @@ module Binding =
 
     let id itemEquals (getId: 'a -> 'id) : string -> Binding<_, 'msg, _> =
       OneWaySeq.create itemEquals getId
+      |> createBindingT
+
+  [<RequireQualifiedAccess>]
+  module TwoWaySeqT =
+
+    /// Elemental instance of a one-way-seq binding.
+    let create<'a, 'item, 'id, 'msg when 'id : equality> get itemEquals (getId : 'item -> 'id) update : string -> Binding<'a, 'msg, ObservableCollection<'item>> =
+      TwoWaySeq.create itemEquals getId update
+      |> BindingData.mapModel get
       |> createBindingT
 
   /// <summary>
@@ -490,6 +500,14 @@ module Binding =
         else
           compareKeys
       OneWaySeqGrouped.create itemEquals getId getGrouppingKey compareKeys
+      |> BindingData.mapModel get
+      |> createBinding
+
+
+  module TwoWaySeq =
+
+    let internal create get itemEquals getId update =
+      TwoWaySeq.create itemEquals getId update
       |> BindingData.mapModel get
       |> createBinding
 
@@ -1318,6 +1336,136 @@ type Binding private () =
     >> Binding.mapModel get
     >> Binding.mapMsgWithModel set
     >> Binding.addValidation (validate >> ValueOption.ofError >> ValueOption.toList)
+
+
+  /// <summary>
+  ///   Creates a two-way binding to a sequence of items, each uniquely
+  ///   identified by the value returned by <paramref name="getId"/>. The
+  ///   binding will not be updated if the output of <paramref name="get"/>
+  ///   is referentially equal. This is the same as calling
+  ///   <see cref="twoWaySeqLazy"/> with <c>equals = refEq</c> and
+  ///   <c>map = id</c>. The binding is backed by a persistent
+  ///   <c>ObservableCollection</c>, so only changed items (as determined by
+  ///   <paramref name="itemEquals"/>) will be replaced. If the items are
+  ///   complex and you want them updated instead of replaced, consider using
+  ///   <see cref="subModelSeq"/>.
+  /// </summary>
+  /// <param name="get">Gets the collection from the model.</param>
+  /// <param name="itemEquals">
+  ///   Indicates whether two collection items are equal. Good candidates are
+  ///   <c>elmEq</c>, <c>refEq</c>, or simply <c>(=)</c>.
+  /// </param>
+  /// <param name="update">Updates the collection from UI.</param>
+  static member twoWaySeq
+      (get: 'model -> #seq<'a>,
+       itemEquals: 'a -> 'a -> bool,
+       getId: 'a -> 'id,
+       update: NotifyCollectionChangedEventArgs -> 'model -> 'msg)
+      : string -> Binding<'model, 'msg> =
+    Binding.TwoWaySeq.create id itemEquals getId update
+    >> Binding.addLazy refEq
+    >> Binding.mapModel get
+
+
+  /// <summary>
+  ///   Creates a two-way binding to a sequence of items, each uniquely
+  ///   identified by the value returned by <paramref name="getId"/>. The
+  ///   binding will not be updated if the output of <paramref name="get"/>
+  ///   is referentially equal. This is the same as calling
+  ///   <see cref="twoWaySeqLazy"/> with <c>equals = refEq</c> and
+  ///   <c>map = id</c>. The binding is backed by a persistent
+  ///   <c>ObservableCollection</c>, so only changed items (as determined by
+  ///   <paramref name="itemEquals"/>) will be replaced. If the items are
+  ///   complex and you want them updated instead of replaced, consider using
+  ///   <see cref="subModelSeq"/>.
+  /// </summary>
+  /// <param name="get">Gets the collection from the model.</param>
+  /// <param name="itemEquals">
+  ///   Indicates whether two collection items are equal. Good candidates are
+  ///   <c>elmEq</c>, <c>refEq</c>, or simply <c>(=)</c>.
+  /// </param>
+  /// <param name="update">Updates the collection from UI.</param>
+  static member twoWaySeq
+      (get: 'model -> #seq<'a>,
+       itemEquals: 'a -> 'a -> bool,
+       getId: 'a -> 'id,
+       update: NotifyCollectionChangedEventArgs -> 'msg)
+      : string -> Binding<'model, 'msg> =
+    let update args _ = update args
+    Binding.TwoWaySeq.create id itemEquals getId update
+    >> Binding.addLazy refEq
+    >> Binding.mapModel get
+
+
+  /// <summary>
+  ///   Creates a two-way binding to a sequence of items, each uniquely
+  ///   identified by the value returned by <paramref name="getId"/>. The
+  ///   binding will not be updated if the output of <paramref name="get"/>
+  ///   does not change, as determined by <paramref name="equals"/>.
+  ///   The binding is backed by a persistent <c>ObservableCollection</c>, so
+  ///   only changed items (as determined by <paramref name="itemEquals"/>)
+  ///   will be replaced. If the items are complex and you want them updated
+  ///   instead of replaced, consider using <see cref="subModelSeq"/>.
+  /// </summary>
+  /// <param name="get">Gets the intermediate value from the model.</param>
+  /// <param name="equals">
+  ///   Indicates whether two intermediate values are equal. Good candidates are
+  ///   <c>elmEq</c> and <c>refEq</c>.
+  /// </param>
+  /// <param name="map">Transforms the value into the final collection.</param>
+  /// <param name="itemEquals">
+  ///   Indicates whether two collection items are equal. Good candidates are
+  ///   <c>elmEq</c>, <c>refEq</c>, or simply <c>(=)</c>.
+  /// </param>
+  /// <param name="getId">Gets a unique identifier for a collection item.</param>
+  /// <param name="update">Updates the collection from UI.</param>
+  static member twoWaySeqLazy
+      (get: 'model -> 'a,
+       equals: 'a -> 'a -> bool,
+       map: 'a -> #seq<'b>,
+       itemEquals: 'b -> 'b -> bool,
+       getId: 'b -> 'id,
+       update: NotifyCollectionChangedEventArgs -> #seq<'b> -> 'msg)
+      : string -> Binding<'model, 'msg> =
+    Binding.TwoWaySeq.create map itemEquals getId update
+    >> Binding.addLazy equals
+    >> Binding.mapModel get
+
+  /// <summary>
+  ///   Creates a two-way binding to a sequence of items, each uniquely
+  ///   identified by the value returned by <paramref name="getId"/>. The
+  ///   binding will not be updated if the output of <paramref name="get"/>
+  ///   does not change, as determined by <paramref name="equals"/>.
+  ///   The binding is backed by a persistent <c>ObservableCollection</c>, so
+  ///   only changed items (as determined by <paramref name="itemEquals"/>)
+  ///   will be replaced. If the items are complex and you want them updated
+  ///   instead of replaced, consider using <see cref="subModelSeq"/>.
+  /// </summary>
+  /// <param name="get">Gets the intermediate value from the model.</param>
+  /// <param name="equals">
+  ///   Indicates whether two intermediate values are equal. Good candidates are
+  ///   <c>elmEq</c> and <c>refEq</c>.
+  /// </param>
+  /// <param name="map">Transforms the value into the final collection.</param>
+  /// <param name="itemEquals">
+  ///   Indicates whether two collection items are equal. Good candidates are
+  ///   <c>elmEq</c>, <c>refEq</c>, or simply <c>(=)</c>.
+  /// </param>
+  /// <param name="getId">Gets a unique identifier for a collection item.</param>
+  /// <param name="update">Updates the collection from UI.</param>
+  static member twoWaySeqLazy
+      (get: 'model -> 'a,
+       equals: 'a -> 'a -> bool,
+       map: 'a -> #seq<'b>,
+       itemEquals: 'b -> 'b -> bool,
+       getId: 'b -> 'id,
+       update: NotifyCollectionChangedEventArgs -> 'msg)
+      : string -> Binding<'model, 'msg> =
+    let update args _ = update args
+    Binding.TwoWaySeq.create map itemEquals getId update
+    >> Binding.addLazy equals
+    >> Binding.mapModel get
+
 
   /// <summary>
   ///   Creates a <c>Command</c> binding that depends only on the model (not the

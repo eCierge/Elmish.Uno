@@ -92,8 +92,8 @@
     <PackageVersion Include="FSharp.Collections.Immutable" Version="2.0.0-ci-853395216" />
     <PackageVersion Include="FSharp.Control.FusionTasks" Version="2.6.0" />
     <PackageVersion Include="FSharp.Control.Reactive" Version="5.0.2" />
-    <PackageVersion Include="FSharp.Core" Version="8.0.300" />
-    <PackageVersion Include="FsToolkit.ErrorHandling" Version="4.15.2" />
+    <PackageVersion Include="FSharp.Core" Version="8.0.301" />
+    <PackageVersion Include="FsToolkit.ErrorHandling" Version="4.16.0" />
   </ItemGroup>
   <ItemGroup Label="Build and Test">
     <PackageVersion Include="BenchmarkDotNet" Version="0.13.2" />

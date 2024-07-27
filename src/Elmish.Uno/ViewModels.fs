@@ -317,6 +317,15 @@ and GetCustomProperty(name: string) =
         DynamicCustomProperty<DynamicViewModel<'model,'msg>, System.Collections.IEnumerable>(name,
           fun vm -> vm.TryGetMemberCore(name, rootBinding) :?> _) :> _
       | c -> raise (NotSupportedException $"Type '{c.GetType().FullName}' is not a collection")
+    | TwoWaySeq data ->
+      match data.Values.GetCollection() with
+      | :? System.Collections.IList ->
+        DynamicCustomProperty<DynamicViewModel<'model,'msg>, System.Collections.IList>(name,
+          fun vm -> vm.TryGetMemberCore(name, rootBinding) :?> _) :> _
+      | :? System.Collections.IEnumerable ->
+        DynamicCustomProperty<DynamicViewModel<'model,'msg>, System.Collections.IEnumerable>(name,
+          fun vm -> vm.TryGetMemberCore(name, rootBinding) :?> _) :> _
+      | c -> raise (NotSupportedException $"Type '{c.GetType().FullName}' is not a collection")
     | Cmd _ ->
       DynamicCustomProperty<DynamicViewModel<'model,'msg>, System.Windows.Input.ICommand>(name,
         fun vm -> vm.TryGetMemberCore(name, rootBinding) :?> _) :> _
