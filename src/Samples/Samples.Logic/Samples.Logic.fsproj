@@ -1,7 +1,12 @@
 ﻿<Project Sdk="Uno.Sdk">
   <PropertyGroup>
-    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows')) or '$(EnableWindowsTargeting)' == 'true'">$(TargetFrameworks);$(DotNetVersion)-windows10.0.22621</TargetFrameworks>
-    <TargetFrameworks>$(TargetFrameworks);$(DotNetVersion)</TargetFrameworks>
+    <TargetFrameworks>
+      $(DotNetVersion)-windows10.0.22621;
+      $(DotNetVersion);
+      $(DotNetVersion)-android;
+      $(DotNetVersion)-ios;
+      $(DotNetVersion)-maccatalyst
+    </TargetFrameworks>
     <TargetFrameworks Condition="'$(OverrideTargetFramework)'!=''">$(OverrideTargetFramework)</TargetFrameworks>
   </PropertyGroup>
 
@@ -30,9 +35,6 @@
   <ItemGroup>
     <PackageReference Include="Elmish" />
     <PackageReference Include="FSharp.Control.FusionTasks" />
-    <PackageReference Include="Microsoft.WindowsAppSDK" Condition="$(TargetFramework.Contains('windows10'))" />
-    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Condition="$(TargetFramework.Contains('windows10'))" />
-    <PackageReference Include="Uno.WinUI" />
   </ItemGroup>
 
   <Target Name="XamlPreCompile" Condition="$(TargetFramework.Contains('windows10'))" />
