@@ -231,9 +231,14 @@ module Binding =
   module TwoWaySeqT =
 
     /// Elemental instance of a one-way-seq binding.
-    let create<'a, 'item, 'id, 'msg when 'id : equality> get itemEquals (getId : 'item -> 'id) update : string -> Binding<'a, 'msg, ObservableCollection<'item>> =
-      TwoWaySeq.create itemEquals getId update
-      |> BindingData.mapModel get
+    let create<'model, 'item, 'id, 'msg when 'id : equality>
+      (get : 'model -> seq<'item>)
+      (itemEquals: 'item -> 'item -> bool)
+      (getId : 'item -> 'id)
+      (update : NotifyCollectionChangedEventArgs -> 'model -> 'msg)
+      : string -> Binding<'model, 'msg, ObservableCollection<'item>>
+      =
+      TwoWaySeq.create get itemEquals getId update
       |> createBindingT
 
   /// <summary>
@@ -507,8 +512,7 @@ module Binding =
   module TwoWaySeq =
 
     let internal create get itemEquals getId update =
-      TwoWaySeq.create itemEquals getId update
-      |> BindingData.mapModel get
+      TwoWaySeq.create get itemEquals getId update
       |> createBinding
 
 
@@ -1357,10 +1361,10 @@ type Binding private () =
   /// </param>
   /// <param name="update">Updates the collection from UI.</param>
   static member twoWaySeq
-      (get: 'model -> #seq<'a>,
+      (get: 'model -> seq<'a>,
        itemEquals: 'a -> 'a -> bool,
        getId: 'a -> 'id,
-       update: NotifyCollectionChangedEventArgs -> 'model -> 'msg)
+       update: NotifyCollectionChangedEventArgs -> seq<'a> -> 'msg)
       : string -> Binding<'model, 'msg> =
     Binding.TwoWaySeq.create id itemEquals getId update
     >> Binding.addLazy refEq
@@ -1386,7 +1390,7 @@ type Binding private () =
   /// </param>
   /// <param name="update">Updates the collection from UI.</param>
   static member twoWaySeq
-      (get: 'model -> #seq<'a>,
+      (get: 'model -> seq<'a>,
        itemEquals: 'a -> 'a -> bool,
        getId: 'a -> 'id,
        update: NotifyCollectionChangedEventArgs -> 'msg)
@@ -1422,10 +1426,10 @@ type Binding private () =
   static member twoWaySeqLazy
       (get: 'model -> 'a,
        equals: 'a -> 'a -> bool,
-       map: 'a -> #seq<'b>,
+       map: 'a -> seq<'b>,
        itemEquals: 'b -> 'b -> bool,
        getId: 'b -> 'id,
-       update: NotifyCollectionChangedEventArgs -> #seq<'b> -> 'msg)
+       update: NotifyCollectionChangedEventArgs -> seq<'b> -> 'msg)
       : string -> Binding<'model, 'msg> =
     Binding.TwoWaySeq.create map itemEquals getId update
     >> Binding.addLazy equals
@@ -1456,7 +1460,7 @@ type Binding private () =
   static member twoWaySeqLazy
       (get: 'model -> 'a,
        equals: 'a -> 'a -> bool,
-       map: 'a -> #seq<'b>,
+       map: 'a -> seq<'b>,
        itemEquals: 'b -> 'b -> bool,
        getId: 'b -> 'id,
        update: NotifyCollectionChangedEventArgs -> 'msg)

@@ -5,6 +5,7 @@ open Elmish.Collections
 open System
 open System.Collections.Generic
 open System.Collections.ObjectModel
+open System.Collections.Specialized
 open System.Runtime.InteropServices
 open System.Windows.Input
 open Microsoft.UI.Xaml
@@ -887,6 +888,135 @@ type BindingT private () =
     >> Binding.mapModel get
     >> Binding.mapMsgWithModel setWithModel
     >> Binding.addValidation (validate >> ValueOption.ofError >> ValueOption.toList)
+
+
+  /// <summary>
+  ///   Creates a two-way binding to a sequence of items, each uniquely
+  ///   identified by the value returned by <paramref name="getId"/>. The
+  ///   binding will not be updated if the output of <paramref name="get"/>
+  ///   is referentially equal. This is the same as calling
+  ///   <see cref="twoWaySeqLazy"/> with <c>equals = refEq</c> and
+  ///   <c>map = id</c>. The binding is backed by a persistent
+  ///   <c>ObservableCollection</c>, so only changed items (as determined by
+  ///   <paramref name="itemEquals"/>) will be replaced. If the items are
+  ///   complex and you want them updated instead of replaced, consider using
+  ///   <see cref="subModelSeq"/>.
+  /// </summary>
+  /// <param name="get">Gets the collection from the model.</param>
+  /// <param name="itemEquals">
+  ///   Indicates whether two collection items are equal. Good candidates are
+  ///   <c>elmEq</c>, <c>refEq</c>, or simply <c>(=)</c>.
+  /// </param>
+  /// <param name="update">Updates the collection from UI.</param>
+  static member twoWaySeq
+      (get: 'model -> seq<'T>,
+       itemEquals: 'T -> 'T -> bool,
+       getId: 'T -> 'id,
+       update: NotifyCollectionChangedEventArgs -> seq<'T> -> 'msg)
+      : string -> Binding<'model, 'msg, ObservableCollection<'T>> =
+    Binding.TwoWaySeqT.create id itemEquals getId update
+    >> Binding.addLazy refEq
+    >> Binding.mapModel get
+
+
+  /// <summary>
+  ///   Creates a two-way binding to a sequence of items, each uniquely
+  ///   identified by the value returned by <paramref name="getId"/>. The
+  ///   binding will not be updated if the output of <paramref name="get"/>
+  ///   is referentially equal. This is the same as calling
+  ///   <see cref="twoWaySeqLazy"/> with <c>equals = refEq</c> and
+  ///   <c>map = id</c>. The binding is backed by a persistent
+  ///   <c>ObservableCollection</c>, so only changed items (as determined by
+  ///   <paramref name="itemEquals"/>) will be replaced. If the items are
+  ///   complex and you want them updated instead of replaced, consider using
+  ///   <see cref="subModelSeq"/>.
+  /// </summary>
+  /// <param name="get">Gets the collection from the model.</param>
+  /// <param name="itemEquals">
+  ///   Indicates whether two collection items are equal. Good candidates are
+  ///   <c>elmEq</c>, <c>refEq</c>, or simply <c>(=)</c>.
+  /// </param>
+  /// <param name="update">Updates the collection from UI.</param>
+  static member twoWaySeq
+      (get: 'model -> seq<'T>,
+       itemEquals: 'T -> 'T -> bool,
+       getId: 'T -> 'id,
+       update: NotifyCollectionChangedEventArgs -> 'msg)
+      : string -> Binding<'model, 'msg, ObservableCollection<'T>> =
+    let update args _ = update args
+    Binding.TwoWaySeqT.create id itemEquals getId update
+    >> Binding.addLazy refEq
+    >> Binding.mapModel get
+
+
+  /// <summary>
+  ///   Creates a two-way binding to a sequence of items, each uniquely
+  ///   identified by the value returned by <paramref name="getId"/>. The
+  ///   binding will not be updated if the output of <paramref name="get"/>
+  ///   does not change, as determined by <paramref name="equals"/>.
+  ///   The binding is backed by a persistent <c>ObservableCollection</c>, so
+  ///   only changed items (as determined by <paramref name="itemEquals"/>)
+  ///   will be replaced. If the items are complex and you want them updated
+  ///   instead of replaced, consider using <see cref="subModelSeq"/>.
+  /// </summary>
+  /// <param name="get">Gets the intermediate value from the model.</param>
+  /// <param name="equals">
+  ///   Indicates whether two intermediate values are equal. Good candidates are
+  ///   <c>elmEq</c> and <c>refEq</c>.
+  /// </param>
+  /// <param name="map">Transforms the value into the final collection.</param>
+  /// <param name="itemEquals">
+  ///   Indicates whether two collection items are equal. Good candidates are
+  ///   <c>elmEq</c>, <c>refEq</c>, or simply <c>(=)</c>.
+  /// </param>
+  /// <param name="getId">Gets a unique identifier for a collection item.</param>
+  /// <param name="update">Updates the collection from UI.</param>
+  static member twoWaySeqLazy
+      (get: 'model -> 'T,
+       equals: 'T -> 'T -> bool,
+       map: 'T -> seq<'b>,
+       itemEquals: 'b -> 'b -> bool,
+       getId: 'b -> 'id,
+       update: NotifyCollectionChangedEventArgs -> seq<'b> -> 'msg)
+      : string -> Binding<'model, 'msg, ObservableCollection<'b>> =
+    Binding.TwoWaySeqT.create map itemEquals getId update
+    >> Binding.addLazy equals
+    >> Binding.mapModel get
+
+  /// <summary>
+  ///   Creates a two-way binding to a sequence of items, each uniquely
+  ///   identified by the value returned by <paramref name="getId"/>. The
+  ///   binding will not be updated if the output of <paramref name="get"/>
+  ///   does not change, as determined by <paramref name="equals"/>.
+  ///   The binding is backed by a persistent <c>ObservableCollection</c>, so
+  ///   only changed items (as determined by <paramref name="itemEquals"/>)
+  ///   will be replaced. If the items are complex and you want them updated
+  ///   instead of replaced, consider using <see cref="subModelSeq"/>.
+  /// </summary>
+  /// <param name="get">Gets the intermediate value from the model.</param>
+  /// <param name="equals">
+  ///   Indicates whether two intermediate values are equal. Good candidates are
+  ///   <c>elmEq</c> and <c>refEq</c>.
+  /// </param>
+  /// <param name="map">Transforms the value into the final collection.</param>
+  /// <param name="itemEquals">
+  ///   Indicates whether two collection items are equal. Good candidates are
+  ///   <c>elmEq</c>, <c>refEq</c>, or simply <c>(=)</c>.
+  /// </param>
+  /// <param name="getId">Gets a unique identifier for a collection item.</param>
+  /// <param name="update">Updates the collection from UI.</param>
+  static member twoWaySeqLazy
+      (get: 'model -> 'T,
+       equals: 'T -> 'T -> bool,
+       map: 'T -> seq<'b>,
+       itemEquals: 'b -> 'b -> bool,
+       getId: 'b -> 'id,
+       update: NotifyCollectionChangedEventArgs -> 'msg)
+      : string -> Binding<'model, 'msg, ObservableCollection<'b>> =
+    let update args _ = update args
+    Binding.TwoWaySeqT.create map itemEquals getId update
+    >> Binding.addLazy equals
+    >> Binding.mapModel get
 
 
   /// <summary>

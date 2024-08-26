@@ -663,8 +663,8 @@ module BindingData =
 
     let boxMinorTypes d = d |> mapMinorTypes box box unbox
 
-    let create itemEquals getId update =
-      { Get = (fun x -> upcast x)
+    let create get itemEquals getId update =
+      { Get = get
         CreateCollection = ObservableCollection >> CollectionTarget.create
         ItemEquals = itemEquals
         GetId = getId
