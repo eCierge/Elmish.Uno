@@ -1,6 +1,6 @@
-﻿using System.Collections.ObjectModel;
+﻿namespace Elmish.Collections;
 
-namespace Elmish.ObservableLookup;
+using System.Collections.ObjectModel;
 
 public interface IGroupingList<TKey, TElement> : IGrouping<TKey, TElement>, IList<TElement> { }
 

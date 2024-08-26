@@ -6,7 +6,7 @@ open System.Collections
 open System.Collections.Generic
 open System.Collections.ObjectModel
 open System.Linq
-open Elmish.ObservableLookup
+open Elmish.Collections
 
 type SourceOrTarget =
   | Source

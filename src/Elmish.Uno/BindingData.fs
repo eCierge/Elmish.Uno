@@ -10,7 +10,7 @@ open System.Windows.Input
 open Microsoft.UI.Xaml
 
 open Elmish
-open Elmish.ObservableLookup
+open Elmish.Collections
 
 
 module Helper =

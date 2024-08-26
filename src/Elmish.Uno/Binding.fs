@@ -5,7 +5,7 @@
 open System.Windows
 
 open Elmish
-open Elmish.ObservableLookup
+open Elmish.Collections
 open System.Collections.Generic
 open System.Collections.ObjectModel
 open System.Collections.Specialized

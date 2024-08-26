@@ -1,7 +1,7 @@
 ﻿namespace Elmish.Uno
 
 open Elmish
-open Elmish.ObservableLookup
+open Elmish.Collections
 open System
 open System.Collections.Generic
 open System.Collections.ObjectModel

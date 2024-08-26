@@ -1,4 +1,4 @@
-﻿namespace Elmish.ObservableLookup;
+﻿namespace Elmish.Collections;
 
 using System;
 using System.Collections;
