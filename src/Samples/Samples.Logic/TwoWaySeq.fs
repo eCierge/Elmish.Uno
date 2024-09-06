@@ -33,7 +33,7 @@ let update msg m =
 
 [<CompiledName "Bindings">]
 let bindings : Binding<Model, Msg> list = [
-  "Tokens" |> Binding.twoWaySeq ((fun m -> m.Tokens), (=), id, TokensChanged)
+  "Tokens" |> Binding.twoWaySeq ((_.Tokens >> Seq.ofList), (=), id, TokensChanged)
   "AddToken" |> Binding.cmd AddToken
 ]
 

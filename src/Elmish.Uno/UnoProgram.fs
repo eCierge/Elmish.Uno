@@ -305,17 +305,9 @@ module UnoProgram =
     let dispatchFromViewModel msg =
       elmishDispatcher.TryEnqueue(fun () -> dispatch msg) |> ignore // handle as a command message
 
-    let args =
-      let initial, _ = Program.init program.ElmishProgram arg
-      { initialModel = initial
-        dispatch = dispatchFromViewModel
-        loggingArgs =
-          { performanceLogThresholdMs = program.PerformanceLogThreshold
-            nameChain = "main"
-            log = bindingsLogger
-            logPerformance = performanceLogger } }
-
+    let mutable initialModel = Unchecked.defaultof<'model>
     let setUiState model _syncDispatch =
+      initialModel <- model
       elmishDispatcher.TryEnqueue(
         fun () ->
           try
@@ -348,7 +340,13 @@ module UnoProgram =
     |> Program.withSetState setUiState
     |> Program.runWithDispatch cmdDispatch arg
 
-    args
+    { initialModel = initialModel
+      dispatch = dispatchFromViewModel
+      loggingArgs =
+        { performanceLogThresholdMs = program.PerformanceLogThreshold
+          nameChain = "main"
+          log = bindingsLogger
+          logPerformance = performanceLogger } }
 
   [<CompiledName "CreateVmArgs">]
   let createVmArgs

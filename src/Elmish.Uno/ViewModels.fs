@@ -364,13 +364,12 @@ type [<AllowNullLiteral>] ViewModelBase<'model, 'msg>(args: ViewModelArgs<'model
   let mutable helper = ViewModelHelper.empty (fun () -> this) args
 
   let { loggingArgs = loggingArgs
-        initialModel = initialModel
         dispatch = dispatch } = args
   let { log = log; nameChain = nameChain } = loggingArgs
 
   let initializeBinding initializedBindings binding =
     Initialize(loggingArgs, binding.Name, ViewModelHelper.getFunctionsForSubModelSelectedItem loggingArgs initializedBindings)
-      .Recursive(initialModel, dispatch, (fun () -> this |> IViewModel.currentModel), binding.Data)
+      .Recursive((this |> IViewModel.currentModel), dispatch, (fun () -> this |> IViewModel.currentModel), binding.Data)
 
   member _.NotifyPropertyChanged (name: string) =
     helper.PropertyChanged.Trigger(helper.GetSender (), PropertyChangedEventArgs name)
