@@ -15,7 +15,7 @@ open Elmish.Uno
 
 
 
-type internal TestVm<'model, 'msg, 'B1>(model, binding: string -> Binding<'model,'msg>) as this =
+type internal TestVm<'model, 'msg, 'B1>(model, binding: Binding<'model,'msg>) as this =
   inherit ViewModelBase<'model, 'msg>({ initialModel = model; dispatch = (fun x -> this.Dispatch x); loggingArgs = LoggingViewModelArgs.none })
 
   let pcTriggers = ConcurrentDictionary<string, int>()
@@ -36,8 +36,8 @@ type internal TestVm<'model, 'msg, 'B1>(model, binding: string -> Binding<'model
 
   member _.UpdateModel(m) = IViewModel.updateModel(this, m)
 
-  member x.GetPropertyName = nameof(x.GetProperty)
-  member _.GetProperty = base.Get<'B1>() (binding >> Binding.unboxT)
+  static member GetPropertyName = nameof(Unchecked.defaultof<TestVm<'model, 'msg, 'B1>>.GetProperty)
+  member _.GetProperty = base.Get<'B1>(binding |> Binding.unboxT)
 
   member private __.Dispatch x =
     dispatchMsgs.Add x
@@ -66,7 +66,7 @@ type internal TestVm<'model, 'msg, 'B1>(model, binding: string -> Binding<'model
     (this.GetProperty |> unbox<INotifyCollectionChanged>).CollectionChanged.Add
       (fun e ->
         ccTriggers.AddOrUpdate(
-          this.GetPropertyName,
+          TestVm<'model, 'msg, 'B1>.GetPropertyName,
           [e],
           (fun _ me -> e :: me)) |> ignore
       )
@@ -76,10 +76,12 @@ type internal TestVm<'model, 'msg, 'B1>(model, binding: string -> Binding<'model
   member this.TrackCecTriggersForGetProperty () =
     (this.GetProperty |> unbox<ICommand>).CanExecuteChanged.Add
       (fun _ ->
-        cecTriggers.AddOrUpdate(this.GetPropertyName, 1, (fun _ count -> count + 1)) |> ignore
+        cecTriggers.AddOrUpdate(TestVm<'model, 'msg, 'B1>.GetPropertyName, 1, (fun _ count -> count + 1)) |> ignore
       )
 
+module TestVm =
 
+    let GetPropertyName = TestVm<'model, 'msg, 'B1>.GetPropertyName
 
 [<AutoOpen>]
 module Helpers =
@@ -153,7 +155,7 @@ module OneWay =
 
       let get = string<int>
 
-      let binding = oneWay get
+      let binding = oneWay get TestVm.GetPropertyName
       let vm = TestVm(m1, binding)
 
       test <@ vm.GetProperty = get m1 @>
@@ -172,12 +174,12 @@ module OneWay =
 
       let get = string<int>
 
-      let binding = oneWay get
+      let binding = oneWay get TestVm.GetPropertyName
       let vm = TestVm(m1, binding)
       let _ = vm.GetProperty
 
       vm.UpdateModel m2
-      test <@ vm.NumPcTriggersFor vm.GetPropertyName = if get m1 = get m2 then 0 else 1 @>
+      test <@ vm.NumPcTriggersFor TestVm.GetPropertyName = if get m1 = get m2 then 0 else 1 @>
   }
 
   [<Fact>]
@@ -192,7 +194,7 @@ module OneWay =
     Property.check <| property {
       let! m = GenX.auto<int>
 
-      let binding = oneWay id >> Binding.addSticky isEven
+      let binding = (oneWay id >> Binding.addSticky isEven) TestVm.GetPropertyName
       let vm = TestVm(m, binding)
 
       vm.UpdateModel (m + 1)
@@ -211,7 +213,7 @@ module OneWayLazy =
       let equals = (=)
       let map = String.length
 
-      let binding = oneWayLazy get equals map
+      let binding = oneWayLazy get equals map TestVm.GetPropertyName
       let vm = TestVm(m, binding)
 
       test <@ vm.GetProperty = (m |> get |> map) @>
@@ -228,7 +230,7 @@ module OneWayLazy =
       let equals _ _ = false
       let map = String.length
 
-      let binding = oneWayLazy get equals map
+      let binding = oneWayLazy get equals map TestVm.GetPropertyName
       let vm = TestVm(m1, binding)
       vm.UpdateModel m2
 
@@ -246,7 +248,7 @@ module OneWayLazy =
       let equals _ _ = true
       let map = String.length
 
-      let binding = oneWayLazy get equals map
+      let binding = oneWayLazy get equals map TestVm.GetPropertyName
       let vm = TestVm(m1, binding)
       let _ = vm.GetProperty  // populate cache
       vm.UpdateModel m2
@@ -266,7 +268,7 @@ module OneWayLazy =
       let equals _ _ = eq
       let map = InvokeTester String.length
 
-      let binding = oneWayLazy get equals map.Fn
+      let binding = oneWayLazy get equals map.Fn TestVm.GetPropertyName
       let vm = TestVm(m1, binding)
 
       let _ = vm.GetProperty
@@ -288,7 +290,7 @@ module OneWayLazy =
       let equals = (=)
       let map = InvokeTester String.length
 
-      let binding = oneWayLazy get equals map.Fn
+      let binding = oneWayLazy get equals map.Fn TestVm.GetPropertyName
       let vm = TestVm(m1, binding)
       let _ = vm.GetProperty
 
@@ -310,7 +312,7 @@ module OneWayLazy =
       let equals = (=)
       let map = InvokeTester String.length
 
-      let binding = oneWayLazy get equals map.Fn
+      let binding = oneWayLazy get equals map.Fn TestVm.GetPropertyName
       let vm = TestVm(m1, binding)
 
       let _ = vm.GetProperty
@@ -336,10 +338,10 @@ module OneWayLazy =
       let equals _ _ = eq
       let map = String.length
 
-      let binding = oneWayLazy get equals map
+      let binding = oneWayLazy get equals map TestVm.GetPropertyName
       let vm = TestVm(m1, binding)
       let _ = vm.GetProperty
       vm.UpdateModel m2
 
-      test <@ vm.NumPcTriggersFor vm.GetPropertyName = if not eq then 1 else 0 @>
+      test <@ vm.NumPcTriggersFor TestVm.GetPropertyName = if not eq then 1 else 0 @>
   }
