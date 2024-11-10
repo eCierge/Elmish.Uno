@@ -36,7 +36,13 @@
   <Choose>
     <When Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">
       <ItemGroup>
-
+        <PackageReference Include="Xamarin.AndroidX.Activity" />
+        <PackageReference Include="Xamarin.AndroidX.AppCompat" />
+        <PackageReference Include="Xamarin.AndroidX.Core" />
+        <PackageReference Include="Xamarin.AndroidX.Fragment" />
+        <PackageReference Include="Xamarin.AndroidX.Legacy.Support.V4" />
+        <PackageReference Include="Xamarin.AndroidX.RecyclerView" />
+        <PackageReference Include="Xamarin.AndroidX.SwipeRefreshLayout" />
         <PackageReference Include="Xamarin.Google.Android.Material" />
         <PackageReference Include="Uno.UniversalImageLoader" />
       </ItemGroup>

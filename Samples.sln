@@ -9,19 +9,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Platforms", "Platforms", "{
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{D966D8E4-00F3-443C-955A-85F773D3485D}"
 	ProjectSection(SolutionItems) = preProject
-		..\.editorconfig = ..\.editorconfig
-		Directory.Build.targets = Directory.Build.targets
-		..\global.json = ..\global.json
-		..\NuGet.Config = ..\NuGet.Config
-		Packages.props = Packages.props
-		..\README.md = ..\README.md
-		..\RELEASE_NOTES.md = ..\RELEASE_NOTES.md
-		Solution.Build.props = Solution.Build.props
-		..\TUTORIAL.md = ..\TUTORIAL.md
-		..\REFERENCE.md = ..\REFERENCE.md
 		src\Samples\Directory.Build.props = src\Samples\Directory.Build.props
 		src\Samples\Directory.Build.targets = src\Samples\Directory.Build.targets
-		solution-config.props.sample = solution-config.props.sample
+		src\Samples\solution-config.props.sample = src\Samples\solution-config.props.sample
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Samples.Windows", "src\Samples\Samples.Windows\Samples.Windows.csproj", "{13D44485-4908-46DD-9F34-46F34A6021D6}"

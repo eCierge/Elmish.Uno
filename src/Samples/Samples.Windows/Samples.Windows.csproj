@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Uno.Sdk">
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>$(DotNetVersion)-windows10.0.22621</TargetFramework>
+    <TargetFramework>$(DotNetVersion)-windows10.0.26100</TargetFramework>
     <RootNamespace>Samples.Windows</RootNamespace>
     <Platforms>x86;x64;arm64</Platforms>
 

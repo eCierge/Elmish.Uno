@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Uno.Sdk">
   <PropertyGroup>
     <TargetFrameworks>
-      $(DotNetVersion)-windows10.0.22621;
+      $(DotNetVersion)-windows10.0.26100;
       $(DotNetVersion);
       $(DotNetVersion)-android;
       $(DotNetVersion)-ios;

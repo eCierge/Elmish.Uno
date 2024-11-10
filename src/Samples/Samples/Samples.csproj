@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Uno.Sdk">
   <PropertyGroup>
     <TargetFrameworks>
-      $(DotNetVersion)-windows10.0.22621;
+      $(DotNetVersion)-windows10.0.26100;
       $(DotNetVersion);
       $(DotNetVersion)-android;
       $(DotNetVersion)-ios;
@@ -21,7 +21,7 @@
       the "Microsoft.Windows.SDK.BuildTools" package above, and the "revision" version number
       must be the highest found in https://www.nuget.org/packages/Microsoft.Windows.SDK.NET.Ref.
     -->
-    <!-- <WindowsSdkPackageVersion>10.0.22621.28</WindowsSdkPackageVersion> -->
+    <!-- <WindowsSdkPackageVersion>10.0.26100.48</WindowsSdkPackageVersion> -->
   </PropertyGroup>
 
   <ItemGroup>
@@ -29,6 +29,7 @@
     <PackageReference Include="CommunityToolkit.WinUI.Controls.TokenizingTextBox" />
     <PackageReference Include="CommunityToolkit.WinUI.Converters" />
     <PackageReference Include="CommunityToolkit.WinUI.Triggers" />
+    <PackageReference Include="Uno.WinUI.DevServer" Condition="'$(Configuration)'=='Debug'" />
   </ItemGroup>
 
   <ItemGroup>
