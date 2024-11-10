@@ -1,6 +1,5 @@
-﻿namespace Microsoft.Toolkit.Uwp.UI.Triggers;
+﻿namespace CommunityToolkit.WinUI.Triggers;
 
-#if !WINDOWS
 // Copyright (c) Morten Nielsen. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
@@ -8,7 +7,6 @@ using CommunityToolkit.WinUI.Helpers;
 
 using Elmish.Uno.Samples;
 
-using Microsoft.Graphics.Display;
 using Microsoft.UI.Xaml;
 
 using Windows.Devices.Sensors;
@@ -119,4 +117,3 @@ public class OrientationStateTrigger : StateTriggerBase
         }
     }
 }
-#endif
