@@ -35,6 +35,8 @@
   <ItemGroup>
     <PackageReference Include="Elmish" />
     <PackageReference Include="FSharp.Control.FusionTasks" />
+    <PackageReference Include="Serilog.Extensions.Logging" />
+    <PackageReference Include="Serilog.Sinks.Console" />
   </ItemGroup>
 
   <Target Name="XamlPreCompile" Condition="$(TargetFramework.Contains('windows10'))" />

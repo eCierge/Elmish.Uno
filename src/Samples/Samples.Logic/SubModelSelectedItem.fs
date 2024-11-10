@@ -36,10 +36,10 @@ let bindings : Binding<Model, Msg> list = [
   "Entities" |> Binding.subModelSeq(
     (fun m -> m.Entities),
     (fun e -> e.Id),
-    (fun () -> [
+    [
       "Name" |> Binding.oneWay (fun (_, e) -> e.Name)
       "SelectedLabel" |> Binding.oneWay (fun (m, e) -> if m.Selected = Some e.Id then " - SELECTED" else "")
-    ]))
+    ])
 
   "SelectedEntity" |> Binding.subModelSelectedItem("Entities", (fun m -> m.Selected), Select)
 ]

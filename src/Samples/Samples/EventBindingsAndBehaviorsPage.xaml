@@ -60,12 +60,12 @@
       Command="{Binding ToggleVisibility}"
       Content="{Binding ButtonText}"
       d:Content="Button text">
-      <Button.ToolTip>
+      <ToolTipService.ToolTip>
         <TextBlock>
           <Run Text="{Binding ButtonText}" />
           <Run Text="(Ctrl + T)" />
         </TextBlock>
-      </Button.ToolTip>
+      </ToolTipService.ToolTip>
     </Button>
     <TextBlock
       Margin="0,10,0,10"

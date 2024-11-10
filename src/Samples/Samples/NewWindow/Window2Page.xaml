@@ -65,6 +65,6 @@
         Command="{Binding Submit}"
         Content="Submit"
         Style="{StaticResource AccentButtonStyle}" />
-</Page>
+    </StackPanel>
   </StackPanel>
-</Window>
+</Page>
