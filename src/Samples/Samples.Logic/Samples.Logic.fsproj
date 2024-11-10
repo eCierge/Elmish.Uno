@@ -19,6 +19,7 @@
     <Compile Include="SubModel.fs" />
     <Compile Include="SubModelOpt.fs" />
     <Compile Include="SubModelSelectedItem.fs" />
+    <Compile Include="SubModelSelectedItem.Cascading.fs" />
     <Compile Include="SubModelSeq.fs" />
     <Compile Include="UiBoundCmdParam.fs" />
     <Compile Include="Validation.fs" />

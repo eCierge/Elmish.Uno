@@ -26,6 +26,7 @@ using SubModelOptForm2Program = Elmish.Uno.Samples.SubModelOpt.Program.Form2;
 using SubModelOptProgram = Elmish.Uno.Samples.SubModelOpt.Program;
 using SubModelProgram = Elmish.Uno.Samples.SubModel.Program;
 using SubModelSelectedItemProgram = Elmish.Uno.Samples.SubModelSelectedItem.Program;
+using SubModelSelectedItemCascadingProgram = Elmish.Uno.Samples.SubModelSelectedItemCascading.Program;
 using SubModelSeqProgram = Elmish.Uno.Samples.SubModelSeq.Program;
 using UiBoundCmdParamProgram = Elmish.Uno.Samples.UiBoundCmdParam.Program;
 using ValidationProgram = Elmish.Uno.Samples.Validation.Program;
@@ -43,6 +44,7 @@ internal class DesignData
     public object SubModelOptForm1 => SubModelOptForm1Program.DesignInstance;
     public object SubModelOptForm2 => SubModelOptForm2Program.DesignInstance;
     public object SubModelSelectedItem => SubModelSelectedItemProgram.DesignInstance;
+    public object SubModelSelectedItemCascading => new SubModelSelectedItemCascadingProgram.SubModelSelectedItemCascadingViewModel(dispatcher: null!);
     public object SubModelSeq => SubModelSeqProgram.DesignInstance;
     public object UiBoundCmdParam => UiBoundCmdParamProgram.DesignInstance;
     public object Validation => ValidationProgram.DesignInstance;
