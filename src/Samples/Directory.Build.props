@@ -45,7 +45,7 @@
     <UnoToolkitVersion>6.3.5</UnoToolkitVersion> <!-- https://www.nuget.org/packages/Uno.Toolkit -->
     <UnoThemesVersion>5.3.1</UnoThemesVersion> <!-- https://www.nuget.org/packages/Uno.Themes -->
     <UnoUniversalImageLoaderVersion>1.9.37</UnoUniversalImageLoaderVersion> <!-- https://www.nuget.org/packages/Uno.UniversalImageLoader -->
-    <UnoWasmBootstrapVersion>9.0.3</UnoWasmBootstrapVersion> <!-- https://www.nuget.org/packages/Uno.Wasm.Bootstrap -->
+    <UnoWasmBootstrapVersion>8.0.21</UnoWasmBootstrapVersion> <!-- https://www.nuget.org/packages/Uno.Wasm.Bootstrap -->
   </PropertyGroup>
 
 </Project>
