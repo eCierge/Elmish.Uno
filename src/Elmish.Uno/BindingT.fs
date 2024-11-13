@@ -58,7 +58,7 @@ type BindingT private () =
   static member oneWayOpt
       (get: 'model -> 'a option)
       : string -> Binding<'model, 'msg, Nullable<'a>> =
-    Binding.OneWayT.opt<'a, 'msg>
+    Binding.OneWayT.opt
     >> Binding.addLazy (=)
     >> Binding.mapModel get
 
@@ -72,7 +72,7 @@ type BindingT private () =
   static member oneWayOpt
       (get: 'model -> 'a voption)
       : string -> Binding<'model, 'msg, Nullable<'a>> =
-    Binding.OneWayT.vopt<'a, 'msg>
+    Binding.OneWayT.vopt
     >> Binding.addLazy (=)
     >> Binding.mapModel get
 
@@ -155,7 +155,7 @@ type BindingT private () =
        equals: 'a -> 'a -> bool,
        map: 'a -> 'b option)
       : string -> Binding<'model, 'msg, Nullable<'b>> =
-    Binding.OneWayT.opt<'b, 'msg>
+    Binding.OneWayT.opt
     >> Binding.mapModel map
     >> Binding.addLazy equals
     >> Binding.mapModel get
@@ -184,7 +184,7 @@ type BindingT private () =
        equals: 'a -> 'a -> bool,
        map: 'a -> 'b voption)
       : string -> Binding<'model, 'msg, Nullable<'b>> =
-    Binding.OneWayT.vopt<'b, 'msg>
+    Binding.OneWayT.vopt
     >> Binding.mapModel map
     >> Binding.addLazy equals
     >> Binding.mapModel get
@@ -398,12 +398,12 @@ type BindingT private () =
   /// <param name="get">Gets the value from the model.</param>
   /// <param name="setWithModel">Returns the message to dispatch.</param>
   static member twoWayOpt
-      (getOpt: 'model -> 'a option,
+      (get: 'model -> 'a option,
        setWithModel: 'a option -> 'model -> 'msg)
       : string -> Binding<'model, 'msg, Nullable<'a>> =
-    Binding.TwoWayT.opt<'a>
+    Binding.TwoWayT.opt
     >> Binding.addLazy (=)
-    >> Binding.mapModel getOpt
+    >> Binding.mapModel get
     >> Binding.mapMsgWithModel setWithModel
 
 
@@ -415,12 +415,12 @@ type BindingT private () =
   /// <param name="get">Gets the value from the model.</param>
   /// <param name="set">Returns the message to dispatch.</param>
   static member twoWayOpt
-      (getVOpt: 'model -> 'a voption,
+      (get: 'model -> 'a voption,
        setWithModel: 'a voption -> 'model -> 'msg)
       : string -> Binding<'model, 'msg, Nullable<'a>> =
-    Binding.TwoWayT.vopt<'a>
+    Binding.TwoWayT.vopt
     >> Binding.addLazy (=)
-    >> Binding.mapModel getVOpt
+    >> Binding.mapModel get
     >> Binding.mapMsgWithModel setWithModel
 
   /// <summary>
@@ -431,12 +431,12 @@ type BindingT private () =
   /// <param name="get">Gets the value from the model.</param>
   /// <param name="setWithModel">Returns the message to dispatch.</param>
   static member twoWayOptObj
-      (getOpt: 'model -> 'a option,
+      (get: 'model -> 'a option,
        setWithModel: 'a option -> 'model -> 'msg)
       : string -> Binding<'model, 'msg, 'a> =
     Binding.TwoWayT.optobj<'a>
     >> Binding.addLazy (=)
-    >> Binding.mapModel getOpt
+    >> Binding.mapModel get
     >> Binding.mapMsgWithModel setWithModel
 
   /// <summary>
@@ -447,12 +447,12 @@ type BindingT private () =
   /// <param name="get">Gets the value from the model.</param>
   /// <param name="set">Returns the message to dispatch.</param>
   static member twoWayOptObj
-      (getVOpt: 'model -> 'a voption,
+      (get: 'model -> 'a voption,
        setWithModel: 'a voption -> 'model -> 'msg)
       : string -> Binding<'model, 'msg, 'a> =
     Binding.TwoWayT.voptobj<'a>
     >> Binding.addLazy (=)
-    >> Binding.mapModel getVOpt
+    >> Binding.mapModel get
     >> Binding.mapMsgWithModel setWithModel
 
   /// <summary>
@@ -548,13 +548,13 @@ type BindingT private () =
   ///   Returns the validation messages from the updated model.
   /// </param>
   static member twoWayOptValidate
-      (getVOpt: 'model -> 'a voption,
+      (get: 'model -> 'a voption,
        setWithModel: 'a voption -> 'model -> 'msg,
        validate: 'model -> string list)
       : string -> Binding<'model, 'msg, Nullable<'a>> =
-    Binding.TwoWayT.vopt<'a>
+    Binding.TwoWayT.vopt
     >> Binding.addLazy (=)
-    >> Binding.mapModel getVOpt
+    >> Binding.mapModel get
     >> Binding.mapMsgWithModel setWithModel
     >> Binding.addValidation validate
 
@@ -574,7 +574,7 @@ type BindingT private () =
        setWithModel: 'a voption -> 'model -> 'msg,
        validate: 'model -> string voption)
       : string -> Binding<'model, 'msg, Nullable<'a>> =
-    Binding.TwoWayT.vopt<'a>
+    Binding.TwoWayT.vopt
     >> Binding.addLazy (=)
     >> Binding.mapModel get
     >> Binding.mapMsgWithModel setWithModel
@@ -596,7 +596,7 @@ type BindingT private () =
        setWithModel: 'a voption -> 'model -> 'msg,
        validate: 'model -> string option)
       : string -> Binding<'model, 'msg, Nullable<'a>> =
-    Binding.TwoWayT.vopt<'a>
+    Binding.TwoWayT.vopt
     >> Binding.addLazy (=)
     >> Binding.mapModel get
     >> Binding.mapMsgWithModel setWithModel
@@ -618,7 +618,7 @@ type BindingT private () =
        setWithModel: 'a voption -> 'model -> 'msg,
        validate: 'model -> Result<'ignored, string>)
       : string -> Binding<'model, 'msg, Nullable<'a>> =
-    Binding.TwoWayT.vopt<'a>
+    Binding.TwoWayT.vopt
     >> Binding.addLazy (=)
     >> Binding.mapModel get
     >> Binding.mapMsgWithModel setWithModel
@@ -640,7 +640,7 @@ type BindingT private () =
        setWithModel: 'a option -> 'model -> 'msg,
        validate: 'model -> string list)
       : string -> Binding<'model, 'msg, Nullable<'a>> =
-    Binding.TwoWayT.opt<'a>
+    Binding.TwoWayT.opt
     >> Binding.addLazy (=)
     >> Binding.mapModel get
     >> Binding.mapMsgWithModel setWithModel
@@ -662,7 +662,7 @@ type BindingT private () =
        setWithModel: 'a option -> 'model -> 'msg,
        validate: 'model -> string voption)
       : string -> Binding<'model, 'msg, Nullable<'a>> =
-    Binding.TwoWayT.opt<'a>
+    Binding.TwoWayT.opt
     >> Binding.addLazy (=)
     >> Binding.mapModel get
     >> Binding.mapMsgWithModel setWithModel
@@ -684,7 +684,7 @@ type BindingT private () =
        setWithModel: 'a option -> 'model -> 'msg,
        validate: 'model -> string option)
       : string -> Binding<'model, 'msg, Nullable<'a>> =
-    Binding.TwoWayT.opt<'a>
+    Binding.TwoWayT.opt
     >> Binding.addLazy (=)
     >> Binding.mapModel get
     >> Binding.mapMsgWithModel setWithModel
@@ -706,7 +706,7 @@ type BindingT private () =
        setWithModel: 'a option -> 'model -> 'msg,
        validate: 'model -> Result<'ignored, string>)
       : string -> Binding<'model, 'msg, Nullable<'a>> =
-    Binding.TwoWayT.opt<'a>
+    Binding.TwoWayT.opt
     >> Binding.addLazy (=)
     >> Binding.mapModel get
     >> Binding.mapMsgWithModel setWithModel
@@ -725,13 +725,13 @@ type BindingT private () =
   ///   Returns the validation messages from the updated model.
   /// </param>
   static member twoWayOptObjValidate
-      (getVOpt: 'model -> 'a voption,
+      (get: 'model -> 'a voption,
        setWithModel: 'a voption -> 'model -> 'msg,
        validate: 'model -> string list)
       : string -> Binding<'model, 'msg, 'a> =
     Binding.TwoWayT.voptobj<'a>
     >> Binding.addLazy (=)
-    >> Binding.mapModel getVOpt
+    >> Binding.mapModel get
     >> Binding.mapMsgWithModel setWithModel
     >> Binding.addValidation validate
 
@@ -2033,7 +2033,7 @@ module ExtensionsT =
         (get: 'model -> 'a option,
          set: 'a option -> 'msg)
         : string -> Binding<'model, 'msg, Nullable<'a>> =
-      Binding.TwoWayT.opt<'a>
+      Binding.TwoWayT.opt
       >> Binding.addLazy (=)
       >> Binding.mapModel get
       >> Binding.mapMsg set
@@ -2049,7 +2049,7 @@ module ExtensionsT =
         (get: 'model -> 'a voption,
          set: 'a voption -> 'msg)
         : string -> Binding<'model, 'msg, Nullable<'a>> =
-      Binding.TwoWayT.vopt<'a>
+      Binding.TwoWayT.vopt
       >> Binding.addLazy (=)
       >> Binding.mapModel get
       >> Binding.mapMsg set
@@ -2182,7 +2182,7 @@ module ExtensionsT =
          set: 'a voption -> 'msg,
          validate: 'model -> string list)
         : string -> Binding<'model, 'msg, Nullable<'a>> =
-      Binding.TwoWayT.vopt<'a>
+      Binding.TwoWayT.vopt
       >> Binding.addLazy (=)
       >> Binding.mapModel get
       >> Binding.mapMsg set
@@ -2204,7 +2204,7 @@ module ExtensionsT =
          set: 'a voption -> 'msg,
          validate: 'model -> string voption)
         : string -> Binding<'model, 'msg, Nullable<'a>> =
-      Binding.TwoWayT.vopt<'a>
+      Binding.TwoWayT.vopt
       >> Binding.addLazy (=)
       >> Binding.mapModel get
       >> Binding.mapMsg set
@@ -2226,7 +2226,7 @@ module ExtensionsT =
          set: 'a voption -> 'msg,
          validate: 'model -> string option)
         : string -> Binding<'model, 'msg, Nullable<'a>> =
-      Binding.TwoWayT.vopt<'a>
+      Binding.TwoWayT.vopt
       >> Binding.addLazy (=)
       >> Binding.mapModel get
       >> Binding.mapMsg set
@@ -2248,7 +2248,7 @@ module ExtensionsT =
          set: 'a voption -> 'msg,
          validate: 'model -> Result<'ignored, string>)
         : string -> Binding<'model, 'msg, Nullable<'a>> =
-      Binding.TwoWayT.vopt<'a>
+      Binding.TwoWayT.vopt
       >> Binding.addLazy (=)
       >> Binding.mapModel get
       >> Binding.mapMsg set
@@ -2271,7 +2271,7 @@ module ExtensionsT =
          set: 'a option -> 'msg,
          validate: 'model -> string list)
         : string -> Binding<'model, 'msg, Nullable<'a>> =
-      Binding.TwoWayT.opt<'a>
+      Binding.TwoWayT.opt
       >> Binding.addLazy (=)
       >> Binding.mapModel get
       >> Binding.mapMsg set
@@ -2293,7 +2293,7 @@ module ExtensionsT =
          set: 'a option -> 'msg,
          validate: 'model -> string voption)
         : string -> Binding<'model, 'msg, Nullable<'a>> =
-      Binding.TwoWayT.opt<'a>
+      Binding.TwoWayT.opt
       >> Binding.addLazy (=)
       >> Binding.mapModel get
       >> Binding.mapMsg set
@@ -2315,7 +2315,7 @@ module ExtensionsT =
          set: 'a option -> 'msg,
          validate: 'model -> string option)
         : string -> Binding<'model, 'msg, Nullable<'a>> =
-      Binding.TwoWayT.opt<'a>
+      Binding.TwoWayT.opt
       >> Binding.addLazy (=)
       >> Binding.mapModel get
       >> Binding.mapMsg set
@@ -2337,7 +2337,7 @@ module ExtensionsT =
          set: 'a option -> 'msg,
          validate: 'model -> Result<'ignored, string>)
         : string -> Binding<'model, 'msg, Nullable<'a>> =
-      Binding.TwoWayT.opt<'a>
+      Binding.TwoWayT.opt
       >> Binding.addLazy (=)
       >> Binding.mapModel get
       >> Binding.mapMsg set
