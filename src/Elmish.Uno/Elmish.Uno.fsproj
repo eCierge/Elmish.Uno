@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Uno.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>$(DotNetVersion)-windows10.0.22621;$(DotNetVersion)</TargetFrameworks>
+    <TargetFrameworks>$(DotNetVersion)-windows10.0.26100;$(DotNetVersion)</TargetFrameworks>
     <UnoSingleProject>true</UnoSingleProject>
     <OutputType>Library</OutputType>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -17,7 +17,7 @@
       the "Microsoft.Windows.SDK.BuildTools" package above, and the "revision" version number
       must be the highest found in https://www.nuget.org/packages/Microsoft.Windows.SDK.NET.Ref.
     -->
-    <!-- <WindowsSdkPackageVersion>10.0.26100.48</WindowsSdkPackageVersion> -->
+    <!-- <WindowsSdkPackageVersion>10.0.26100.54</WindowsSdkPackageVersion> -->
 
     <Description>Elmish implementation for WInUI and Uno Platform</Description>
 
