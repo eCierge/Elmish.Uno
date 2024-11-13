@@ -2,13 +2,13 @@
 
 open System
 open System.Collections.Specialized
-open System.Windows.Input
 open Microsoft.Extensions.Logging
 open Microsoft.UI.Xaml
 open FsToolkit.ErrorHandling
 
 open Elmish
 
+#nowarn "1204" // The function is for use by compiled F# code and should not be used directly
 
 type UpdateData =
   | ErrorsChanged of string
@@ -326,8 +326,8 @@ module internal MapOutputType =
         Validate = b.Validate
       }
 
-  let boxVm b = recursiveCase box unbox b
-  let unboxVm b = recursiveCase unbox box b
+  let boxVm b = recursiveCase box LanguagePrimitives.IntrinsicFunctions.UnboxFast b
+  let unboxVm b = recursiveCase LanguagePrimitives.IntrinsicFunctions.UnboxFast box b
 
 type SubModelSelectedItemLast() =
 
