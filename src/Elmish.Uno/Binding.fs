@@ -133,14 +133,14 @@ module Binding =
     /// Creates a one-way binding to an optional value. The binding
     /// automatically converts between a missing value in the model and
     /// a <c>null</c> value in the view.
-    let optobj<'a, 'msg when 'a : null> : string -> Binding<'a option, 'msg, 'a> =
+    let optobj<'a, 'msg when 'a : not struct> : string -> Binding<'a option, 'msg, 'a> =
       id<'a, 'msg>
       >> mapModel (function Some v -> v | None -> Unchecked.defaultof<'a>)
 
     /// Creates a one-way binding to an optional value. The binding
     /// automatically converts between a missing value in the model and
     /// a <c>null</c> value in the view.
-    let voptobj<'a, 'msg when 'a : null> : string -> Binding<'a voption, 'msg, 'a> =
+    let voptobj<'a, 'msg when 'a : not struct> : string -> Binding<'a voption, 'msg, 'a> =
       id<'a, 'msg>
       >> mapModel (function ValueSome v -> v | ValueNone -> Unchecked.defaultof<'a>)
 
@@ -177,18 +177,18 @@ module Binding =
     /// Creates a two-way binding to an optional value. The binding
     /// automatically converts between a missing value in the model and
     /// a <c>null</c> value in the view.
-    let optobj<'a when 'a : null> : string -> Binding<'a option, 'a option, 'a> =
+    let optobj<'a when 'a : not struct> : string -> Binding<'a option, 'a option, 'a> =
       id<'a>
       >> mapModel (function Some v -> v | None -> Unchecked.defaultof<'a>)
-      >> mapMsg Option.ofObj
+      >> mapMsg (fun v -> if obj.ReferenceEquals(Unchecked.defaultof<'a>, v) then None else Some v)
 
     /// Creates a two-way binding to an optional value. The binding
     /// automatically converts between a missing value in the model and
     /// a <c>null</c> value in the view.
-    let voptobj<'a when 'a : null> : string -> Binding<'a voption, 'a voption, 'a> =
+    let voptobj<'a when 'a : not struct> : string -> Binding<'a voption, 'a voption, 'a> =
       id<'a>
       >> mapModel (function ValueSome v -> v | ValueNone -> Unchecked.defaultof<'a>)
-      >> mapMsg ValueOption.ofObj
+      >> mapMsg (fun v -> if obj.ReferenceEquals(Unchecked.defaultof<'a>, v) then ValueNone else ValueSome v)
 
   /// <summary>
   ///   The strongly-typed counterpart of <c>Binding.oneWaySeq</c> with parameter <c>getId</c>.
