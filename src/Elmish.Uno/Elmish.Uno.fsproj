@@ -78,7 +78,6 @@
 
   <ItemGroup>
     <PackageReference Include="Elmish" />
-    <PackageReference Include="FSharp.Core" />
     <PackageReference Include="FSharp.Collections.Immutable" />
     <PackageReference Include="FSharp.Core" />
     <PackageReference Include="FsToolkit.ErrorHandling" />
