@@ -13,9 +13,7 @@ open Swensen.Unquote
 
 open Elmish.Uno
 
-
-
-type internal TestVm<'model, 'msg, 'B1>(model, binding: Binding<'model,'msg>) as this =
+type internal TestVm<'model, 'msg, 'B1 when 'model : not null and 'msg : not null>(model, binding: Binding<'model,'msg>) as this =
   inherit ViewModelBase<'model, 'msg>({ initialModel = model; dispatch = (fun x -> this.Dispatch x); loggingArgs = LoggingViewModelArgs.none })
 
   let pcTriggers = ConcurrentDictionary<string, int>()

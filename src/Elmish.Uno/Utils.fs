@@ -41,7 +41,7 @@ type private ElmEq<'T>() =
     )
 
   static member Eq x1 x2 =
-    gettersAndEq |> Array.forall (fun (get, eq) -> eq (get (box x1), get (box x2)))
+    gettersAndEq |> Array.forall (fun (get, eq) -> eq (get (x1 :> obj), get (x2 :> obj)))
 
 
 /// Memberwise equality where value-typed members and string members are
@@ -52,5 +52,5 @@ type private ElmEq<'T>() =
 /// normally immutable. For a direct reference equality check (not memberwise),
 /// see refEq (which should be used when passing a single non-string reference
 /// type from the model).
-let elmEq<'T> : 'T -> 'T -> bool =
+let elmEq<'T when 'T : not null> : 'T -> 'T -> bool =
   ElmEq<'T>.Eq

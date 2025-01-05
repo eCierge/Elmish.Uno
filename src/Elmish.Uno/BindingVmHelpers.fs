@@ -331,12 +331,12 @@ module internal MapOutputType =
 
 type SubModelSelectedItemLast() =
 
-  member _.Base(data: BaseBindingData<'model, 'msg, obj>) : int =
+  member _.Base(data: BaseBindingData<'model, 'msg, objnull>) : int =
     match data with
     | SubModelSelectedItemData _ -> 1
     | _ -> 0
 
-  member this.Recursive<'model, 'msg>(data: BindingData<'model, 'msg, obj>) : int =
+  member this.Recursive<'model, 'msg>(data: BindingData<'model, 'msg, objnull>) : int =
     match data with
     | BaseBindingData d -> this.Base d
     | CachingData d -> this.Recursive d
@@ -344,7 +344,7 @@ type SubModelSelectedItemLast() =
     | LazyData d -> this.Recursive d.BindingData
     | AlterMsgStreamData d -> this.Recursive d.BindingData
 
-  member this.CompareBindingDatas() : BindingData<'model, 'msg, obj> -> BindingData<'model, 'msg, obj> -> int =
+  member this.CompareBindingDatas() : BindingData<'model, 'msg, objnull> -> BindingData<'model, 'msg, objnull> -> int =
     fun a b -> this.Recursive(a) - this.Recursive(b)
 
 

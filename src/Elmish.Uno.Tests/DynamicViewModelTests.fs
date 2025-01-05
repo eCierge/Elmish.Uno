@@ -27,7 +27,7 @@ type private DataErrorsChangedEventArgs = System.ComponentModel.DataErrorsChange
 [<AutoOpen>]
 module Extensions =
 
-  type DynamicViewModel<'model, 'msg> with
+  type DynamicViewModel<'model, 'msg when 'model : not null and 'msg : not null> with
 
     member internal this.Get propName =
       (?) this propName
@@ -36,7 +36,7 @@ module Extensions =
       (?<-) this propName value
 
 
-type internal TestVm<'model, 'msg>(model, bindings) as this =
+type internal TestVm<'model, 'msg when 'model : not null and 'msg : not null>(model, bindings) as this =
   inherit DynamicViewModel<'model, 'msg>({ initialModel = model; dispatch = (fun x -> this.Dispatch x); loggingArgs = LoggingViewModelArgs.none }, bindings)
 
   let pcTriggers = ConcurrentDictionary<string, int>()
@@ -719,7 +719,7 @@ module TwoWay =
       let! m2 = GenX.auto<int>
 
       let get = string<int>
-      let set _ _ = ()
+      let set _ _ = ""
 
       let binding = twoWay get set name
       let vm = TestVm(m1, binding)
@@ -744,7 +744,7 @@ module TwoWay =
       let! m2 = GenX.auto<int>
 
       let get = string<int>
-      let set _ _ = ()
+      let set _ _ = ""
 
       let binding = twoWay get set name
       let vm = TestVm(m1, binding)
@@ -789,7 +789,7 @@ module TwoWayValidate =
       let! m2 = GenX.auto<int>
 
       let get = string<int>
-      let set _ _ = ()
+      let set _ _ = ""
       let validate _ = ValueNone
 
       let binding = twoWayValidate name get set validate
@@ -815,7 +815,7 @@ module TwoWayValidate =
       let! m2 = GenX.auto<int>
 
       let get = string<int>
-      let set _ _ = ()
+      let set _ _ = ""
       let validate _ = ValueNone
 
       let binding = twoWayValidate name get set validate
@@ -859,7 +859,7 @@ module TwoWayValidate =
       let! m2 = GenX.auto<int>
 
       let get _ = ()
-      let set _ _ = ()
+      let set _ _ = ""
       let validate m = if m < 0 then ValueSome (string m) else ValueNone
 
       let binding = twoWayValidate name get set validate
@@ -879,7 +879,7 @@ module TwoWayValidate =
       let! m2 = GenX.auto<int>
 
       let get _ = ()
-      let set _ _ = ()
+      let set _ _ = ""
       let validate m = if m < 0 then ValueSome (string m) else ValueNone
 
       let binding = twoWayValidate name get set validate
@@ -899,7 +899,7 @@ module TwoWayValidate =
       let! m2 = GenX.auto<int>
 
       let get _ = ()
-      let set _ _ = ()
+      let set _ _ = ""
       let validate _ = ValueNone
 
       let binding = twoWayValidate name get set validate
@@ -924,7 +924,7 @@ module TwoWayValidate =
       let! m2 = GenX.auto<int>
 
       let get _ = ()
-      let set _ _ = ()
+      let set _ _ = ""
       let validate m = ValueSome (string<int> m)
 
       let binding = twoWayValidate name get set validate
@@ -949,7 +949,7 @@ module TwoWayValidate =
       let! m2 = GenX.auto<int> |> GenX.notEqualTo m1
 
       let get _ = ()
-      let set _ _ = ()
+      let set _ _ = ""
       let validate m =
         if m = m1
         then ValueSome (string<int> m)
@@ -1144,7 +1144,7 @@ module SubModel =
       let! sticky = Gen.bool
 
       let getModel (m: byte * int) = (snd m) / 2 |> ValueSome
-      let toMsg _ = ()
+      let toMsg _ = ""
 
       let binding = subModel name getModel toMsg [] sticky
       let vm = TestVm(m1, binding)
@@ -1165,7 +1165,7 @@ module SubModel =
       let! sticky = Gen.bool
 
       let getModel _ = ValueNone
-      let toMsg _ = ()
+      let toMsg _ = ""
 
       let binding = subModel name getModel toMsg [] sticky
       let vm = TestVm(m, binding)
@@ -1188,7 +1188,7 @@ module SubModel =
         elif m = m2 then ValueNone
         elif m = m3 then (snd m) / 3 |> ValueSome
         else failwith "Should never happen"
-      let toMsg _ = ()
+      let toMsg _ = ""
 
       let binding = subModel name getModel toMsg [] sticky
       let vm = TestVm(m1, binding)
@@ -1217,7 +1217,7 @@ module SubModel =
       let! sticky = Gen.bool
 
       let getModel (m: byte * int) = if snd m < 0 then ValueNone else (snd m) / 2 |> ValueSome
-      let toMsg _ = ()
+      let toMsg _ = ""
 
       let binding = subModel name getModel toMsg [] sticky
       let vm = TestVm(m1, binding)
@@ -1244,7 +1244,7 @@ module SubModel =
       let! sticky = Gen.bool
 
       let getModel = snd >> ValueSome
-      let toMsg _ = ()
+      let toMsg _ = ""
       let subGet = string<int>
 
       let subBinding = oneWay subGet subName
@@ -1445,7 +1445,7 @@ module SubModelSelectedItem =
       let toMsg = snd
 
       let get _ = selectedSubModel |> ValueOption.map getId
-      let set _ _ = ()
+      let set _ _ = ""
 
       let subModelSeqBinding = subModelSeq subModelSeqName getModels getId toMsg []
       let selectedItemBinding = subModelSelectedItem selectedItemName subModelSeqName get set
@@ -1456,7 +1456,7 @@ module SubModelSelectedItem =
       | ValueNone ->
           test <@ vm.Get selectedItemName = null @>
       | ValueSome sm ->
-          test <@ (vm.Get selectedItemName |> unbox<IViewModel<Guid, unit>>) |> Option.ofObj |> Option.map (fun vm -> vm.CurrentModel)
+          test <@ (vm.Get selectedItemName |> unbox<IViewModel<Guid, string>>) |> Option.ofObj |> Option.map (fun vm -> vm.CurrentModel)
                    = (m |> getModels |> List.tryFind (fun x -> getId x = getId sm))
                @>
     }
@@ -1505,7 +1505,7 @@ module SubModelSelectedItem =
     let selectedItemName = "Foo"
     let subModelSeqName = "Bar"
     let bindings =
-      [ selectedItemName |> Binding.subModelSelectedItem (subModelSeqName, Some, ignore)
+      [ selectedItemName |> Binding.subModelSelectedItem (subModelSeqName, Some, (fun _ -> ""))
         subModelSeqName |> Binding.subModelSeq ((fun _ -> []), (fun _ -> ""), []) ]
     let mutable error : string option = None
     let loggingArgs =
@@ -1660,7 +1660,7 @@ module AlterMsgStream =
     let name = ""
     let model = 0
     let get = ignore
-    let set _ _ = ()
+    let set _ _ = ""
     let alteration = InvokeTester id
     let binding =
       twoWay get set name
