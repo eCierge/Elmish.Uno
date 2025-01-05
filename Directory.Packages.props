@@ -28,6 +28,7 @@
     <PackageVersion Include="CommunityToolkit.WinUI.Extensions" Version="$(CommunityToolkitVersion)" />
     <PackageVersion Include="CommunityToolkit.WinUI.Helpers" Version="$(CommunityToolkitVersion)" />
     <PackageVersion Include="CommunityToolkit.WinUI.Triggers" Version="$(CommunityToolkitVersion)" />
+    <PackageVersion Include="FSharp.Core" Version="9.0.101" />
     <PackageVersion Include="Microsoft.Extensions.Http" Version="$(MicrosoftExtensionsVersion)" />
     <PackageVersion Include="Microsoft.Extensions.Hosting" Version="$(MicrosoftExtensionsVersion)" />
     <PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="$(MicrosoftExtensionsVersion)" />
@@ -64,17 +65,16 @@
     <PackageVersion Include="FSharp.Collections.Immutable" Version="2.0.0-ci-853395216" />
     <PackageVersion Include="FSharp.Control.FusionTasks" Version="2.6.0" />
     <PackageVersion Include="FSharp.Control.Reactive" Version="5.0.2" />
-    <PackageVersion Include="FSharp.Core" Version="8.0.401" />
     <PackageVersion Include="FsToolkit.ErrorHandling" Version="4.18.0" />
   </ItemGroup>
   <ItemGroup Label="Build and Test">
-    <PackageVersion Include="BenchmarkDotNet" Version="0.13.2" />
+    <PackageVersion Include="BenchmarkDotNet" Version="0.14.0" />
     <PackageVersion Include="FSharp.Interop.Dynamic" Version="5.0.1.268" />
-    <PackageVersion Include="Hedgehog" Version="0.12.1" />
-    <PackageVersion Include="Hedgehog.Experimental" Version="0.6.0" />
-    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.9.0" />
-    <PackageVersion Include="Unquote" Version="6.1.0" />
-    <PackageVersion Include="xunit.core" Version="2.7.0" />
-    <PackageVersion Include="xunit.runner.visualstudio" Version="2.5.7" />
+    <PackageVersion Include="Hedgehog" Version="0.13.0" />
+    <PackageVersion Include="Hedgehog.Experimental" Version="0.7.0" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
+    <PackageVersion Include="Unquote" Version="7.0.1" />
+    <PackageVersion Include="xunit.core" Version="2.9.2" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="3.0.0" />
   </ItemGroup>
 </Project>
