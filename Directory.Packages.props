@@ -2,7 +2,6 @@
   <PropertyGroup>
     <SystemVersion>8.0.0</SystemVersion>
     <MicrosoftExtensionsVersion>8.0.0</MicrosoftExtensionsVersion>
-    <FSharpCoreVersion>8.0.0</FSharpCoreVersion>
     <CommunityToolkitVersion>8.1.240916</CommunityToolkitVersion>
   </PropertyGroup>
   <ItemGroup Label="Microsoft">

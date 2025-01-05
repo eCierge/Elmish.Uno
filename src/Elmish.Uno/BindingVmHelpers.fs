@@ -81,12 +81,12 @@ type OneWayToSourceBinding<'model, 'T> = {
   Set: 'T -> 'model -> unit
 }
 
-type OneWaySeqBinding<'model, 'T, 'aCollection, 'id when 'id : equality> = {
+type OneWaySeqBinding<'model, 'T, 'aCollection, 'id when 'id : equality and 'id : not null> = {
   OneWaySeqData: OneWaySeqData<'model, 'T, 'aCollection, 'id>
   Values: CollectionTarget<'T, 'aCollection>
 }
 
-type OneWaySeqGroupedBinding<'model, 'T, 'aCollection, 'id, 'key when 'id : equality and 'key : equality> = {
+type OneWaySeqGroupedBinding<'model, 'T, 'aCollection, 'id, 'key when 'id : equality and 'id : not null and 'key : equality and 'key : not null> = {
   OneWaySeqGroupedData: OneWaySeqGroupedData<'model, 'T, 'aCollection, 'id, 'key>
   Values: GroupedCollectionTarget<'T, 'aCollection, 'key>
 }
@@ -96,7 +96,7 @@ type TwoWayBinding<'model, 'T> = {
   Set: 'T -> 'model -> unit
 }
 
-type TwoWaySeqBinding<'model, 'msg, 'T, 'aCollection, 'id when 'id : equality> = {
+type TwoWaySeqBinding<'model, 'msg, 'T, 'aCollection, 'id when 'id : equality and 'id : not null> = {
   TwoWaySeqData: TwoWaySeqData<'model, 'msg, 'T, 'aCollection, 'id>
   Values: CollectionTarget<'T, 'aCollection>
   Update: NotifyCollectionChangedEventArgs -> 'model -> unit
@@ -131,7 +131,7 @@ type SubModelSeqUnkeyedBinding<'model, 'msg, 'bindingModel, 'bindingMsg, 'vm, 'v
     GetCurrentModel: unit -> 'model
   }
 
-type SubModelSeqKeyedBinding<'model, 'msg, 'bindingModel, 'bindingMsg, 'vm, 'vmCollection, 'id when 'id : equality> =
+type SubModelSeqKeyedBinding<'model, 'msg, 'bindingModel, 'bindingMsg, 'vm, 'vmCollection, 'id when 'id : equality and 'id : not null> =
   { SubModelSeqKeyedData: SubModelSeqKeyedData<'model, 'msg, 'bindingModel, 'bindingMsg, 'vm, 'vmCollection, 'id>
     Dispatch: 'msg -> unit
     Vms: CollectionTarget<'vm, 'vmCollection>
@@ -326,7 +326,7 @@ module internal MapOutputType =
         Validate = b.Validate
       }
 
-  let boxVm b = recursiveCase box LanguagePrimitives.IntrinsicFunctions.UnboxFast b
+  let boxVm b = recursiveCase (box >> nonNull) LanguagePrimitives.IntrinsicFunctions.UnboxFast b
   let unboxVm b = recursiveCase LanguagePrimitives.IntrinsicFunctions.UnboxFast box b
 
 type SubModelSelectedItemLast() =
@@ -366,7 +366,7 @@ type FuncsFromSubModelSeqKeyed() =
   member _.Base(binding: BaseVmBinding<'model, 'msg, 't>) : SelectedItemBinding<'T, 'b, 'c, obj> option =
     match binding with
     | SubModelSeqKeyed b ->
-      { VmToId = box >> b.SubModelSeqKeyedData.VmToId
+      { VmToId = box >> nonNull >> b.SubModelSeqKeyedData.VmToId
         FromId = b.FromId >> Option.map unbox }
       |> Some
     | _ -> None
@@ -467,7 +467,7 @@ type Initialize<'t>
               let mutable vmWinState = WindowState.Closed
               { SubModelWinData = d
                 Dispatch = dispatch
-                WinRef = WeakReference<_>(null)
+                WinRef = WeakReference<Window>(nonNull null)
                 PreventClose = ref true
                 GetVmWinState = fun () -> vmWinState
                 SetVmWinState = fun vmState -> vmWinState <- vmState
@@ -477,7 +477,7 @@ type Initialize<'t>
               let chain = LoggingViewModelArgs.getNameChainFor nameChain name
               let args = ViewModelArgs.create m (toMsg >> dispatch) chain loggingArgs
               let vm = d.CreateViewModel args
-              let winRef = WeakReference<_>(null)
+              let winRef = WeakReference<Window>(nonNull null)
               let preventClose = ref true
               log.LogTrace("[{BindingNameChain}] Creating visible window", chain)
               Helpers2.showNewWindow winRef d.GetWindow d.OnCloseRequested preventClose vm getCurrentModel dispatch
@@ -632,8 +632,9 @@ type Update<'t>
             | false, _ ->
                 log.LogError("[{BindingNameChain}] Attempted to close window, but did not find window reference", winPropChain)
             | true, w ->
+
                 log.LogTrace("[{BindingNameChain}] Closing window", winPropChain)
-                b.WinRef.SetTarget null
+                b.WinRef.SetTarget (nonNull null)
                 (*
                  * The Window might be in the process of closing,
                  * so instead of immediately executing Window.Close via DispatcherQueue.TryEnqueue,
@@ -641,7 +642,6 @@ type Update<'t>
                  * https://github.com/elmish/Elmish.WPF/issues/330
                  *)
                 w.DispatcherQueue.TryEnqueue(fun () -> w.Close()) |> ignore
-            b.WinRef.SetTarget null
 
           let showNew vm =
             b.PreventClose.Value <- true
@@ -756,7 +756,7 @@ type [<Struct>] Get<'t>(nameChain: string) =
                 | None -> // selecting failed
                     { NameChain = nameChain
                       SubModelSeqBindingName = binding.SubModelSeqBindingName
-                      Id = id.ToString() }
+                      Id = id.ToString() |> nonNull }
                     |> GetError.SubModelSelectedItem
                     |> Error
         b.TypedGet model

@@ -202,7 +202,7 @@ type [<AllowNullLiteral>] DynamicViewModel<'model, 'msg>
       helper <- { helper with Model = newModel }
       ViewModelHelper.raiseEvents hadErrors eventsToRaise helper
 
-  member internal _.TryGetMemberCore (name: string, binding: VmBinding<'model, 'msg, obj>, result: byref<_>) =
+  member internal _.TryGetMemberCore (name: string, binding: VmBinding<'model, 'msg, obj>, result: byref<_ | null>) =
     try
       match Get(nameChain).Recursive(helper.Model, binding) with
       | Ok v ->
@@ -270,8 +270,8 @@ type [<AllowNullLiteral>] DynamicViewModel<'model, 'msg>
     member _.HasErrors = (helper :> INotifyDataErrorInfo).HasErrors
     member _.GetErrors name = (helper :> INotifyDataErrorInfo).GetErrors name
 
-  member private this.GetProperty(name : string) : ICustomProperty =
-    if name = "CurrentModel" then DynamicCustomProperty<DynamicViewModel<'model,'msg>, obj>(name, fun vm -> vm.CurrentModel |> box) :> _
+  member private this.GetProperty(name : string) : ICustomProperty | null =
+    if name = "CurrentModel" then DynamicCustomProperty<DynamicViewModel<'model,'msg>, obj>(name, fun vm -> vm.CurrentModel :> obj) :> _
     else
     match this.Bindings.TryGetValue name with
     | false, _ ->
@@ -292,11 +292,11 @@ type [<AllowNullLiteral>] DynamicViewModel<'model, 'msg>
 
 and GetCustomProperty(name: string) =
 
-  member internal _.Base (rootBinding: VmBinding<'model, 'msg, obj>, vmBinding: BaseVmBinding<'bindingModel, 'bindingMsg, obj>) : ICustomProperty =
+  member internal _.Base (rootBinding: VmBinding<'model, 'msg, obj>, vmBinding: BaseVmBinding<'bindingModel, 'bindingMsg, obj>) : ICustomProperty | null =
     match vmBinding with
-    | OneWay _ -> DynamicCustomProperty<DynamicViewModel<'model,'msg>, obj>(name, fun vm -> vm.TryGetMemberCore(name, rootBinding)) :> _
+    | OneWay _ -> DynamicCustomProperty<DynamicViewModel<'model,'msg>, obj | null>(name, fun vm -> vm.TryGetMemberCore(name, rootBinding)) :> _
     | TwoWay _ ->
-      DynamicCustomProperty<DynamicViewModel<'model,'msg>, obj>(name,
+      DynamicCustomProperty<DynamicViewModel<'model,'msg>, obj | null>(name,
         (fun vm -> vm.TryGetMemberCore(name, rootBinding)),
         (fun vm value -> vm.TrySetMemberCore(name, rootBinding, value) |> ignore)) :> _
     | OneWaySeq data ->
@@ -331,20 +331,20 @@ and GetCustomProperty(name: string) =
         fun vm -> vm.TryGetMemberCore(name, rootBinding) :?> _) :> _
     | SubModel _
     | SubModelWin _ ->
-      DynamicCustomProperty<DynamicViewModel<'model,'msg>, obj>(name,
+      DynamicCustomProperty<DynamicViewModel<'model,'msg>, obj | null>(name,
         fun vm -> vm.TryGetMemberCore(name, rootBinding)) :> _
     | SubModelSeqUnkeyed _
     | SubModelSeqKeyed _ ->
       DynamicCustomProperty<DynamicViewModel<'model,'msg>, System.Collections.IList>(name,
         fun vm -> vm.TryGetMemberCore(name, rootBinding) :?> _) :> _
     | SubModelSelectedItem _ ->
-      DynamicCustomProperty<DynamicViewModel<'model,'msg>, obj>(name,
+      DynamicCustomProperty<DynamicViewModel<'model,'msg>, obj | null>(name,
         fun vm -> vm.TryGetMemberCore(name, rootBinding)) :> _
 
   member internal this.Recursive<'model, 'msg, 'bindingModel, 'bindingMsg>
       (rootBinding: VmBinding<'model, 'msg, obj>,
        binding: VmBinding<'bindingModel, 'bindingMsg, obj>)
-      : ICustomProperty =
+      : ICustomProperty | null =
     match binding with
     | BaseVmBinding b -> this.Base(rootBinding, b)
     | Cached b -> this.Recursive(rootBinding, b.Binding)

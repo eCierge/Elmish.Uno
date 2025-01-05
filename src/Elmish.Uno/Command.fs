@@ -16,7 +16,7 @@ type internal Command(execute, canExecute) =
   // so a strong reference must be maintained,
   // which is achieved by this mutable let-binding.
   // Can test this via the UiBoundCmdParam sample.
-  let mutable _handler = Unchecked.defaultof<EventHandler>
+  let mutable _handler = null
 
   member this.AddRequeryHandler () =
     let handler = EventHandler(fun _ _ -> this.RaiseCanExecuteChanged())

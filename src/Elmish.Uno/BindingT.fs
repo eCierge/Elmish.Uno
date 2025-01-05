@@ -314,6 +314,7 @@ type BindingT private () =
        getGrouppingKey: 'b -> 'key,
        [<Optional>] compareKeys: 'key -> 'key -> int)
       : string -> Binding<'model, 'msg, ObservableLookup<'key, 'b>> =
+    let compareKeys = compareKeys |> withNull |> ValueOption.ofObj
     Binding.OneWaySeqT.createGrouped map itemEquals getId getGrouppingKey compareKeys
     >> Binding.addLazy equals
     >> Binding.mapModel get
@@ -373,6 +374,7 @@ type BindingT private () =
        getGrouppingKey: 'a -> 'key,
        [<Optional>] compareKeys: 'key -> 'key -> int)
       : string -> Binding<'model, 'msg, ObservableLookup<'key, 'a>> =
+    let compareKeys = compareKeys |> withNull |> ValueOption.ofObj
     Binding.OneWaySeqT.createGrouped id itemEquals getId getGrouppingKey compareKeys
     >> Binding.addLazy refEq
     >> Binding.mapModel get

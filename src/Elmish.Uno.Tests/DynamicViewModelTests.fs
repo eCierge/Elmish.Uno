@@ -48,11 +48,11 @@ type internal TestVm<'model, 'msg>(model, bindings) as this =
 
   do
     (this :> INotifyPropertyChanged).PropertyChanged.Add (fun e ->
-      pcTriggers.AddOrUpdate(e.PropertyName, 1, (fun _ count -> count + 1)) |> ignore
+      pcTriggers.AddOrUpdate(e.PropertyName |> nonNull, 1, (fun _ count -> count + 1)) |> ignore
     )
 
     (this :> INotifyDataErrorInfo).ErrorsChanged.Add (fun e ->
-      ecTriggers.AddOrUpdate(e.PropertyName, 1, (fun _ count -> count + 1)) |> ignore
+      ecTriggers.AddOrUpdate(e.PropertyName |> nonNull, 1, (fun _ count -> count + 1)) |> ignore
     )
 
   new(model, binding) = TestVm(model, [binding])
@@ -1506,7 +1506,7 @@ module SubModelSelectedItem =
     let subModelSeqName = "Bar"
     let bindings =
       [ selectedItemName |> Binding.subModelSelectedItem (subModelSeqName, Some, ignore)
-        subModelSeqName |> Binding.subModelSeq ((fun _ -> []), ignore, []) ]
+        subModelSeqName |> Binding.subModelSeq ((fun _ -> []), (fun _ -> ""), []) ]
     let mutable error : string option = None
     let loggingArgs =
       { LoggingViewModelArgs.none

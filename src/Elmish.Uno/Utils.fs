@@ -14,13 +14,13 @@ open System.Reflection
 /// Returns a fast, untyped getter for the property specified by the PropertyInfo.
 /// The getter takes an instance and returns a property value.
 let buildUntypedGetter (propertyInfo: PropertyInfo) : obj -> obj =
-  let method = propertyInfo.GetMethod
+  let method = propertyInfo.GetMethod |> nonNull
   let objExpr = Expression.Parameter(typeof<obj>, "o")
   let expr =
     Expression.Lambda<Func<obj, obj>>(
       Expression.Convert(
         Expression.Call(
-          Expression.Convert(objExpr, method.DeclaringType), method),
+          Expression.Convert(objExpr, method.DeclaringType |> nonNull), method),
           typeof<obj>),
       objExpr)
   let action = expr.Compile()

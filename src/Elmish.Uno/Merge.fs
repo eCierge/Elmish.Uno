@@ -31,7 +31,7 @@ type CollectionTarget<'T, 'aCollection> =
     Enumerate: unit -> IEnumerable
     GetCollection: unit -> 'aCollection }
 
-type GroupedCollectionTarget<'T, 'aCollection, 'key> =
+type GroupedCollectionTarget<'T, 'aCollection, 'key when 'key : not null> =
   { CompareKeys: 'key -> 'key -> int
     GetKeys: unit -> 'key seq
     Get: 'key -> IList
@@ -55,7 +55,7 @@ module CollectionTarget =
       GetCollection = fun () -> oc }
 
   let wrap (oc: IList) =
-    let moveMethodInfo = oc.GetType().GetMethod("Move")
+    let moveMethodInfo = oc.GetType().GetMethod("Move") |> nonNull
     { GetLength = fun () -> oc.Count
       GetAt = fun i -> oc.[i]
       Append = oc.Add >> ignore
@@ -94,10 +94,10 @@ module CollectionTarget =
 
 module GroupedCollectionTarget =
 
-  let create (oc: ObservableLookup<'TKey, 'TValue>) =
-    { CompareKeys = fun x y -> oc.Comparer.Compare (x, y)
+  let create<'Key, 'Value when 'Key : not null> (oc: ObservableLookup<'Key, 'Value>) =
+    { Get = fun key -> oc[key]
       GetKeys = fun () -> oc.Keys
-      Get = fun key -> oc[key]
+      CompareKeys = fun x y -> oc.Comparer.Compare (x, y)
       Add = fun key items -> oc.Add(key, items)
       Remove = oc.Remove >> ignore
       Clear = oc.Clear
@@ -170,13 +170,13 @@ module Merge =
     let recordRemoval curTargetIdx curTarget curTargetId =
       if removals.ContainsKey curTargetId then
         let struct (firstIdx, _) = removals.[curTargetId]
-        raise (DuplicateIdException (Target, firstIdx, curTargetIdx, curTargetId.ToString()))
+        raise (DuplicateIdException (Target, firstIdx, curTargetIdx, curTargetId.ToString() |> nonNull))
       else
         removals.Add(curTargetId, (curTargetIdx, curTarget))
     let recordAddition curSourceIdx curSource curSourceId =
       if additions.ContainsKey curSourceId then
         let struct (firstIdx, _) = additions.[curSourceId]
-        raise (DuplicateIdException (Source, firstIdx, curSourceIdx, curSourceId.ToString()))
+        raise (DuplicateIdException (Source, firstIdx, curSourceIdx, curSourceId.ToString() |> nonNull))
       else
         additions.Add(curSourceId, (curSourceIdx, curSource))
 

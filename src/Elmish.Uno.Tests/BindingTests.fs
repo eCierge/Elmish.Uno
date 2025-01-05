@@ -116,7 +116,7 @@ module oneWayOpt =
         let get _ = None
         let d = Binding.oneWayOpt(get) |> getOneWayData
 
-        test <@ isNull (d.Get x) @>
+        test <@ isNull <| withNull (d.Get x) @>
       }
 
 
@@ -153,7 +153,7 @@ module oneWayOpt =
         let get _ = ValueNone
         let d = Binding.oneWayOpt(get) |> getOneWayData
 
-        test <@ isNull (d.Get x) @>
+        test <@ d.Get x |> Option.ofObj |> Option.isNone @>
       }
 
 
@@ -203,7 +203,7 @@ module oneWaySeq =
       let itemEquals : int -> int -> bool = (=)
       let d = Binding.oneWaySeq(fail, itemEquals, fail) |> getOneWaySeqData
 
-      test <@ d.ItemEquals (box x) (box y) = itemEquals x y @>
+      test <@ d.ItemEquals (x :> obj) (y :> obj) = itemEquals x y @>
     }
 
 
@@ -228,7 +228,7 @@ module oneWaySeqLazy =
       let getId = string<int>
       let d = Binding.oneWaySeqLazy(fail, fail2, fail, fail2, getId) |> getOneWaySeqData
 
-      test <@ d.GetId (box x) |> unbox = getId x @>
+      test <@ d.GetId (x :> obj) |> unbox = getId x @>
     }
 
 
@@ -241,7 +241,7 @@ module oneWaySeqLazy =
       let itemEquals : int -> int -> bool = (=)
       let d = Binding.oneWaySeqLazy(fail, fail2, fail, itemEquals, fail) |> getOneWaySeqData
 
-      test <@ d.ItemEquals (box x) (box y) = itemEquals x y @>
+      test <@ d.ItemEquals (x :> obj) (y :> obj) = itemEquals x y @>
     }
 
 
@@ -282,7 +282,7 @@ module twoWay =
         let set (p: string) (m: int) = p + string m
         let d = Binding.twoWay((fun _ -> ""), set) |> getTwoWayData
 
-        test <@ d.Set (box p) m |> unbox = set p m @>
+        test <@ d.Set (p :> obj) m |> unbox = set p m @>
       }
 
 
@@ -320,7 +320,7 @@ module twoWay =
         let set (p: string) = p + p
         let d = Binding.twoWay((fun _ -> ""), set) |> getTwoWayData
 
-        test <@ d.Set (box p) m |> unbox = set p @>
+        test <@ d.Set (p :> obj) m |> unbox = set p @>
       }
 
 
@@ -351,7 +351,7 @@ module twoWayOpt =
         let get _ = None
         let d = Binding.twoWayOpt(get, fail2) |> getTwoWayData
 
-        test <@ isNull (d.Get x) @>
+        test <@ d.Get x |> Option.ofObj |> Option.isNone @>
       }
 
 
@@ -364,7 +364,7 @@ module twoWayOpt =
         let set (p: string option) (m: int) = p |> Option.map ((+) (string m))
         let d = Binding.twoWayOpt((fun _ -> Some ""), set) |> getTwoWayData
 
-        test <@ d.Set (box p) m |> unbox = set (Some p) m @>
+        test <@ d.Set (p :> obj) m |> unbox = set (Some p) m @>
       }
 
 
@@ -376,7 +376,7 @@ module twoWayOpt =
         let set (p: string option) (m: int) = p |> Option.map ((+) (string m))
         let d = Binding.twoWayOpt((fun _ -> Some ""), set) |> getTwoWayData
 
-        test <@ d.Set null m |> unbox = set None m @>
+        test <@ d.Set (nonNull null) m |> unbox = set None m @>
       }
 
 
@@ -404,7 +404,7 @@ module twoWayOpt =
         let get _ = ValueNone
         let d = Binding.twoWayOpt(get, fail2) |> getTwoWayData
 
-        test <@ isNull (d.Get x) @>
+        test <@ d.Get x |> Option.ofObj |> Option.isNone @>
       }
 
 
@@ -417,7 +417,7 @@ module twoWayOpt =
         let set (p: string voption) (m: int) = p |> ValueOption.map ((+) (string m))
         let d = Binding.twoWayOpt((fun _ -> ValueSome ""), set) |> getTwoWayData
 
-        test <@ d.Set (box p) m |> unbox = set (ValueSome p) m @>
+        test <@ d.Set (p :> obj) m |> unbox = set (ValueSome p) m @>
       }
 
 
@@ -429,7 +429,7 @@ module twoWayOpt =
         let set (p: string voption) (m: int) = p |> ValueOption.map ((+) (string m))
         let d = Binding.twoWayOpt((fun _ -> ValueSome ""), set) |> getTwoWayData
 
-        test <@ d.Set null m |> unbox = set ValueNone m @>
+        test <@ d.Set (nonNull null) m |> unbox = set ValueNone m @>
       }
 
 
@@ -457,7 +457,7 @@ module twoWayOpt =
         let get _ = None
         let d = Binding.twoWayOpt(get, (fail: _ option -> int)) |> getTwoWayData
 
-        test <@ isNull (d.Get x) @>
+        test <@ d.Get x |> Option.ofObj |> Option.isNone @>
       }
 
 
@@ -470,7 +470,7 @@ module twoWayOpt =
         let set (p: string option) = p |> Option.map ((+) (string m))
         let d = Binding.twoWayOpt((fun _ -> Some ""), set) |> getTwoWayData
 
-        test <@ d.Set (box p) m |> unbox = set (Some p) @>
+        test <@ d.Set (p :> obj) m |> unbox = set (Some p) @>
       }
 
 
@@ -482,7 +482,7 @@ module twoWayOpt =
         let set (p: string option) = p |> Option.map ((+) (string m))
         let d = Binding.twoWayOpt((fun _ -> Some ""), set) |> getTwoWayData
 
-        test <@ d.Set null m |> unbox = set None @>
+        test <@ d.Set (nonNull null) m |> unbox = set None @>
       }
 
 
@@ -510,7 +510,7 @@ module twoWayOpt =
         let get _ = ValueNone
         let d = Binding.twoWayOpt(get, (fail: _ voption -> int)) |> getTwoWayData
 
-        test <@ isNull (d.Get x) @>
+        test <@ d.Get x |> Option.ofObj |> Option.isNone @>
       }
 
 
@@ -523,7 +523,7 @@ module twoWayOpt =
         let set (p: string voption) = p |> ValueOption.map ((+) (string m))
         let d = Binding.twoWayOpt((fun _ -> ValueSome ""), set) |> getTwoWayData
 
-        test <@ d.Set (box p) m |> unbox = set (ValueSome p) @>
+        test <@ d.Set (p :> obj) m |> unbox = set (ValueSome p) @>
       }
 
 
@@ -535,7 +535,7 @@ module twoWayOpt =
         let set (p: string voption) = p |> ValueOption.map ((+) (string m))
         let d = Binding.twoWayOpt((fun _ -> ValueSome ""), set) |> getTwoWayData
 
-        test <@ d.Set null m |> unbox = set ValueNone @>
+        test <@ d.Set (nonNull null) m |> unbox = set ValueNone @>
       }
 
 
@@ -567,7 +567,7 @@ module twoWayValidate =
     //    let set (p: string) (m: int) = p + string m
     //    let d = Binding.twoWayValidate(fail, set, (fail: _ -> _ voption)) |> getValidationData
 
-    //    test <@ d.Set (box p) m |> unbox = set p m @>
+    //    test <@ d.Set (p :> obj) m |> unbox = set p m @>
     //  }
 
 
@@ -609,7 +609,7 @@ module twoWayValidate =
     //    let set (p: string) (m: int) = p + string m
     //    let d = Binding.twoWayValidate(fail, set, (fail: _ -> _ option)) |> getValidationData
 
-    //    test <@ d.Set (box p) m |> unbox = set p m @>
+    //    test <@ d.Set (p :> obj) m |> unbox = set p m @>
     //  }
 
 
@@ -651,7 +651,7 @@ module twoWayValidate =
     //    let set (p: string) (m: int) = p + string m
     //    let d = Binding.twoWayValidate(fail, set, (fail: _ -> Result<_,_>)) |> getValidationData
 
-    //    test <@ d.Set (box p) m |> unbox = set p m @>
+    //    test <@ d.Set (p :> obj) m |> unbox = set p m @>
     //  }
 
     [<Fact>]
@@ -692,7 +692,7 @@ module twoWayValidate =
     //    let set (p: string) = p + p
     //    let d = Binding.twoWayValidate(fail, set, (fail: _ -> _ voption)) |> getValidationData
 
-    //    test <@ d.Set (box p) m |> unbox = set p @>
+    //    test <@ d.Set (p :> obj) m |> unbox = set p @>
     //  }
 
 
@@ -734,7 +734,7 @@ module twoWayValidate =
     //    let set (p: string) = p + p
     //    let d = Binding.twoWayValidate(fail, set, (fail: _ -> _ option)) |> getValidationData
 
-    //    test <@ d.Set (box p) m |> unbox = set p @>
+    //    test <@ d.Set (p :> obj) m |> unbox = set p @>
     //  }
 
 
@@ -776,7 +776,7 @@ module twoWayValidate =
     //    let set (p: string) = p + p
     //    let d = Binding.twoWayValidate(fail, set, (fail: _ -> Result<_,_>)) |> getValidationData
 
-    //    test <@ d.Set (box p) m |> unbox = set p @>
+    //    test <@ d.Set (p :> obj) m |> unbox = set p @>
     //  }
 
 
@@ -820,7 +820,7 @@ module twoWayOptValidate =
     //    let get _ = ValueNone
     //    let d = Binding.twoWayOptValidate(get, fail2, (fail: _ -> _ voption)) |> getValidationData
 
-    //    test <@ isNull (d.Get x) @>
+    //    test <@ d.Get x |> Option.ofObj |> Option.isNone @>
     //  }
 
 
@@ -833,7 +833,7 @@ module twoWayOptValidate =
     //    let set (p: string voption) (m: int) = p |> ValueOption.map ((+) (string m))
     //    let d = Binding.twoWayOptValidate(fail, set, (fail: _ -> _ voption)) |> getValidationData
 
-    //    test <@ d.Set (box p) m |> unbox = set (ValueSome p) m @>
+    //    test <@ d.Set (p :> obj) m |> unbox = set (ValueSome p) m @>
     //  }
 
 
@@ -845,7 +845,7 @@ module twoWayOptValidate =
     //    let set (p: string voption) (m: int) = p |> ValueOption.map ((+) (string m))
     //    let d = Binding.twoWayOptValidate(fail, set, (fail: _ -> _ voption)) |> getValidationData
 
-    //    test <@ d.Set null m |> unbox = set ValueNone m @>
+    //    test <@ d.Set (nonNull null) m |> unbox = set ValueNone m @>
     //  }
 
 
@@ -886,7 +886,7 @@ module twoWayOptValidate =
     //    let get _ = ValueNone
     //    let d = Binding.twoWayOptValidate(get, fail2, (fail: _ -> _ option)) |> getValidationData
 
-    //    test <@ isNull (d.Get x) @>
+    //    test <@ d.Get x |> Option.ofObj |> Option.isNone @>
     //  }
 
 
@@ -899,7 +899,7 @@ module twoWayOptValidate =
     //    let set (p: string voption) (m: int) = p |> ValueOption.map ((+) (string m))
     //    let d = Binding.twoWayOptValidate(fail, set, (fail: _ -> _ option)) |> getValidationData
 
-    //    test <@ d.Set (box p) m |> unbox = set (ValueSome p) m @>
+    //    test <@ d.Set (p :> obj) m |> unbox = set (ValueSome p) m @>
     //  }
 
     //[<Fact>]
@@ -910,7 +910,7 @@ module twoWayOptValidate =
     //    let set (p: string voption) (m: int) = p |> ValueOption.map ((+) (string m))
     //    let d = Binding.twoWayOptValidate(fail, set, (fail: _ -> _ option)) |> getValidationData
 
-    //    test <@ d.Set null m |> unbox = set ValueNone m @>
+    //    test <@ d.Set (nonNull null) m |> unbox = set ValueNone m @>
     //  }
 
 
@@ -951,7 +951,7 @@ module twoWayOptValidate =
     //    let get _ = ValueNone
     //    let d = Binding.twoWayOptValidate(get, fail2, (fail: _ -> Result<_,_>)) |> getValidationData
 
-    //    test <@ isNull (d.Get x) @>
+    //    test <@ d.Get x |> Option.ofObj |> Option.isNone @>
     //  }
 
 
@@ -964,7 +964,7 @@ module twoWayOptValidate =
     //    let set (p: string voption) (m: int) = p |> ValueOption.map ((+) (string m))
     //    let d = Binding.twoWayOptValidate(fail, set, (fail: _ -> Result<_,_>)) |> getValidationData
 
-    //    test <@ d.Set (box p) m |> unbox = set (ValueSome p) m @>
+    //    test <@ d.Set (p :> obj) m |> unbox = set (ValueSome p) m @>
     //  }
 
 
@@ -976,7 +976,7 @@ module twoWayOptValidate =
     //    let set (p: string voption) (m: int) = p |> ValueOption.map ((+) (string m))
     //    let d = Binding.twoWayOptValidate(fail, set, (fail: _ -> Result<_,_>)) |> getValidationData
 
-    //    test <@ d.Set null m |> unbox = set ValueNone m @>
+    //    test <@ d.Set (nonNull null) m |> unbox = set ValueNone m @>
     //  }
 
     [<Fact>]
@@ -1016,7 +1016,7 @@ module twoWayOptValidate =
     //    let get _ = None
     //    let d = Binding.twoWayOptValidate(get, fail2, (fail: _ -> _ voption)) |> getValidationData
 
-    //    test <@ isNull (d.Get x) @>
+    //    test <@ d.Get x |> Option.ofObj |> Option.isNone @>
     //  }
 
 
@@ -1029,7 +1029,7 @@ module twoWayOptValidate =
     //    let set (p: string option) (m: int) = p |> Option.map ((+) (string m))
     //    let d = Binding.twoWayOptValidate(fail, set, (fail: _ -> _ voption)) |> getValidationData
 
-    //    test <@ d.Set (box p) m |> unbox = set (Some p) m @>
+    //    test <@ d.Set (p :> obj) m |> unbox = set (Some p) m @>
     //  }
 
 
@@ -1041,7 +1041,7 @@ module twoWayOptValidate =
     //    let set (p: string option) (m: int) = p |> Option.map ((+) (string m))
     //    let d = Binding.twoWayOptValidate(fail, set, (fail: _ -> _ voption)) |> getValidationData
 
-    //    test <@ d.Set null m |> unbox = set None m @>
+    //    test <@ d.Set (nonNull null) m |> unbox = set None m @>
     //  }
 
 
@@ -1082,7 +1082,7 @@ module twoWayOptValidate =
     //    let get _ = None
     //    let d = Binding.twoWayOptValidate(get, fail2, (fail: _ -> _ option)) |> getValidationData
 
-    //    test <@ isNull (d.Get x) @>
+    //    test <@ d.Get x |> Option.ofObj |> Option.isNone @>
     //  }
 
 
@@ -1095,7 +1095,7 @@ module twoWayOptValidate =
     //    let set (p: string option) (m: int) = p |> Option.map ((+) (string m))
     //    let d = Binding.twoWayOptValidate(fail, set, (fail: _ -> _ option)) |> getValidationData
 
-    //    test <@ d.Set (box p) m |> unbox = set (Some p) m @>
+    //    test <@ d.Set (p :> obj) m |> unbox = set (Some p) m @>
     //  }
 
 
@@ -1107,7 +1107,7 @@ module twoWayOptValidate =
     //    let set (p: string option) (m: int) = p |> Option.map ((+) (string m))
     //    let d = Binding.twoWayOptValidate(fail, set, (fail: _ -> _ option)) |> getValidationData
 
-    //    test <@ d.Set null m |> unbox = set None m @>
+    //    test <@ d.Set (nonNull null) m |> unbox = set None m @>
     //  }
 
 
@@ -1148,7 +1148,7 @@ module twoWayOptValidate =
     //    let get _ = None
     //    let d = Binding.twoWayOptValidate(get, fail2, (fail: _ -> Result<_,_>)) |> getValidationData
 
-    //    test <@ isNull (d.Get x) @>
+    //    test <@ d.Get x |> Option.ofObj |> Option.isNone @>
     //  }
 
 
@@ -1161,7 +1161,7 @@ module twoWayOptValidate =
     //    let set (p: string option) (m: int) = p |> Option.map ((+) (string m))
     //    let d = Binding.twoWayOptValidate(fail, set, (fail: _ -> Result<_,_>)) |> getValidationData
 
-    //    test <@ d.Set (box p) m |> unbox = set (Some p) m @>
+    //    test <@ d.Set (p :> obj) m |> unbox = set (Some p) m @>
     //  }
 
 
@@ -1173,7 +1173,7 @@ module twoWayOptValidate =
     //    let set (p: string option) (m: int) = p |> Option.map ((+) (string m))
     //    let d = Binding.twoWayOptValidate(fail, set, (fail: _ -> Result<_,_>)) |> getValidationData
 
-    //    test <@ d.Set null m |> unbox = set None m @>
+    //    test <@ d.Set (nonNull null) m |> unbox = set None m @>
     //  }
 
 
@@ -1216,7 +1216,7 @@ module twoWayOptValidate =
     //    let get _ = ValueNone
     //    let d = Binding.twoWayOptValidate(get, (fail: _ -> int), (fail: _ -> _ voption)) |> getValidationData
 
-    //    test <@ isNull (d.Get x) @>
+    //    test <@ d.Get x |> Option.ofObj |> Option.isNone @>
     //  }
 
     //    let set (p: string voption) = p |> ValueOption.map (fun x -> x + x)
@@ -1231,7 +1231,7 @@ module twoWayOptValidate =
     //    let set (p: string voption) = p |> ValueOption.map (fun x -> x + x)
     //    let d = Binding.twoWayOptValidate(fail, set, (fail: _ -> _ voption)) |> getValidationData
 
-    //    test <@ d.Set (box p) m |> unbox = set (ValueSome p) @>
+    //    test <@ d.Set (p :> obj) m |> unbox = set (ValueSome p) @>
     //  }
 
     //    let set (p: string voption) = p |> ValueOption.map (fun x -> x + x)
@@ -1245,7 +1245,7 @@ module twoWayOptValidate =
     //    let set (p: string voption) = p |> ValueOption.map (fun x -> x + x)
     //    let d = Binding.twoWayOptValidate(fail, set, (fail: _ -> _ voption)) |> getValidationData
 
-    //    test <@ d.Set null m |> unbox = set ValueNone @>
+    //    test <@ d.Set (nonNull null) m |> unbox = set ValueNone @>
     //  }
 
 
@@ -1288,7 +1288,7 @@ module twoWayOptValidate =
     //    let get _ = ValueNone
     //    let d = Binding.twoWayOptValidate(get, (fail: _ -> int), (fail: _ -> _ option)) |> getValidationData
 
-    //    test <@ isNull (d.Get x) @>
+    //    test <@ d.Get x |> Option.ofObj |> Option.isNone @>
     //  }
 
     //    let set (p: string voption) = p |> ValueOption.map (fun x -> x + x)
@@ -1303,7 +1303,7 @@ module twoWayOptValidate =
     //    let set (p: string voption) = p |> ValueOption.map (fun x -> x + x)
     //    let d = Binding.twoWayOptValidate(fail, set, (fail: _ -> _ option)) |> getValidationData
 
-    //    test <@ d.Set (box p) m |> unbox = set (ValueSome p) @>
+    //    test <@ d.Set (p :> obj) m |> unbox = set (ValueSome p) @>
     //  }
 
     //    let set (p: string voption) = p |> ValueOption.map (fun x -> x + x)
@@ -1317,7 +1317,7 @@ module twoWayOptValidate =
     //    let set (p: string voption) = p |> ValueOption.map (fun x -> x + x)
     //    let d = Binding.twoWayOptValidate(fail, set, (fail: _ -> _ option)) |> getValidationData
 
-    //    test <@ d.Set null m |> unbox = set ValueNone @>
+    //    test <@ d.Set (nonNull null) m |> unbox = set ValueNone @>
     //  }
 
 
@@ -1360,7 +1360,7 @@ module twoWayOptValidate =
     //    let get _ = ValueNone
     //    let d = Binding.twoWayOptValidate(get, (fail: _ -> int), (fail: _ -> Result<_,_>)) |> getValidationData
 
-    //    test <@ isNull (d.Get x) @>
+    //    test <@ d.Get x |> Option.ofObj |> Option.isNone @>
     //  }
 
     //    let set (p: string voption) = p |> ValueOption.map (fun x -> x + x)
@@ -1375,7 +1375,7 @@ module twoWayOptValidate =
     //    let set (p: string voption) = p |> ValueOption.map (fun x -> x + x)
     //    let d = Binding.twoWayOptValidate(fail, set, (fail: _ -> Result<_,_>)) |> getValidationData
 
-    //    test <@ d.Set (box p) m |> unbox = set (ValueSome p) @>
+    //    test <@ d.Set (p :> obj) m |> unbox = set (ValueSome p) @>
     //  }
 
     //    let set (p: string voption) = p |> ValueOption.map (fun x -> x + x)
@@ -1389,7 +1389,7 @@ module twoWayOptValidate =
     //    let set (p: string voption) = p |> ValueOption.map (fun x -> x + x)
     //    let d = Binding.twoWayOptValidate(fail, set, (fail: _ -> Result<_,_>)) |> getValidationData
 
-    //    test <@ d.Set null m |> unbox = set ValueNone @>
+    //    test <@ d.Set (nonNull null) m |> unbox = set ValueNone @>
     //  }
 
 
@@ -1432,7 +1432,7 @@ module twoWayOptValidate =
     //    let get _ = None
     //    let d = Binding.twoWayOptValidate(get, (fail: _ -> int), (fail: _ -> _ voption)) |> getValidationData
 
-    //    test <@ isNull (d.Get x) @>
+    //    test <@ d.Get x |> Option.ofObj |> Option.isNone @>
     //  }
 
 
@@ -1445,7 +1445,7 @@ module twoWayOptValidate =
     //    let set (p: string option) = p |> Option.map (fun x -> x + x)
     //    let d = Binding.twoWayOptValidate(fail, set, (fail: _ -> _ voption)) |> getValidationData
 
-    //    test <@ d.Set (box p) m |> unbox = set (Some p) @>
+    //    test <@ d.Set (p :> obj) m |> unbox = set (Some p) @>
     //  }
 
 
@@ -1457,7 +1457,7 @@ module twoWayOptValidate =
     //    let set (p: string option) = p |> Option.map (fun x -> x + x)
     //    let d = Binding.twoWayOptValidate(fail, set, (fail: _ -> _ voption)) |> getValidationData
 
-    //    test <@ d.Set null m |> unbox = set None @>
+    //    test <@ d.Set (nonNull null) m |> unbox = set None @>
     //  }
 
 
@@ -1498,7 +1498,7 @@ module twoWayOptValidate =
     //    let get _ = None
     //    let d = Binding.twoWayOptValidate(get, (fail: _ -> int), (fail: _ -> _ option)) |> getValidationData
 
-    //    test <@ isNull (d.Get x) @>
+    //    test <@ d.Get x |> Option.ofObj |> Option.isNone @>
     //  }
 
 
@@ -1511,7 +1511,7 @@ module twoWayOptValidate =
     //    let set (p: string option) = p |> Option.map (fun x -> x + x)
     //    let d = Binding.twoWayOptValidate(fail, set, (fail: _ -> _ option)) |> getValidationData
 
-    //    test <@ d.Set (box p) m |> unbox = set (Some p) @>
+    //    test <@ d.Set (p :> obj) m |> unbox = set (Some p) @>
     //  }
 
 
@@ -1523,7 +1523,7 @@ module twoWayOptValidate =
     //    let set (p: string option) = p |> Option.map (fun x -> x + x)
     //    let d = Binding.twoWayOptValidate(fail, set, (fail: _ -> _ option)) |> getValidationData
 
-    //    test <@ d.Set null m |> unbox = set None @>
+    //    test <@ d.Set (nonNull null) m |> unbox = set None @>
     //  }
 
 
@@ -1564,7 +1564,7 @@ module twoWayOptValidate =
     //    let get _ = None
     //    let d = Binding.twoWayOptValidate(get, (fail: _ -> int), (fail: _ -> Result<_,_>)) |> getValidationData
 
-    //    test <@ isNull (d.Get x) @>
+    //    test <@ d.Get x |> Option.ofObj |> Option.isNone @>
     //  }
 
 
@@ -1577,7 +1577,7 @@ module twoWayOptValidate =
     //    let set (p: string option) = p |> Option.map (fun x -> x + x)
     //    let d = Binding.twoWayOptValidate(fail, set, (fail: _ -> Result<_,_>)) |> getValidationData
 
-    //    test <@ d.Set (box p) m |> unbox = set (Some p) @>
+    //    test <@ d.Set (p :> obj) m |> unbox = set (Some p) @>
     //  }
 
 
@@ -1589,7 +1589,7 @@ module twoWayOptValidate =
     //    let set (p: string option) = p |> Option.map (fun x -> x + x)
     //    let d = Binding.twoWayOptValidate(fail, set, (fail: _ -> Result<_,_>)) |> getValidationData
 
-    //    test <@ d.Set null m |> unbox = set None @>
+    //    test <@ d.Set (nonNull null) m |> unbox = set None @>
     //  }
 
 
@@ -1727,7 +1727,7 @@ module cmdParam =
         let exec (p: obj) (m: int) = unbox p + string m
         let d = Binding.cmdParam(exec) |> getCmdData
 
-        test <@ d.Exec (box p) m = (exec p m |> ValueSome) @>
+        test <@ d.Exec (p :> obj) m = (exec p m |> ValueSome) @>
       }
 
 
@@ -1737,7 +1737,7 @@ module cmdParam =
         let! m = GenX.auto<int>
         let! p = GenX.auto<string>
         let d = Binding.cmdParam(fail2) |> getCmdData
-        test <@ d.CanExec (box p) m = true @>
+        test <@ d.CanExec (p :> obj) m = true @>
       }
 
 
@@ -1763,7 +1763,7 @@ module cmdParam =
         let exec (p: obj) = string p
         let d = Binding.cmdParam(exec) |> getCmdData
 
-        test <@ d.Exec (box p) m = (exec p |> ValueSome) @>
+        test <@ d.Exec (p :> obj) m = (exec p |> ValueSome) @>
       }
 
 
@@ -1773,7 +1773,7 @@ module cmdParam =
         let! m = GenX.auto<int>
         let! p = GenX.auto<string>
         let d = Binding.cmdParam(fail: obj -> obj) |> getCmdData
-        test <@ d.CanExec (box p) m = true @>
+        test <@ d.CanExec (p :> obj) m = true @>
       }
 
 
@@ -1802,7 +1802,7 @@ module cmdParamIf =
         let exec (p: obj) (m: int) = unbox p + string m
         let d = Binding.cmdParamIf(exec, fail) |> getCmdData
 
-        test <@ d.Exec (box p) m = (exec p m |> ValueSome) @>
+        test <@ d.Exec (p :> obj) m = (exec p m |> ValueSome) @>
       }
 
 
@@ -1815,7 +1815,7 @@ module cmdParamIf =
         let canExec (p: obj) m = (unbox<string> p).Length + m > 0
         let d = Binding.cmdParamIf(fail, canExec) |> getCmdData
 
-        test <@ d.CanExec (box p) m = canExec p m @>
+        test <@ d.CanExec (p :> obj) m = canExec p m @>
       }
 
 
@@ -1841,7 +1841,7 @@ module cmdParamIf =
         let exec (p: obj) m = (p :?> string).Length + m |> ValueSome |> ValueOption.filter (fun x -> x > 0)
         let d = Binding.cmdParamIf(exec) |> getCmdData
 
-        test <@ d.Exec (box p) m = exec p m @>
+        test <@ d.Exec (p :> obj) m = exec p m @>
       }
 
 
@@ -1854,7 +1854,7 @@ module cmdParamIf =
         let exec (p: obj) m = (p :?> string).Length + m |> ValueSome
         let d = Binding.cmdParamIf(exec) |> getCmdData
 
-        test <@ d.CanExec (box p) m = true @>
+        test <@ d.CanExec (p :> obj) m = true @>
       }
 
 
@@ -1867,7 +1867,7 @@ module cmdParamIf =
         let exec (_: obj) _ = ValueNone
         let d = Binding.cmdParamIf(exec) |> getCmdData
 
-        test <@ d.CanExec (box p) m = false @>
+        test <@ d.CanExec (p :> obj) m = false @>
       }
 
 
@@ -1893,7 +1893,7 @@ module cmdParamIf =
         let exec (p: obj) m = (p :?> string).Length + m |> Some |> Option.filter (fun x -> x > 0)
         let d = Binding.cmdParamIf(exec) |> getCmdData
 
-        test <@ d.Exec (box p) m = (exec p m |> ValueOption.ofOption) @>
+        test <@ d.Exec (p :> obj) m = (exec p m |> ValueOption.ofOption) @>
       }
 
 
@@ -1906,7 +1906,7 @@ module cmdParamIf =
         let exec (p: obj) m = (p :?> string).Length + m |> Some
         let d = Binding.cmdParamIf(exec) |> getCmdData
 
-        test <@ d.CanExec (box p) m = true @>
+        test <@ d.CanExec (p :> obj) m = true @>
       }
 
 
@@ -1919,7 +1919,7 @@ module cmdParamIf =
         let exec (_: obj) _ = None
         let d = Binding.cmdParamIf(exec) |> getCmdData
 
-        test <@ d.CanExec (box p) m = false @>
+        test <@ d.CanExec (p :> obj) m = false @>
       }
 
 
@@ -1947,7 +1947,7 @@ module cmdParamIf =
           if x > 0 then Ok x else Error (string x)
         let d = Binding.cmdParamIf(exec) |> getCmdData
 
-        test <@ d.Exec (box p) m = (exec p m |> ValueOption.ofOk) @>
+        test <@ d.Exec (p :> obj) m = (exec p m |> ValueOption.ofOk) @>
       }
 
 
@@ -1960,7 +1960,7 @@ module cmdParamIf =
         let exec (p: obj) m = (p :?> string).Length + m |> Ok
         let d = Binding.cmdParamIf(exec) |> getCmdData
 
-        test <@ d.CanExec (box p) m = true @>
+        test <@ d.CanExec (p :> obj) m = true @>
       }
 
 
@@ -1974,7 +1974,7 @@ module cmdParamIf =
         let exec (_: obj) _ = Error err
         let d = Binding.cmdParamIf(exec) |> getCmdData
 
-        test <@ d.CanExec (box p) m = false @>
+        test <@ d.CanExec (p :> obj) m = false @>
       }
 
 
@@ -2000,7 +2000,7 @@ module cmdParamIf =
         let exec (p: obj) = (unbox<string> p).Length
         let d = Binding.cmdParamIf(exec, fail) |> getCmdData
 
-        test <@ d.Exec (box p) m = (exec p |> ValueSome) @>
+        test <@ d.Exec (p :> obj) m = (exec p |> ValueSome) @>
       }
 
 
@@ -2013,7 +2013,7 @@ module cmdParamIf =
         let canExec (p: obj) = (unbox<string> p).Length + m > 0
         let d = Binding.cmdParamIf(fail, canExec) |> getCmdData
 
-        test <@ d.CanExec (box p) m = canExec p @>
+        test <@ d.CanExec (p :> obj) m = canExec p @>
       }
 
 
@@ -2039,7 +2039,7 @@ module cmdParamIf =
         let exec (p: obj) = (p :?> string).Length |> ValueSome |> ValueOption.filter (fun x -> x > 0)
         let d = Binding.cmdParamIf(exec) |> getCmdData
 
-        test <@ d.Exec (box p) m = exec p @>
+        test <@ d.Exec (p :> obj) m = exec p @>
       }
 
 
@@ -2052,7 +2052,7 @@ module cmdParamIf =
         let exec (p: obj) = (p :?> string).Length |> ValueSome
         let d = Binding.cmdParamIf(exec) |> getCmdData
 
-        test <@ d.CanExec (box p) m = true @>
+        test <@ d.CanExec (p :> obj) m = true @>
       }
 
 
@@ -2065,7 +2065,7 @@ module cmdParamIf =
         let exec (_: obj) = ValueNone
         let d = Binding.cmdParamIf(exec) |> getCmdData
 
-        test <@ d.CanExec (box p) m = false @>
+        test <@ d.CanExec (p :> obj) m = false @>
       }
 
 
@@ -2093,7 +2093,7 @@ module cmdParamIf =
         let exec (p: obj) = (p :?> string).Length |> Some |> Option.filter (fun x -> x > 0)
         let d = Binding.cmdParamIf(exec) |> getCmdData
 
-        test <@ d.Exec (box p) m = (exec p |> ValueOption.ofOption) @>
+        test <@ d.Exec (p :> obj) m = (exec p |> ValueOption.ofOption) @>
       }
 
 
@@ -2106,7 +2106,7 @@ module cmdParamIf =
         let exec (p: obj) = (p :?> string).Length |> Some
         let d = Binding.cmdParamIf(exec) |> getCmdData
 
-        test <@ d.CanExec (box p) m = true @>
+        test <@ d.CanExec (p :> obj) m = true @>
       }
 
 
@@ -2119,7 +2119,7 @@ module cmdParamIf =
         let exec (_: obj) = None
         let d = Binding.cmdParamIf(exec) |> getCmdData
 
-        test <@ d.CanExec (box p) m = false @>
+        test <@ d.CanExec (p :> obj) m = false @>
       }
 
 
@@ -2147,7 +2147,7 @@ module cmdParamIf =
           if x > 0 then Ok x else Error (string x)
         let d = Binding.cmdParamIf(exec) |> getCmdData
 
-        test <@ d.Exec (box p) m = (exec p |> ValueOption.ofOk) @>
+        test <@ d.Exec (p :> obj) m = (exec p |> ValueOption.ofOk) @>
       }
 
 
@@ -2160,7 +2160,7 @@ module cmdParamIf =
         let exec (p: obj) = (p :?> string).Length |> Ok
         let d = Binding.cmdParamIf(exec) |> getCmdData
 
-        test <@ d.CanExec (box p) m = true @>
+        test <@ d.CanExec (p :> obj) m = true @>
       }
 
 
@@ -2174,7 +2174,7 @@ module cmdParamIf =
         let exec (_: obj) = Error err
         let d = Binding.cmdParamIf(exec) |> getCmdData
 
-        test <@ d.CanExec (box p) m = false @>
+        test <@ d.CanExec (p :> obj) m = false @>
       }
 
 
@@ -2200,7 +2200,7 @@ module subModel =
         let! x = GenX.auto<int>
         let getSubModel = string<int>
         let d = Binding.subModel(getSubModel, []) |> getSubModelData
-        test <@ d.GetModel x = ((x, getSubModel x) |> box |> ValueSome) @>
+        test <@ d.GetModel x = ((x, getSubModel x) |> box |> nonNull |> ValueSome) @>
       }
 
 
@@ -2210,7 +2210,7 @@ module subModel =
         let! m = GenX.auto<int>
         let! x = GenX.auto<int>
         let d = Binding.subModel((fun _ -> 0), []) |> getSubModelData
-        test <@ d.ToMsg m (box x) = x @>
+        test <@ d.ToMsg m (x :> obj) = x @>
       }
 
   module toMsg_noToBindingModel =
@@ -2231,7 +2231,7 @@ module subModel =
         let! x = GenX.auto<int>
         let getSubModel = string<int>
         let d = Binding.subModel(getSubModel, fail, []) |> getSubModelData
-        test <@ d.GetModel x = ((x, getSubModel x) |> box |> ValueSome) @>
+        test <@ d.GetModel x = ((x, getSubModel x) |> box |> nonNull |> ValueSome) @>
       }
 
 
@@ -2244,7 +2244,7 @@ module subModel =
         let toMsg = string<int>
         let d = Binding.subModel((fun _ -> 0), toMsg, []) |> getSubModelData
 
-        test <@ d.ToMsg m (box x) = toMsg x @>
+        test <@ d.ToMsg m (x :> obj) = toMsg x @>
       }
 
 
@@ -2267,7 +2267,7 @@ module subModel =
         let getSubModel = string<int>
         let toBindingModel (m: int, s: string) = m + s.Length
         let d = Binding.subModel(getSubModel, toBindingModel, fail, []) |> getSubModelData
-        test <@ d.GetModel x = ((x, getSubModel x) |> toBindingModel |> box |> ValueSome) @>
+        test <@ d.GetModel x = ((x, getSubModel x) |> toBindingModel |> box |> nonNull |> ValueSome) @>
       }
 
 
@@ -2280,7 +2280,7 @@ module subModel =
         let toMsg = string<int>
         let d = Binding.subModel((fun _ -> 0), (fun _ -> 0), toMsg, []) |> getSubModelData
 
-        test <@ d.ToMsg m (box x) = toMsg x @>
+        test <@ d.ToMsg m (x :> obj) = toMsg x @>
       }
 
 
@@ -2306,7 +2306,7 @@ module subModelOpt =
         let! x = GenX.auto<int>
         let getSubModel = string >> ValueSome
         let d = Binding.subModelOpt(getSubModel, []) |> getSubModelData
-        test <@ d.GetModel x = ((x, (getSubModel x).Value) |> box |> ValueSome) @>
+        test <@ d.GetModel x = ((x, (getSubModel x).Value) |> box |> nonNull |> ValueSome) @>
       }
 
 
@@ -2326,7 +2326,7 @@ module subModelOpt =
         let! m = GenX.auto<int>
         let! x = GenX.auto<int>
         let d = Binding.subModelOpt((fun _ -> ValueSome 0), []) |> getSubModelData
-        test <@ d.ToMsg m (box x) = x @>
+        test <@ d.ToMsg m (x :> obj) = x @>
       }
 
 
@@ -2349,7 +2349,7 @@ module subModelOpt =
         let! x = GenX.auto<int>
         let getSubModel = string >> Some
         let d = Binding.subModelOpt(getSubModel, []) |> getSubModelData
-        test <@ d.GetModel x = ((x, (getSubModel x).Value) |> box |> ValueSome) @>
+        test <@ d.GetModel x = ((x, (getSubModel x).Value) |> box |> nonNull |> ValueSome) @>
       }
 
 
@@ -2369,7 +2369,7 @@ module subModelOpt =
         let! m = GenX.auto<int>
         let! x = GenX.auto<int>
         let d = Binding.subModelOpt((fun _ -> Some 0), []) |> getSubModelData
-        test <@ d.ToMsg m (box x) = x @>
+        test <@ d.ToMsg m (x :> obj) = x @>
       }
 
 
@@ -2391,7 +2391,7 @@ module subModelOpt =
         let! x = GenX.auto<int>
         let getSubModel = string >> ValueSome
         let d = Binding.subModelOpt(getSubModel, fail, []) |> getSubModelData
-        test <@ d.GetModel x = ((x, (getSubModel x).Value) |> box |> ValueSome) @>
+        test <@ d.GetModel x = ((x, (getSubModel x).Value) |> box |> nonNull |> ValueSome) @>
       }
 
 
@@ -2414,7 +2414,7 @@ module subModelOpt =
         let toMsg = string<int>
         let d = Binding.subModelOpt((fun _ -> ValueSome 0), toMsg, []) |> getSubModelData
 
-        test <@ d.ToMsg m (box x) = toMsg x @>
+        test <@ d.ToMsg m (x :> obj) = toMsg x @>
       }
 
 
@@ -2437,7 +2437,7 @@ module subModelOpt =
         let! x = GenX.auto<int>
         let getSubModel = string >> Some
         let d = Binding.subModelOpt(getSubModel, fail, []) |> getSubModelData
-        test <@ d.GetModel x = ((x, (getSubModel x).Value) |> box |> ValueSome) @>
+        test <@ d.GetModel x = ((x, (getSubModel x).Value) |> box |> nonNull |> ValueSome) @>
       }
 
 
@@ -2460,7 +2460,7 @@ module subModelOpt =
         let toMsg = string<int>
         let d = Binding.subModelOpt((fun _ -> Some 0), toMsg, []) |> getSubModelData
 
-        test <@ d.ToMsg m (box x) = toMsg x @>
+        test <@ d.ToMsg m (x :> obj) = toMsg x @>
       }
 
 
@@ -2483,7 +2483,7 @@ module subModelOpt =
         let getSubModel = string >> ValueSome
         let toBindingModel (m: int, s: string) = m + s.Length
         let d = Binding.subModelOpt(getSubModel, toBindingModel, fail, []) |> getSubModelData
-        test <@ d.GetModel x = ((x, (getSubModel x).Value) |> toBindingModel |> box |> ValueSome) @>
+        test <@ d.GetModel x = ((x, (getSubModel x).Value) |> toBindingModel |> box |> nonNull |> ValueSome) @>
       }
 
 
@@ -2506,7 +2506,7 @@ module subModelOpt =
         let toMsg = string<int>
         let d = Binding.subModelOpt((fun _ -> ValueSome 0), (fun _ -> ValueSome 0), toMsg, []) |> getSubModelData
 
-        test <@ d.ToMsg m (box x) = toMsg x @>
+        test <@ d.ToMsg m (x :> obj) = toMsg x @>
       }
 
 
@@ -2530,7 +2530,7 @@ module subModelOpt =
         let getSubModel = string >> Some
         let toBindingModel (m: int, s: string) = m + s.Length
         let d = Binding.subModelOpt(getSubModel, toBindingModel, fail, []) |> getSubModelData
-        test <@ d.GetModel x = ((x, (getSubModel x).Value) |> toBindingModel |> box |> ValueSome) @>
+        test <@ d.GetModel x = ((x, (getSubModel x).Value) |> toBindingModel |> box |> nonNull |> ValueSome) @>
       }
 
 
@@ -2553,7 +2553,7 @@ module subModelOpt =
         let toMsg = string<int>
         let d = Binding.subModelOpt((fun _ -> Some 0), (fun _ -> Some 0), toMsg, []) |> getSubModelData
 
-        test <@ d.ToMsg m (box x) = toMsg x @>
+        test <@ d.ToMsg m (x :> obj) = toMsg x @>
       }
 
 
@@ -2705,7 +2705,7 @@ module subModelSelectedItem =
         let get _ = ValueNone
         let set (p: string voption) m = p |> ValueOption.map (fun p -> p.Length + m |> string)
         let d = Binding.subModelSelectedItem("", get, set) |> getSubModelSelectedItemData
-        test <@ d.Set (p |> ValueOption.map box) m = set p m @>
+        test <@ d.Set (p |> ValueOption.map (fun v -> v :> obj)) m = set p m @>
       }
 
 
@@ -2749,7 +2749,7 @@ module subModelSelectedItem =
         let get _ = None
         let set (p: string option) m = p |> Option.map (fun p -> p.Length + m |> string)
         let d = Binding.subModelSelectedItem("", get, set) |> getSubModelSelectedItemData
-        test <@ d.Set (p |> Option.map box |> ValueOption.ofOption) m = set p m @>
+        test <@ d.Set (p |> ValueOption.ofOption |> ValueOption.map (box >> nonNull)) m = set p m @>
       }
 
 
@@ -2793,7 +2793,7 @@ module subModelSelectedItem =
           let get _ = ValueNone
           let set (p: string voption) = p |> ValueOption.map (fun p -> p.Length |> string)
           let d = Binding.subModelSelectedItem("", get, set) |> getSubModelSelectedItemData
-          test <@ d.Set (p |> ValueOption.map box) m = set p @>
+          test <@ d.Set (p |> ValueOption.map (box >> nonNull)) m = set p @>
         }
 
 
@@ -2837,7 +2837,7 @@ module subModelSelectedItem =
         let get _ = None
         let set (p: string option) = p |> Option.map (fun p -> p.Length |> string)
         let d = Binding.subModelSelectedItem("", get, set) |> getSubModelSelectedItemData
-        test <@ d.Set (p |> Option.map box |> ValueOption.ofOption) m = set p @>
+        test <@ d.Set (p |> ValueOption.ofOption |> ValueOption.map (box >> nonNull)) m = set p @>
       }
 
 

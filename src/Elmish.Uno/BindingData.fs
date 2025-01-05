@@ -12,6 +12,7 @@ open Microsoft.UI.Xaml
 open Elmish
 open Elmish.Collections
 
+#nowarn "1204"
 
 module Helper =
 
@@ -27,7 +28,7 @@ type OneWayData<'model, 'T> =
   { Get: 'model -> 'T }
 
 
-type OneWaySeqData<'model, 'T, 'aCollection, 'id when 'id : equality> =
+type OneWaySeqData<'model, 'T, 'aCollection, 'id when 'id : equality and 'id : not null> =
   { Get: 'model -> 'T seq
     CreateCollection: 'T seq -> CollectionTarget<'T, 'aCollection>
     GetId: 'T -> 'id
@@ -42,7 +43,7 @@ type OneWaySeqData<'model, 'T, 'aCollection, 'id when 'id : equality> =
     Merge.keyed d.GetId d.GetId create update values newVals
 
 
-type OneWaySeqGroupedData<'model, 'T, 'aCollection, 'id, 'key when 'id : equality and 'key : equality> =
+type OneWaySeqGroupedData<'model, 'T, 'aCollection, 'id, 'key when 'id : equality and 'id : not null and 'key : equality and 'key : not null> =
   { Get: 'model -> 'T seq
     CreateCollection: 'T seq -> GroupedCollectionTarget<'T, 'aCollection, 'key>
     GetId: 'T -> 'id
@@ -64,7 +65,7 @@ type TwoWayData<'model, 'msg, 'T> =
     Set: 'T -> 'model -> 'msg }
 
 
-type TwoWaySeqData<'model, 'msg, 'T, 'aCollection, 'id when 'id : equality> =
+type TwoWaySeqData<'model, 'msg, 'T, 'aCollection, 'id when 'id : equality and 'id : not null> =
   { Get: 'model -> 'T seq
     CreateCollection: 'T seq -> CollectionTarget<'T, 'aCollection>
     GetId: 'T -> 'id
@@ -118,7 +119,7 @@ and SubModelSeqUnkeyedData<'model, 'msg, 'bindingModel, 'bindingMsg, 'vm, 'vmCol
     ToMsg: 'model -> int * 'bindingMsg -> 'msg }
 
 
-and SubModelSeqKeyedData<'model, 'msg, 'bindingModel, 'bindingMsg, 'vm, 'vmCollection, 'id when 'id : equality> =
+and SubModelSeqKeyedData<'model, 'msg, 'bindingModel, 'bindingMsg, 'vm, 'vmCollection, 'id when 'id : equality and 'id : not null> =
   { GetSubModels: 'model -> 'bindingModel seq
     CreateViewModel: ViewModelArgs<'bindingModel, 'bindingMsg> -> 'vm
     CreateCollection: 'vm seq -> CollectionTarget<'vm, 'vmCollection>
@@ -287,7 +288,7 @@ module BindingData =
           Set = d.Set
         }
 
-  let boxT b = MapT.recursiveCase box unbox b
+  let boxT b = MapT.recursiveCase (box >> nonNull) unbox b
   let unboxT b = MapT.recursiveCase unbox box b
 
   let mapModel f =
@@ -465,8 +466,8 @@ module BindingData =
   let addCaching b = b |> CachingData
   let addValidation validate b = { BindingData = b; Validate = validate } |> ValidationData
   let addLazy (equals: 'model -> 'model -> bool) b =
-      { BindingData = b |> mapModel unbox |> mapMsg box
-        Get = box
+      { BindingData = b |> mapModel LanguagePrimitives.IntrinsicFunctions.UnboxFast |> mapMsg (box >> nonNull)
+        Get = (box >> nonNull)
         Set = fun (dMsg: obj) _ -> unbox dMsg
         Equals = fun m1 m2 -> equals (unbox m1) (unbox m2)
       } |> LazyData
@@ -474,8 +475,8 @@ module BindingData =
       (alteration: ('dispatchMsg -> unit) -> 'bindingMsg -> unit)
       (b: BindingData<'bindingModel, 'bindingMsg, 't>)
       : BindingData<'model, 'msg, 't> =
-    { BindingData = b |> mapModel unbox |> mapMsg box
-      Get = box
+    { BindingData = b |> mapModel LanguagePrimitives.IntrinsicFunctions.UnboxFast |> mapMsg (box >> nonNull)
+      Get = (box >> nonNull)
       Set = fun (dMsg: obj) _ -> unbox dMsg
       AlterMsgStream =
         fun (f: obj -> unit) ->
@@ -496,12 +497,12 @@ module BindingData =
 
   module Option =
 
-    let box ma = ma |> Option.map box |> Option.toObj
+    let box ma = ma |> Option.map (box >> nonNull) |> Option.toObj |> nonNull
     let unbox obj = obj |> Option.ofObj |> Option.map unbox
 
   module ValueOption =
 
-    let box ma = ma |> ValueOption.map box |> ValueOption.toObj
+    let box ma = ma |> ValueOption.map (box >> nonNull) |> ValueOption.toObj |> nonNull
     let unbox obj = obj |> ValueOption.ofObj |> ValueOption.map unbox
 
 
@@ -536,7 +537,7 @@ module BindingData =
       ItemEquals = fun a1 a2 -> d.ItemEquals (inMapA a1) (inMapA a2)
     }
 
-    let boxMinorTypes d = d |> mapMinorTypes box box unbox
+    let boxMinorTypes d = d |> mapMinorTypes (box >> nonNull) (box >> nonNull) LanguagePrimitives.IntrinsicFunctions.UnboxFast
 
     let create itemEquals getId =
       { Get = (fun x -> upcast x)
@@ -583,7 +584,10 @@ module BindingData =
       ItemEquals = fun a1 a2 -> d.ItemEquals (inMapA a1) (inMapA a2)
     }
 
-    let boxMinorTypes d = d |> mapMinorTypes box box box unbox unbox
+    let boxMinorTypes d =
+      d |> mapMinorTypes
+             (box >> nonNull) (box >> nonNull) (box >> nonNull)
+             LanguagePrimitives.IntrinsicFunctions.UnboxFast LanguagePrimitives.IntrinsicFunctions.UnboxFast
 
     let createWithComparer itemEquals getId getGrouppingKey keyComparer =
       { Get = (fun x -> upcast x)
@@ -597,12 +601,11 @@ module BindingData =
       |> OneWaySeqGroupedData
       |> BaseBindingData
 
-    let create itemEquals getId getGrouppingKey compareKeys =
+    let create itemEquals getId getGrouppingKey (compareKeys : ('key -> 'key -> int) voption) =
       let comparer =
-        if obj.ReferenceEquals(compareKeys, Unchecked.defaultof<_>) then
-          Comparer<'key>.Default
-        else
-          Comparer.Create (Comparison compareKeys)
+        match compareKeys with
+        | ValueNone -> Comparer<'key>.Default
+        | ValueSome compareKeys -> Comparer.Create (Comparison compareKeys)
       createWithComparer itemEquals getId getGrouppingKey comparer
 
     let private mapFunctions
@@ -661,7 +664,7 @@ module BindingData =
       Update = d.Update
     }
 
-    let boxMinorTypes d = d |> mapMinorTypes box box unbox
+    let boxMinorTypes d = d |> mapMinorTypes (box >> nonNull) (box >> nonNull) LanguagePrimitives.IntrinsicFunctions.UnboxFast
 
     let create get itemEquals getId update =
       { Get = get
@@ -726,7 +729,7 @@ module BindingData =
       SubModelSeqBindingName = d.SubModelSeqBindingName
     }
 
-    let boxMinorTypes d = d |> mapMinorTypes box unbox
+    let boxMinorTypes d = d |> mapMinorTypes (box >> nonNull) LanguagePrimitives.IntrinsicFunctions.UnboxFast
 
     let create subModelSeqBindingName =
       { Get = id
@@ -765,7 +768,10 @@ module BindingData =
       ToMsg = fun m bMsg -> d.ToMsg m (inMapBindingMsg bMsg)
     }
 
-    let boxMinorTypes d = d |> mapMinorTypes box box unbox unbox
+    let boxMinorTypes d =
+      d |> mapMinorTypes
+             (box >> nonNull) (box >> nonNull)
+             LanguagePrimitives.IntrinsicFunctions.UnboxFast LanguagePrimitives.IntrinsicFunctions.UnboxFast
 
     let create createViewModel updateViewModel =
       { GetModel = id
@@ -816,7 +822,10 @@ module BindingData =
       OnCloseRequested = d.OnCloseRequested
     }
 
-    let boxMinorTypes d = d |> mapMinorTypes box box unbox unbox
+    let boxMinorTypes d =
+      d |> mapMinorTypes
+             (box >> nonNull) (box >> nonNull)
+             LanguagePrimitives.IntrinsicFunctions.UnboxFast LanguagePrimitives.IntrinsicFunctions.UnboxFast
 
     let create getState createViewModel updateViewModel toMsg getWindow onCloseRequested =
       { GetState = getState
@@ -875,7 +884,10 @@ module BindingData =
       ToMsg = fun m (idx, bMsg) -> d.ToMsg m (idx, (inMapBindingMsg bMsg))
     }
 
-    let boxMinorTypes d = d |> mapMinorTypes box box box unbox unbox unbox
+    let boxMinorTypes d =
+      d |> mapMinorTypes
+             (box >> nonNull) (box >> nonNull) (box >> nonNull)
+             LanguagePrimitives.IntrinsicFunctions.UnboxFast LanguagePrimitives.IntrinsicFunctions.UnboxFast LanguagePrimitives.IntrinsicFunctions.UnboxFast
 
     let create createViewModel updateViewModel =
       { GetModels = (fun x -> upcast x)
@@ -935,7 +947,10 @@ module BindingData =
         VmToId = fun vm -> vm |> inMapBindingViewModel |> d.VmToId |> outMapId
       }
 
-      let boxMinorTypes d = d |> mapMinorTypes box box box box unbox unbox unbox unbox
+      let boxMinorTypes d =
+        d |> mapMinorTypes
+              (box >> nonNull) (box >> nonNull) (box >> nonNull) (box >> nonNull)
+              LanguagePrimitives.IntrinsicFunctions.UnboxFast LanguagePrimitives.IntrinsicFunctions.UnboxFast LanguagePrimitives.IntrinsicFunctions.UnboxFast LanguagePrimitives.IntrinsicFunctions.UnboxFast
 
       let create createViewModel updateViewModel bmToId vmToId =
         { GetSubModels = (fun x -> upcast x)
