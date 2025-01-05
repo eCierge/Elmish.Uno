@@ -196,6 +196,8 @@ module OneWay =
 
       let binding = (oneWay id >> Binding.addSticky isEven) TestVm.GetPropertyName
       let vm = TestVm(m, binding)
+      // Binding must be triggered first to memoize the value
+      let _ = vm.GetProperty
 
       vm.UpdateModel (m + 1)
       test <@ vm.GetProperty = returnEven m (m + 1) @>
