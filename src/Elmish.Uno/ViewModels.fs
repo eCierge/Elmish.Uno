@@ -162,7 +162,7 @@ type DynamicViewModel<'model, 'msg when 'model : not null and 'msg : not null>
 
     log.LogTrace("[{BindingNameChain}] Initializing bindings", nameChain)
 
-    let bindingDict = Dictionary<string, VmBinding<'model, 'msg, objnull>>(bindings.Length)
+    let bindingDict = Dictionary<string, VmBinding<'model, 'msg, obj>>(bindings.Length)
     let validationDict = Dictionary<string, string list ref>()
 
     let sortedBindings =
@@ -342,15 +342,15 @@ and GetCustomProperty(name: string) =
         fun vm -> vm.TryGetMemberCore(name, rootBinding)) :> _
 
   member internal this.Recursive<'model, 'msg, 'bindingModel, 'bindingMsg when 'model : not null and 'msg : not null>
-      (rootBinding: VmBinding<'model, 'msg, objnull>,
-       binding: VmBinding<'bindingModel, 'bindingMsg, objnull>)
+      (rootBinding: VmBinding<'model, 'msg, obj>,
+       binding: VmBinding<'bindingModel, 'bindingMsg, obj>)
       : ICustomProperty | null =
     match binding with
     | BaseVmBinding b -> this.Base(rootBinding, b)
     | Cached b -> this.Recursive(rootBinding, b.Binding)
     | Validatation b -> this.Recursive(rootBinding, b.Binding)
-    | Lazy b -> this.Recursive<'model, 'msg, obj, obj>(rootBinding, b.Binding)
-    | AlterMsgStream b -> this.Recursive<'model, 'msg, obj, obj>(rootBinding, b.Binding)
+    | Lazy b -> this.Recursive<'model, 'msg, objnull, objnull>(rootBinding, b.Binding)
+    | AlterMsgStream b -> this.Recursive<'model, 'msg, objnull, objnull>(rootBinding, b.Binding)
 
 
 open System.Runtime.CompilerServices
