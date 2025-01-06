@@ -858,7 +858,7 @@ module TwoWayValidate =
       let! m1 = GenX.auto<int>
       let! m2 = GenX.auto<int>
 
-      let get _ = ()
+      let get _ = ""
       let set _ _ = ""
       let validate m = if m < 0 then ValueSome (string m) else ValueNone
 
@@ -878,7 +878,7 @@ module TwoWayValidate =
       let! m1 = GenX.auto<int>
       let! m2 = GenX.auto<int>
 
-      let get _ = ()
+      let get _ = ""
       let set _ _ = ""
       let validate m = if m < 0 then ValueSome (string m) else ValueNone
 
@@ -898,7 +898,7 @@ module TwoWayValidate =
       let! m1 = GenX.auto<int>
       let! m2 = GenX.auto<int>
 
-      let get _ = ()
+      let get _ = ""
       let set _ _ = ""
       let validate _ = ValueNone
 
@@ -923,7 +923,7 @@ module TwoWayValidate =
       let! m1 = GenX.auto<int>
       let! m2 = GenX.auto<int>
 
-      let get _ = ()
+      let get _ = ""
       let set _ _ = ""
       let validate m = ValueSome (string<int> m)
 
@@ -948,7 +948,7 @@ module TwoWayValidate =
       let! m1 = GenX.auto<int>
       let! m2 = GenX.auto<int> |> GenX.notEqualTo m1
 
-      let get _ = ()
+      let get _ = ""
       let set _ _ = ""
       let validate m =
         if m = m1
@@ -1659,7 +1659,7 @@ module AlterMsgStream =
   let ``message stream alteration only invoked once when set called twice`` () =
     let name = ""
     let model = 0
-    let get = ignore
+    let get _ = ""
     let set _ _ = ""
     let alteration = InvokeTester id
     let binding =

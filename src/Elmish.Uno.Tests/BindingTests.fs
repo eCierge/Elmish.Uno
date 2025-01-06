@@ -190,7 +190,7 @@ module oneWaySeq =
       let getId = string<int>
       let d = Binding.oneWaySeq(fail, fail2, getId) |> getOneWaySeqData
 
-      test <@ d.GetId (x :> obj) |> unbox = getId x @>
+      test <@ d.GetId (box x) |> unbox = getId x @>
     }
 
 
@@ -203,7 +203,7 @@ module oneWaySeq =
       let itemEquals : int -> int -> bool = (=)
       let d = Binding.oneWaySeq(fail, itemEquals, fail) |> getOneWaySeqData
 
-      test <@ d.ItemEquals (x :> obj) (y :> obj) = itemEquals x y @>
+      test <@ d.ItemEquals (box x) (box y) = itemEquals x y @>
     }
 
 
@@ -228,7 +228,7 @@ module oneWaySeqLazy =
       let getId = string<int>
       let d = Binding.oneWaySeqLazy(fail, fail2, fail, fail2, getId) |> getOneWaySeqData
 
-      test <@ d.GetId (x :> obj) |> unbox = getId x @>
+      test <@ d.GetId (box x) |> unbox = getId x @>
     }
 
 
@@ -241,7 +241,7 @@ module oneWaySeqLazy =
       let itemEquals : int -> int -> bool = (=)
       let d = Binding.oneWaySeqLazy(fail, fail2, fail, itemEquals, fail) |> getOneWaySeqData
 
-      test <@ d.ItemEquals (x :> obj) (y :> obj) = itemEquals x y @>
+      test <@ d.ItemEquals (box x) (box y) = itemEquals x y @>
     }
 
 
@@ -2210,7 +2210,7 @@ module subModel =
         let! m = GenX.auto<int>
         let! x = GenX.auto<int>
         let d = Binding.subModel((fun _ -> 0), []) |> getSubModelData
-        test <@ d.ToMsg m (x :> obj) = x @>
+        test <@ d.ToMsg m (box x) = x @>
       }
 
   module toMsg_noToBindingModel =
@@ -2244,7 +2244,7 @@ module subModel =
         let toMsg = string<int>
         let d = Binding.subModel((fun _ -> 0), toMsg, []) |> getSubModelData
 
-        test <@ d.ToMsg m (x :> obj) = toMsg x @>
+        test <@ d.ToMsg m (box x) = toMsg x @>
       }
 
 
@@ -2280,7 +2280,7 @@ module subModel =
         let toMsg = string<int>
         let d = Binding.subModel((fun _ -> 0), (fun _ -> 0), toMsg, []) |> getSubModelData
 
-        test <@ d.ToMsg m (x :> obj) = toMsg x @>
+        test <@ d.ToMsg m (box x) = toMsg x @>
       }
 
 
@@ -2326,7 +2326,7 @@ module subModelOpt =
         let! m = GenX.auto<int>
         let! x = GenX.auto<int>
         let d = Binding.subModelOpt((fun _ -> ValueSome 0), []) |> getSubModelData
-        test <@ d.ToMsg m (x :> obj) = x @>
+        test <@ d.ToMsg m (box x) = x @>
       }
 
 
@@ -2369,7 +2369,7 @@ module subModelOpt =
         let! m = GenX.auto<int>
         let! x = GenX.auto<int>
         let d = Binding.subModelOpt((fun _ -> Some 0), []) |> getSubModelData
-        test <@ d.ToMsg m (x :> obj) = x @>
+        test <@ d.ToMsg m (box x) = x @>
       }
 
 
@@ -2414,7 +2414,7 @@ module subModelOpt =
         let toMsg = string<int>
         let d = Binding.subModelOpt((fun _ -> ValueSome 0), toMsg, []) |> getSubModelData
 
-        test <@ d.ToMsg m (x :> obj) = toMsg x @>
+        test <@ d.ToMsg m (box x) = toMsg x @>
       }
 
 
@@ -2460,7 +2460,7 @@ module subModelOpt =
         let toMsg = string<int>
         let d = Binding.subModelOpt((fun _ -> Some 0), toMsg, []) |> getSubModelData
 
-        test <@ d.ToMsg m (x :> obj) = toMsg x @>
+        test <@ d.ToMsg m (box x) = toMsg x @>
       }
 
 
@@ -2506,7 +2506,7 @@ module subModelOpt =
         let toMsg = string<int>
         let d = Binding.subModelOpt((fun _ -> ValueSome 0), (fun _ -> ValueSome 0), toMsg, []) |> getSubModelData
 
-        test <@ d.ToMsg m (x :> obj) = toMsg x @>
+        test <@ d.ToMsg m (box x) = toMsg x @>
       }
 
 
@@ -2551,9 +2551,9 @@ module subModelOpt =
         let! x = GenX.auto<int>
 
         let toMsg = string<int>
-        let d = Binding.subModelOpt((fun _ -> Some 0), (fun _ -> Some 0), toMsg, []) |> getSubModelData
+        let d = Binding.subModelOpt((fun _ -> Some 0), (fun _ _ -> Some 0), toMsg, []) |> getSubModelData
 
-        test <@ d.ToMsg m (x :> obj) = toMsg x @>
+        test <@ d.ToMsg m (box x) = toMsg x @>
       }
 
 

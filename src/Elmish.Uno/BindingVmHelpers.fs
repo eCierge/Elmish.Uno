@@ -165,16 +165,16 @@ type SubModelSelectedItemBinding<'model, 'msg, 'bindingModel, 'bindingMsg, 'vm, 
 
 type BaseVmBinding<'model, 'msg, 't> =
   | OneWay of OneWayBinding<'model, 't>
-  | OneWaySeq of OneWaySeqBinding<'model, obj, 't, obj>
-  | OneWaySeqGrouped of OneWaySeqGroupedBinding<'model, obj, 't, obj, obj>
+  | OneWaySeq of OneWaySeqBinding<'model, objnull, 't, obj>
+  | OneWaySeqGrouped of OneWaySeqGroupedBinding<'model, objnull, 't, obj, obj>
   | TwoWay of TwoWayBinding<'model, 't>
-  | TwoWaySeq of TwoWaySeqBinding<'model, 'msg, obj, 't, obj>
+  | TwoWaySeq of TwoWaySeqBinding<'model, 'msg, objnull, 't, obj>
   | Cmd of cmd: Command
-  | SubModel of SubModelBinding<'model, 'msg, obj, obj, 't>
-  | SubModelWin of SubModelWinBinding<'model, 'msg, obj, obj, 't>
-  | SubModelSeqUnkeyed of SubModelSeqUnkeyedBinding<'model, 'msg, obj, obj, obj, 't>
-  | SubModelSeqKeyed of SubModelSeqKeyedBinding<'model, 'msg, obj, obj, obj, 't, obj>
-  | SubModelSelectedItem of SubModelSelectedItemBinding<'model, 'msg, obj, obj, 't, obj>
+  | SubModel of SubModelBinding<'model, 'msg, objnull, objnull, 't>
+  | SubModelWin of SubModelWinBinding<'model, 'msg, objnull, objnull, 't>
+  | SubModelSeqUnkeyed of SubModelSeqUnkeyedBinding<'model, 'msg, objnull, objnull, objnull, 't>
+  | SubModelSeqKeyed of SubModelSeqKeyedBinding<'model, 'msg, objnull, objnull, objnull, 't, obj>
+  | SubModelSelectedItem of SubModelSelectedItemBinding<'model, 'msg, objnull, objnull, 't, objnull>
 
 
 type CachedBinding<'model, 'msg, 't> = {
@@ -205,8 +205,8 @@ and VmBinding<'model, 'msg, 't> =
   | BaseVmBinding of BaseVmBinding<'model, 'msg, 't>
   | Cached of CachedBinding<'model, 'msg, 't>
   | Validatation of ValidationBinding<'model, 'msg, 't>
-  | Lazy of LazyBinding<'model, 'msg, obj, obj, 't>
-  | AlterMsgStream of AlterMsgStreamBinding<'model, obj, obj, 't>
+  | Lazy of LazyBinding<'model, 'msg, objnull, objnull, 't>
+  | AlterMsgStream of AlterMsgStreamBinding<'model, objnull, objnull, 't>
 
   with
 
@@ -326,7 +326,7 @@ module internal MapOutputType =
         Validate = b.Validate
       }
 
-  let boxVm b = recursiveCase (box >> nonNull) LanguagePrimitives.IntrinsicFunctions.UnboxFast b
+  let boxVm b : VmBinding<_, _, obj> = recursiveCase (fun vm -> vm :> obj) LanguagePrimitives.IntrinsicFunctions.UnboxFast b
   let unboxVm b = recursiveCase LanguagePrimitives.IntrinsicFunctions.UnboxFast box b
 
 type SubModelSelectedItemLast() =
@@ -559,22 +559,22 @@ type Initialize<'t>
           let! b = this.Recursive(initialModel, dispatch, getCurrentModel, d.BindingData)
           return b.AddValidation initialModel d.Validate
       | LazyData d ->
-          let initialModel' : obj = d.Get initialModel
-          let getCurrentModel' : unit -> obj = getCurrentModel >> d.Get
-          let dispatch' : obj -> unit = d.MapDispatch(getCurrentModel, dispatch)
+          let initialModel' : objnull = d.Get initialModel
+          let getCurrentModel' : unit -> objnull = getCurrentModel >> d.Get
+          let dispatch' : objnull -> unit = d.MapDispatch(getCurrentModel, dispatch)
           let d = d |> BindingData.Lazy.measureFunctions measure measure2 measure2
           let! b = this.Recursive(initialModel', dispatch', getCurrentModel', d.BindingData)
           return { Binding = b
-                   Get = d.Get
+                   Get = d.Get >> nonNull
                    Equals = d.Equals
                  } |> Lazy
       | AlterMsgStreamData d ->
-          let initialModel' : obj = d.Get initialModel
-          let getCurrentModel' : unit -> obj = getCurrentModel >> d.Get
-          let dispatch' : obj -> unit = d.MapDispatch(getCurrentModel, dispatch)
+          let initialModel' : objnull = d.Get initialModel
+          let getCurrentModel' : unit -> objnull = getCurrentModel >> d.Get
+          let dispatch' : objnull -> unit = d.MapDispatch(getCurrentModel, dispatch)
           let! b = this.Recursive(initialModel', dispatch', getCurrentModel', d.BindingData)
           return { Binding = b
-                   Get = d.Get
+                   Get = d.Get >> nonNull
                  } |> AlterMsgStream
     }
 
@@ -811,5 +811,5 @@ type [<Struct>] Set<'t>(value: 't) =
         // so don't clear the cache here
         this.Recursive<'model, 'msg>(model, b.Binding)
     | Validatation b -> this.Recursive<'model, 'msg>(model, b.Binding)
-    | Lazy b -> this.Recursive<obj, obj>(b.Get model, b.Binding)
-    | AlterMsgStream b -> this.Recursive<obj, obj>(b.Get model, b.Binding)
+    | Lazy b -> this.Recursive<objnull, objnull>(b.Get model, b.Binding)
+    | AlterMsgStream b -> this.Recursive<objnull, objnull>(b.Get model, b.Binding)
