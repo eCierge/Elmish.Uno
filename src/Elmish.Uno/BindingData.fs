@@ -27,7 +27,7 @@ type OneWayData<'model, 'T> =
   { Get: 'model -> 'T }
 
 
-type OneWaySeqData<'model, 'T, 'aCollection, 'id when 'id : equality> =
+type OneWaySeqData<'model, 'T, 'aCollection, 'id when 'id : equality and 'id : not null> =
   { Get: 'model -> 'T seq
     CreateCollection: 'T seq -> CollectionTarget<'T, 'aCollection>
     GetId: 'T -> 'id
@@ -42,7 +42,7 @@ type OneWaySeqData<'model, 'T, 'aCollection, 'id when 'id : equality> =
     Merge.keyed d.GetId d.GetId create update values newVals
 
 
-type OneWaySeqGroupedData<'model, 'T, 'aCollection, 'id, 'key when 'id : equality and 'key : equality> =
+type OneWaySeqGroupedData<'model, 'T, 'aCollection, 'id, 'key when 'id : equality and 'id : not null and 'key : equality and 'key : not null> =
   { Get: 'model -> 'T seq
     CreateCollection: 'T seq -> GroupedCollectionTarget<'T, 'aCollection, 'key>
     GetId: 'T -> 'id
@@ -64,7 +64,7 @@ type TwoWayData<'model, 'msg, 'T> =
     Set: 'T -> 'model -> 'msg }
 
 
-type TwoWaySeqData<'model, 'msg, 'T, 'aCollection, 'id when 'id : equality> =
+type TwoWaySeqData<'model, 'msg, 'T, 'aCollection, 'id when 'id : equality and 'id : not null> =
   { Get: 'model -> 'T seq
     CreateCollection: 'T seq -> CollectionTarget<'T, 'aCollection>
     GetId: 'T -> 'id
@@ -81,8 +81,8 @@ type TwoWaySeqData<'model, 'msg, 'T, 'aCollection, 'id when 'id : equality> =
 
 
 type CmdData<'model, 'msg> = {
-  Exec: obj -> 'model -> 'msg voption
-  CanExec: obj -> 'model -> bool
+  Exec: objnull -> 'model -> 'msg voption
+  CanExec: objnull -> 'model -> bool
 }
 
 
@@ -118,7 +118,7 @@ and SubModelSeqUnkeyedData<'model, 'msg, 'bindingModel, 'bindingMsg, 'vm, 'vmCol
     ToMsg: 'model -> int * 'bindingMsg -> 'msg }
 
 
-and SubModelSeqKeyedData<'model, 'msg, 'bindingModel, 'bindingMsg, 'vm, 'vmCollection, 'id when 'id : equality> =
+and SubModelSeqKeyedData<'model, 'msg, 'bindingModel, 'bindingMsg, 'vm, 'vmCollection, 'id when 'id : equality and 'id : not null> =
   { GetSubModels: 'model -> 'bindingModel seq
     CreateViewModel: ViewModelArgs<'bindingModel, 'bindingMsg> -> 'vm
     CreateCollection: 'vm seq -> CollectionTarget<'vm, 'vmCollection>
@@ -170,24 +170,24 @@ and AlterMsgStreamData<'model, 'msg, 'bindingModel, 'bindingMsg, 'dispatchMsg, '
 
 and BaseBindingData<'model, 'msg, 't> =
   | OneWayData of OneWayData<'model, 't>
-  | OneWaySeqData of OneWaySeqData<'model, obj, 't, obj>
-  | OneWaySeqGroupedData of OneWaySeqGroupedData<'model, obj, 't, obj, obj>
+  | OneWaySeqData of OneWaySeqData<'model, objnull, 't, obj>
+  | OneWaySeqGroupedData of OneWaySeqGroupedData<'model, objnull, 't, obj, obj>
   | TwoWayData of TwoWayData<'model, 'msg, 't>
-  | TwoWaySeqData of TwoWaySeqData<'model, 'msg, obj, 't, obj>
+  | TwoWaySeqData of TwoWaySeqData<'model, 'msg, objnull, 't, obj>
   | CmdData of CmdData<'model, 'msg>
-  | SubModelData of SubModelData<'model, 'msg, obj, obj, 't>
-  | SubModelWinData of SubModelWinData<'model, 'msg, obj, obj, 't>
-  | SubModelSeqUnkeyedData of SubModelSeqUnkeyedData<'model, 'msg, obj, obj, obj, 't>
-  | SubModelSeqKeyedData of SubModelSeqKeyedData<'model, 'msg, obj, obj, obj, 't, obj>
-  | SubModelSelectedItemData of SubModelSelectedItemData<'model, 'msg, obj>
+  | SubModelData of SubModelData<'model, 'msg, objnull, objnull, 't>
+  | SubModelWinData of SubModelWinData<'model, 'msg, objnull, objnull, 't>
+  | SubModelSeqUnkeyedData of SubModelSeqUnkeyedData<'model, 'msg, objnull, objnull, objnull, 't>
+  | SubModelSeqKeyedData of SubModelSeqKeyedData<'model, 'msg, objnull, objnull, objnull, 't, obj>
+  | SubModelSelectedItemData of SubModelSelectedItemData<'model, 'msg, objnull>
 
 
 and BindingData<'model, 'msg, 't> =
   | BaseBindingData of BaseBindingData<'model, 'msg, 't>
   | CachingData of BindingData<'model, 'msg, 't>
   | ValidationData of ValidationData<'model, 'msg, 't>
-  | LazyData of LazyData<'model, 'msg, obj, obj, 't>
-  | AlterMsgStreamData of AlterMsgStreamData<'model, 'msg, obj, obj, obj, 't>
+  | LazyData of LazyData<'model, 'msg, objnull, objnull, 't>
+  | AlterMsgStreamData of AlterMsgStreamData<'model, 'msg, objnull, objnull, obj, 't>
 
 
 
@@ -277,11 +277,11 @@ module BindingData =
       | LazyData d -> LazyData {
           Get = d.Get
           Set = d.Set
-          BindingData = recursiveCase<obj, obj, 't0, 't1> fOut fIn d.BindingData
+          BindingData = recursiveCase<objnull, objnull, 't0, 't1> fOut fIn d.BindingData
           Equals = d.Equals
         }
       | AlterMsgStreamData d -> AlterMsgStreamData {
-          BindingData = recursiveCase<obj, obj, 't0, 't1> fOut fIn d.BindingData
+          BindingData = recursiveCase<objnull, objnull, 't0, 't1> fOut fIn d.BindingData
           AlterMsgStream = d.AlterMsgStream
           Get = d.Get
           Set = d.Set
@@ -478,7 +478,7 @@ module BindingData =
       Get = box
       Set = fun (dMsg: obj) _ -> unbox dMsg
       AlterMsgStream =
-        fun (f: obj -> unit) ->
+        fun (f: objnull -> unit) ->
           let f' = box >> f
           let g = alteration f'
           unbox >> g
@@ -536,7 +536,7 @@ module BindingData =
       ItemEquals = fun a1 a2 -> d.ItemEquals (inMapA a1) (inMapA a2)
     }
 
-    let boxMinorTypes d = d |> mapMinorTypes box box unbox
+    let boxMinorTypes d = d |> mapMinorTypes box (fun id -> id :> obj) unbox
 
     let create itemEquals getId =
       { Get = (fun x -> upcast x)
@@ -583,7 +583,7 @@ module BindingData =
       ItemEquals = fun a1 a2 -> d.ItemEquals (inMapA a1) (inMapA a2)
     }
 
-    let boxMinorTypes d = d |> mapMinorTypes box box box unbox unbox
+    let boxMinorTypes d = d |> mapMinorTypes box (fun id -> id :> obj) (fun key -> key :> obj) unbox unbox
 
     let createWithComparer itemEquals getId getGrouppingKey keyComparer =
       { Get = (fun x -> upcast x)
@@ -597,12 +597,11 @@ module BindingData =
       |> OneWaySeqGroupedData
       |> BaseBindingData
 
-    let create itemEquals getId getGrouppingKey compareKeys =
+    let create itemEquals getId getGrouppingKey (compareKeys : ('key -> 'key -> int) voption) =
       let comparer =
-        if obj.ReferenceEquals(compareKeys, Unchecked.defaultof<_>) then
-          Comparer<'key>.Default
-        else
-          Comparer.Create (Comparison compareKeys)
+        match compareKeys with
+        | ValueNone -> Comparer<'key>.Default
+        | ValueSome compareKeys -> Comparer.Create (Comparison compareKeys)
       createWithComparer itemEquals getId getGrouppingKey comparer
 
     let private mapFunctions
@@ -661,7 +660,7 @@ module BindingData =
       Update = d.Update
     }
 
-    let boxMinorTypes d = d |> mapMinorTypes box box unbox
+    let boxMinorTypes d = d |> mapMinorTypes box (fun id -> id :> obj) unbox
 
     let create get itemEquals getId update =
       { Get = get
@@ -935,7 +934,7 @@ module BindingData =
         VmToId = fun vm -> vm |> inMapBindingViewModel |> d.VmToId |> outMapId
       }
 
-      let boxMinorTypes d = d |> mapMinorTypes box box box box unbox unbox unbox unbox
+      let boxMinorTypes d = d |> mapMinorTypes box box box (fun id -> id :> obj) unbox unbox unbox unbox
 
       let create createViewModel updateViewModel bmToId vmToId =
         { GetSubModels = (fun x -> upcast x)

@@ -13,9 +13,7 @@ open Swensen.Unquote
 
 open Elmish.Uno
 
-
-
-type internal TestVm<'model, 'msg, 'B1>(model, binding: Binding<'model,'msg>) as this =
+type internal TestVm<'model, 'msg, 'B1 when 'model : not null and 'msg : not null>(model, binding: Binding<'model,'msg>) as this =
   inherit ViewModelBase<'model, 'msg>({ initialModel = model; dispatch = (fun x -> this.Dispatch x); loggingArgs = LoggingViewModelArgs.none })
 
   let pcTriggers = ConcurrentDictionary<string, int>()
@@ -27,11 +25,11 @@ type internal TestVm<'model, 'msg, 'B1>(model, binding: Binding<'model,'msg>) as
 
   do
     (this :> INotifyPropertyChanged).PropertyChanged.Add (fun e ->
-      pcTriggers.AddOrUpdate(e.PropertyName, 1, (fun _ count -> count + 1)) |> ignore
+      pcTriggers.AddOrUpdate(e.PropertyName |> nonNull, 1, (fun _ count -> count + 1)) |> ignore
     )
 
     (this :> INotifyDataErrorInfo).ErrorsChanged.Add (fun e ->
-      ecTriggers.AddOrUpdate(e.PropertyName, 1, (fun _ count -> count + 1)) |> ignore
+      ecTriggers.AddOrUpdate(e.PropertyName |> nonNull, 1, (fun _ count -> count + 1)) |> ignore
     )
 
   member _.UpdateModel(m) = IViewModel.updateModel(this, m)
@@ -81,7 +79,7 @@ type internal TestVm<'model, 'msg, 'B1>(model, binding: Binding<'model,'msg>) as
 
 module TestVm =
 
-    let GetPropertyName = TestVm<'model, 'msg, 'B1>.GetPropertyName
+    let GetPropertyName = TestVm<_, _, _>.GetPropertyName
 
 [<AutoOpen>]
 module Helpers =

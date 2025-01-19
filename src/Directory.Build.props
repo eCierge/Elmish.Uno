@@ -7,8 +7,9 @@
   </PropertyGroup>
   <PropertyGroup>
     <DotNetVersion>net8.0</DotNetVersion>
-    <LangVersion Condition="'$(MSBuildProjectExtension)'=='.csproj'">latest</LangVersion>
-    <LangVersion Condition="'$(MSBuildProjectExtension)'=='.fsproj'">latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <LangVersion Condition="'$(MSBuildProjectExtension)'=='.csproj'">13.0</LangVersion>
+    <LangVersion Condition="'$(MSBuildProjectExtension)'=='.fsproj'">9.0</LangVersion>
     <AccelerateBuildsInVisualStudio>true</AccelerateBuildsInVisualStudio>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>

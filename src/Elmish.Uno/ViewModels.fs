@@ -23,7 +23,7 @@ type Binding<'model, 'msg, 't> =
     { Name: string
       Data: BindingData<'model, 'msg, 't> }
 
-type Binding<'model, 'msg> = Binding<'model, 'msg, obj>
+type Binding<'model, 'msg> = Binding<'model, 'msg, objnull>
 
 
 [<AutoOpen>]
@@ -41,7 +41,7 @@ module internal Helpers =
     member this.CompareBindings() : Binding<'model, 'msg> -> Binding<'model, 'msg> -> int =
       fun a b -> this.Recursive(a.Data) - this.Recursive(b.Data)
 
-type [<AllowNullLiteral>] IViewModel<'model, 'msg> =
+type IViewModel<'model, 'msg> =
   abstract member CurrentModel: 'model
   abstract member UpdateModel: 'model -> unit
 
@@ -53,7 +53,7 @@ type internal ViewModelHelper<'model, 'msg> =
   { GetSender: unit -> obj
     LoggingArgs: LoggingViewModelArgs
     Model: 'model
-    Bindings: Map<string, VmBinding<'model, 'msg, obj>>
+    Bindings: Map<string, VmBinding<'model, 'msg, objnull>>
     ValidationErrors: Map<string, string list ref>
     PropertyChanged: Event<PropertyChangedEventHandler, PropertyChangedEventArgs>
     ErrorsChanged: DelegateEvent<EventHandler<DataErrorsChangedEventArgs>> }
@@ -140,7 +140,7 @@ module internal ViewModelHelper =
       | ValueNone -> log.LogError("SubModelSelectedItem binding referenced binding {SubModelSeqBindingName} but no binding was found with that name", name)
                      ValueNone
 
-type [<AllowNullLiteral>] DynamicViewModel<'model, 'msg>
+type DynamicViewModel<'model, 'msg when 'model : not null and 'msg : not null>
       ( args: ViewModelArgs<'model, 'msg>,
         bindings: Binding<'model, 'msg> list)
       as this =
@@ -202,7 +202,7 @@ type [<AllowNullLiteral>] DynamicViewModel<'model, 'msg>
       helper <- { helper with Model = newModel }
       ViewModelHelper.raiseEvents hadErrors eventsToRaise helper
 
-  member internal _.TryGetMemberCore (name: string, binding: VmBinding<'model, 'msg, obj>, result: byref<_>) =
+  member internal _.TryGetMemberCore (name: string, binding: VmBinding<'model, 'msg, objnull>, result: byref<objnull>) =
     try
       match Get(nameChain).Recursive(helper.Model, binding) with
       | Ok v ->
@@ -219,7 +219,7 @@ type [<AllowNullLiteral>] DynamicViewModel<'model, 'msg>
       log.LogError(e, "[{BindingNameChain}] TryGetMember FAILED: Exception thrown while processing binding {BindingName}", nameChain, name)
       reraise ()
 
-  member internal vm.TryGetMemberCore (name: string, binding: VmBinding<'model, 'msg, obj>) =
+  member internal vm.TryGetMemberCore (name: string, binding: VmBinding<'model, 'msg, objnull>) =
     let mutable result = null
     let _ = vm.TryGetMemberCore(name, binding, &result)
     result
@@ -234,7 +234,7 @@ type [<AllowNullLiteral>] DynamicViewModel<'model, 'msg>
     | true, binding ->
       vm.TryGetMemberCore(name, binding, &result)
 
-  member internal _.TrySetMemberCore (name, binding: VmBinding<'model, 'msg, obj>, value) =
+  member internal _.TrySetMemberCore (name, binding: VmBinding<'model, 'msg, objnull>, value) =
     try
       let success = Set(value).Recursive(helper.Model, binding)
       if not success then
@@ -270,8 +270,8 @@ type [<AllowNullLiteral>] DynamicViewModel<'model, 'msg>
     member _.HasErrors = (helper :> INotifyDataErrorInfo).HasErrors
     member _.GetErrors name = (helper :> INotifyDataErrorInfo).GetErrors name
 
-  member private this.GetProperty(name : string) : ICustomProperty =
-    if name = "CurrentModel" then DynamicCustomProperty<DynamicViewModel<'model,'msg>, obj>(name, fun vm -> vm.CurrentModel |> box) :> _
+  member private this.GetProperty(name : string) : ICustomProperty | null =
+    if name = "CurrentModel" then DynamicCustomProperty<DynamicViewModel<'model,'msg>, obj>(name, fun vm -> vm.CurrentModel :> obj) :> _
     else
     match this.Bindings.TryGetValue name with
     | false, _ ->
@@ -292,11 +292,11 @@ type [<AllowNullLiteral>] DynamicViewModel<'model, 'msg>
 
 and GetCustomProperty(name: string) =
 
-  member internal _.Base (rootBinding: VmBinding<'model, 'msg, obj>, vmBinding: BaseVmBinding<'bindingModel, 'bindingMsg, obj>) : ICustomProperty =
+  member internal _.Base (rootBinding: VmBinding<'model, 'msg, objnull>, vmBinding: BaseVmBinding<'bindingModel, 'bindingMsg, obj>) : ICustomProperty | null =
     match vmBinding with
-    | OneWay _ -> DynamicCustomProperty<DynamicViewModel<'model,'msg>, obj>(name, fun vm -> vm.TryGetMemberCore(name, rootBinding)) :> _
+    | OneWay _ -> DynamicCustomProperty<DynamicViewModel<'model,'msg>, obj | null>(name, fun vm -> vm.TryGetMemberCore(name, rootBinding)) :> _
     | TwoWay _ ->
-      DynamicCustomProperty<DynamicViewModel<'model,'msg>, obj>(name,
+      DynamicCustomProperty<DynamicViewModel<'model,'msg>, obj | null>(name,
         (fun vm -> vm.TryGetMemberCore(name, rootBinding)),
         (fun vm value -> vm.TrySetMemberCore(name, rootBinding, value) |> ignore)) :> _
     | OneWaySeq data ->
@@ -331,32 +331,32 @@ and GetCustomProperty(name: string) =
         fun vm -> vm.TryGetMemberCore(name, rootBinding) :?> _) :> _
     | SubModel _
     | SubModelWin _ ->
-      DynamicCustomProperty<DynamicViewModel<'model,'msg>, obj>(name,
+      DynamicCustomProperty<DynamicViewModel<'model,'msg>, obj | null>(name,
         fun vm -> vm.TryGetMemberCore(name, rootBinding)) :> _
     | SubModelSeqUnkeyed _
     | SubModelSeqKeyed _ ->
       DynamicCustomProperty<DynamicViewModel<'model,'msg>, System.Collections.IList>(name,
         fun vm -> vm.TryGetMemberCore(name, rootBinding) :?> _) :> _
     | SubModelSelectedItem _ ->
-      DynamicCustomProperty<DynamicViewModel<'model,'msg>, obj>(name,
+      DynamicCustomProperty<DynamicViewModel<'model,'msg>, obj | null>(name,
         fun vm -> vm.TryGetMemberCore(name, rootBinding)) :> _
 
-  member internal this.Recursive<'model, 'msg, 'bindingModel, 'bindingMsg>
+  member internal this.Recursive<'model, 'msg, 'bindingModel, 'bindingMsg when 'model : not null and 'msg : not null>
       (rootBinding: VmBinding<'model, 'msg, obj>,
        binding: VmBinding<'bindingModel, 'bindingMsg, obj>)
-      : ICustomProperty =
+      : ICustomProperty | null =
     match binding with
     | BaseVmBinding b -> this.Base(rootBinding, b)
     | Cached b -> this.Recursive(rootBinding, b.Binding)
     | Validatation b -> this.Recursive(rootBinding, b.Binding)
-    | Lazy b -> this.Recursive<'model, 'msg, obj, obj>(rootBinding, b.Binding)
-    | AlterMsgStream b -> this.Recursive<'model, 'msg, obj, obj>(rootBinding, b.Binding)
+    | Lazy b -> this.Recursive<'model, 'msg, objnull, objnull>(rootBinding, b.Binding)
+    | AlterMsgStream b -> this.Recursive<'model, 'msg, objnull, objnull>(rootBinding, b.Binding)
 
 
 open System.Runtime.CompilerServices
 open System.Runtime.InteropServices
 
-type [<AllowNullLiteral>] ViewModelBase<'model, 'msg>(args: ViewModelArgs<'model, 'msg>)
+type ViewModelBase<'model, 'msg when 'model : not null and 'msg : not null>(args: ViewModelArgs<'model, 'msg>)
   as this =
 
   let mutable setBindings = Map.empty<String, VmBinding<'model, 'msg, obj>>

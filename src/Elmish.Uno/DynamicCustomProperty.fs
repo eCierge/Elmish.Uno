@@ -12,10 +12,10 @@ open Microsoft.UI.Xaml.Data;
 /// <typeparam name="value">Value type.</typeparam>
 type DynamicCustomProperty<'target, 'value> (
     name : string,
-    getter : Func<'target, 'value>,
-    [<Optional>] setter : Action<'target, 'value>,
-    [<Optional>] indexGetter : Func<'target, obj, 'value>,
-    [<Optional>] indexSetter : Action<'target, 'value, obj>
+    getter : Func<'target, 'value> | null,
+    [<Optional>] setter : Action<'target, 'value> | null,
+    [<Optional>] indexGetter : Func<'target, obj, 'value> | null,
+    [<Optional>] indexSetter : Action<'target, 'value, obj> | null
 ) =
 
   //new (
@@ -50,18 +50,18 @@ type DynamicCustomProperty<'target, 'value> (
 
     member _.GetValue (target : obj) =
       let target = target :?> 'target
-      match getter with null -> null | _ -> getter.Invoke target |> box
+      match getter with null -> null | getter -> getter.Invoke target |> box
     member _.SetValue (target : obj, value : obj) =
       let target = target :?> 'target
       let value = value :?> 'value
-      match setter with null -> () | _ -> setter.Invoke (target, value)
+      match setter with null -> () | setter -> setter.Invoke (target, value)
     member _.GetIndexedValue(target : obj, index : obj) =
       let target = target :?> 'target
-      match indexGetter with null -> null | _ -> indexGetter.Invoke(target, index) |> box
+      match indexGetter with null -> null | indexGetter -> indexGetter.Invoke(target, index) |> box
     member _.SetIndexedValue(target : obj, value : obj, index : obj) =
       let target = target :?> 'target
       let value = value :?> 'value
-      match indexSetter with null -> () | _ -> indexSetter.Invoke(target, value, index)
+      match indexSetter with null -> () | indexSetter -> indexSetter.Invoke(target, value, index)
 
     member _.CanRead = getter <> null || indexGetter <> null
     member _.CanWrite = setter <> null || indexSetter <> null
