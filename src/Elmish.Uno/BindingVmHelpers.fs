@@ -81,12 +81,12 @@ type OneWayToSourceBinding<'model, 'T> = {
   Set: 'T -> 'model -> unit
 }
 
-type OneWaySeqBinding<'model, 'T, 'aCollection, 'id when 'id : equality> = {
+type OneWaySeqBinding<'model, 'T, 'aCollection, 'id when 'id : equality and 'id : not null> = {
   OneWaySeqData: OneWaySeqData<'model, 'T, 'aCollection, 'id>
   Values: CollectionTarget<'T, 'aCollection>
 }
 
-type OneWaySeqGroupedBinding<'model, 'T, 'aCollection, 'id, 'key when 'id : equality and 'key : equality> = {
+type OneWaySeqGroupedBinding<'model, 'T, 'aCollection, 'id, 'key when 'id : equality and 'id : not null and 'key : equality and 'key : not null> = {
   OneWaySeqGroupedData: OneWaySeqGroupedData<'model, 'T, 'aCollection, 'id, 'key>
   Values: GroupedCollectionTarget<'T, 'aCollection, 'key>
 }
@@ -96,7 +96,7 @@ type TwoWayBinding<'model, 'T> = {
   Set: 'T -> 'model -> unit
 }
 
-type TwoWaySeqBinding<'model, 'msg, 'T, 'aCollection, 'id when 'id : equality> = {
+type TwoWaySeqBinding<'model, 'msg, 'T, 'aCollection, 'id when 'id : equality and 'id : not null> = {
   TwoWaySeqData: TwoWaySeqData<'model, 'msg, 'T, 'aCollection, 'id>
   Values: CollectionTarget<'T, 'aCollection>
   Update: NotifyCollectionChangedEventArgs -> 'model -> unit
@@ -131,7 +131,7 @@ type SubModelSeqUnkeyedBinding<'model, 'msg, 'bindingModel, 'bindingMsg, 'vm, 'v
     GetCurrentModel: unit -> 'model
   }
 
-type SubModelSeqKeyedBinding<'model, 'msg, 'bindingModel, 'bindingMsg, 'vm, 'vmCollection, 'id when 'id : equality> =
+type SubModelSeqKeyedBinding<'model, 'msg, 'bindingModel, 'bindingMsg, 'vm, 'vmCollection, 'id when 'id : equality and 'id : not null> =
   { SubModelSeqKeyedData: SubModelSeqKeyedData<'model, 'msg, 'bindingModel, 'bindingMsg, 'vm, 'vmCollection, 'id>
     Dispatch: 'msg -> unit
     Vms: CollectionTarget<'vm, 'vmCollection>
@@ -165,16 +165,16 @@ type SubModelSelectedItemBinding<'model, 'msg, 'bindingModel, 'bindingMsg, 'vm, 
 
 type BaseVmBinding<'model, 'msg, 't> =
   | OneWay of OneWayBinding<'model, 't>
-  | OneWaySeq of OneWaySeqBinding<'model, obj, 't, obj>
-  | OneWaySeqGrouped of OneWaySeqGroupedBinding<'model, obj, 't, obj, obj>
+  | OneWaySeq of OneWaySeqBinding<'model, objnull, 't, obj>
+  | OneWaySeqGrouped of OneWaySeqGroupedBinding<'model, objnull, 't, obj, obj>
   | TwoWay of TwoWayBinding<'model, 't>
-  | TwoWaySeq of TwoWaySeqBinding<'model, 'msg, obj, 't, obj>
+  | TwoWaySeq of TwoWaySeqBinding<'model, 'msg, objnull, 't, obj>
   | Cmd of cmd: Command
-  | SubModel of SubModelBinding<'model, 'msg, obj, obj, 't>
-  | SubModelWin of SubModelWinBinding<'model, 'msg, obj, obj, 't>
-  | SubModelSeqUnkeyed of SubModelSeqUnkeyedBinding<'model, 'msg, obj, obj, obj, 't>
-  | SubModelSeqKeyed of SubModelSeqKeyedBinding<'model, 'msg, obj, obj, obj, 't, obj>
-  | SubModelSelectedItem of SubModelSelectedItemBinding<'model, 'msg, obj, obj, 't, obj>
+  | SubModel of SubModelBinding<'model, 'msg, objnull, objnull, 't>
+  | SubModelWin of SubModelWinBinding<'model, 'msg, objnull, objnull, 't>
+  | SubModelSeqUnkeyed of SubModelSeqUnkeyedBinding<'model, 'msg, objnull, objnull, objnull, 't>
+  | SubModelSeqKeyed of SubModelSeqKeyedBinding<'model, 'msg, objnull, objnull, objnull, 't, obj>
+  | SubModelSelectedItem of SubModelSelectedItemBinding<'model, 'msg, objnull, objnull, 't, objnull>
 
 
 type CachedBinding<'model, 'msg, 't> = {
@@ -205,8 +205,8 @@ and VmBinding<'model, 'msg, 't> =
   | BaseVmBinding of BaseVmBinding<'model, 'msg, 't>
   | Cached of CachedBinding<'model, 'msg, 't>
   | Validatation of ValidationBinding<'model, 'msg, 't>
-  | Lazy of LazyBinding<'model, 'msg, obj, obj, 't>
-  | AlterMsgStream of AlterMsgStreamBinding<'model, obj, obj, 't>
+  | Lazy of LazyBinding<'model, 'msg, objnull, objnull, 't>
+  | AlterMsgStream of AlterMsgStreamBinding<'model, objnull, objnull, 't>
 
   with
 
@@ -326,17 +326,17 @@ module internal MapOutputType =
         Validate = b.Validate
       }
 
-  let boxVm b = recursiveCase box LanguagePrimitives.IntrinsicFunctions.UnboxFast b
+  let boxVm b : VmBinding<_, _, obj> = recursiveCase (fun vm -> vm :> obj) LanguagePrimitives.IntrinsicFunctions.UnboxFast b
   let unboxVm b = recursiveCase LanguagePrimitives.IntrinsicFunctions.UnboxFast box b
 
 type SubModelSelectedItemLast() =
 
-  member _.Base(data: BaseBindingData<'model, 'msg, obj>) : int =
+  member _.Base(data: BaseBindingData<'model, 'msg, objnull>) : int =
     match data with
     | SubModelSelectedItemData _ -> 1
     | _ -> 0
 
-  member this.Recursive<'model, 'msg>(data: BindingData<'model, 'msg, obj>) : int =
+  member this.Recursive<'model, 'msg>(data: BindingData<'model, 'msg, objnull>) : int =
     match data with
     | BaseBindingData d -> this.Base d
     | CachingData d -> this.Recursive d
@@ -344,7 +344,7 @@ type SubModelSelectedItemLast() =
     | LazyData d -> this.Recursive d.BindingData
     | AlterMsgStreamData d -> this.Recursive d.BindingData
 
-  member this.CompareBindingDatas() : BindingData<'model, 'msg, obj> -> BindingData<'model, 'msg, obj> -> int =
+  member this.CompareBindingDatas() : BindingData<'model, 'msg, objnull> -> BindingData<'model, 'msg, objnull> -> int =
     fun a b -> this.Recursive(a) - this.Recursive(b)
 
 
@@ -366,7 +366,7 @@ type FuncsFromSubModelSeqKeyed() =
   member _.Base(binding: BaseVmBinding<'model, 'msg, 't>) : SelectedItemBinding<'T, 'b, 'c, obj> option =
     match binding with
     | SubModelSeqKeyed b ->
-      { VmToId = box >> b.SubModelSeqKeyedData.VmToId
+      { VmToId = box >> nonNull >> b.SubModelSeqKeyedData.VmToId
         FromId = b.FromId >> Option.map unbox }
       |> Some
     | _ -> None
@@ -467,7 +467,7 @@ type Initialize<'t>
               let mutable vmWinState = WindowState.Closed
               { SubModelWinData = d
                 Dispatch = dispatch
-                WinRef = WeakReference<_>(null)
+                WinRef = WeakReference<Window>(nonNull null)
                 PreventClose = ref true
                 GetVmWinState = fun () -> vmWinState
                 SetVmWinState = fun vmState -> vmWinState <- vmState
@@ -477,7 +477,7 @@ type Initialize<'t>
               let chain = LoggingViewModelArgs.getNameChainFor nameChain name
               let args = ViewModelArgs.create m (toMsg >> dispatch) chain loggingArgs
               let vm = d.CreateViewModel args
-              let winRef = WeakReference<_>(null)
+              let winRef = WeakReference<Window>(nonNull null)
               let preventClose = ref true
               log.LogTrace("[{BindingNameChain}] Creating visible window", chain)
               Helpers2.showNewWindow winRef d.GetWindow d.OnCloseRequested preventClose vm getCurrentModel dispatch
@@ -559,22 +559,22 @@ type Initialize<'t>
           let! b = this.Recursive(initialModel, dispatch, getCurrentModel, d.BindingData)
           return b.AddValidation initialModel d.Validate
       | LazyData d ->
-          let initialModel' : obj = d.Get initialModel
-          let getCurrentModel' : unit -> obj = getCurrentModel >> d.Get
-          let dispatch' : obj -> unit = d.MapDispatch(getCurrentModel, dispatch)
+          let initialModel' : objnull = d.Get initialModel
+          let getCurrentModel' : unit -> objnull = getCurrentModel >> d.Get
+          let dispatch' : objnull -> unit = d.MapDispatch(getCurrentModel, dispatch)
           let d = d |> BindingData.Lazy.measureFunctions measure measure2 measure2
           let! b = this.Recursive(initialModel', dispatch', getCurrentModel', d.BindingData)
           return { Binding = b
-                   Get = d.Get
+                   Get = d.Get >> nonNull
                    Equals = d.Equals
                  } |> Lazy
       | AlterMsgStreamData d ->
-          let initialModel' : obj = d.Get initialModel
-          let getCurrentModel' : unit -> obj = getCurrentModel >> d.Get
-          let dispatch' : obj -> unit = d.MapDispatch(getCurrentModel, dispatch)
+          let initialModel' : objnull = d.Get initialModel
+          let getCurrentModel' : unit -> objnull = getCurrentModel >> d.Get
+          let dispatch' : objnull -> unit = d.MapDispatch(getCurrentModel, dispatch)
           let! b = this.Recursive(initialModel', dispatch', getCurrentModel', d.BindingData)
           return { Binding = b
-                   Get = d.Get
+                   Get = d.Get >> nonNull
                  } |> AlterMsgStream
     }
 
@@ -632,8 +632,9 @@ type Update<'t>
             | false, _ ->
                 log.LogError("[{BindingNameChain}] Attempted to close window, but did not find window reference", winPropChain)
             | true, w ->
+
                 log.LogTrace("[{BindingNameChain}] Closing window", winPropChain)
-                b.WinRef.SetTarget null
+                b.WinRef.SetTarget (nonNull null)
                 (*
                  * The Window might be in the process of closing,
                  * so instead of immediately executing Window.Close via DispatcherQueue.TryEnqueue,
@@ -641,7 +642,6 @@ type Update<'t>
                  * https://github.com/elmish/Elmish.WPF/issues/330
                  *)
                 w.DispatcherQueue.TryEnqueue(fun () -> w.Close()) |> ignore
-            b.WinRef.SetTarget null
 
           let showNew vm =
             b.PreventClose.Value <- true
@@ -756,7 +756,7 @@ type [<Struct>] Get<'t>(nameChain: string) =
                 | None -> // selecting failed
                     { NameChain = nameChain
                       SubModelSeqBindingName = binding.SubModelSeqBindingName
-                      Id = id.ToString() }
+                      Id = id.ToString() |> nonNull }
                     |> GetError.SubModelSelectedItem
                     |> Error
         b.TypedGet model
@@ -811,5 +811,5 @@ type [<Struct>] Set<'t>(value: 't) =
         // so don't clear the cache here
         this.Recursive<'model, 'msg>(model, b.Binding)
     | Validatation b -> this.Recursive<'model, 'msg>(model, b.Binding)
-    | Lazy b -> this.Recursive<obj, obj>(b.Get model, b.Binding)
-    | AlterMsgStream b -> this.Recursive<obj, obj>(b.Get model, b.Binding)
+    | Lazy b -> this.Recursive<objnull, objnull>(b.Get model, b.Binding)
+    | AlterMsgStream b -> this.Recursive<objnull, objnull>(b.Get model, b.Binding)

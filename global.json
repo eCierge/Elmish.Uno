@@ -3,7 +3,7 @@
     "allowPrerelease": false
   },
   "msbuild-sdks": {
-    "Uno.Sdk": "5.5.43",
+    "Uno.Sdk": "5.5.56",
     "Microsoft.Build.NoTargets": "3.7.56"
   }
 }

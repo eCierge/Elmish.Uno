@@ -1,4 +1,4 @@
-module Elmish.Uno.Tests.MergeTests
+﻿module Elmish.Uno.Tests.MergeTests
 
 open System
 open System.Collections.ObjectModel
@@ -251,9 +251,15 @@ let ``starting with two TestClass instances, when merging after removing the las
 
     merge getId getId createAsId updateNoOp (observableCollection |> CollectionTarget.create) array2
 
-    test <@ ((ccEvents
-      |> Seq.filter (fun e -> e.Action = NotifyCollectionChangedAction.Remove)
-      |> Seq.head).OldItems.[0] :?> TestClass).Id = tc2.Id @>
+    test <@
+      match
+        (ccEvents
+        |> Seq.filter (fun e -> e.Action = NotifyCollectionChangedAction.Remove)
+        |> Seq.head).OldItems
+      with
+      | null -> false
+      | oldItems -> (oldItems.[0] :?> TestClass).Id = tc2.Id
+    @>
   }
 
 [<Fact>]

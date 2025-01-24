@@ -14,13 +14,13 @@ open System.Reflection
 /// Returns a fast, untyped getter for the property specified by the PropertyInfo.
 /// The getter takes an instance and returns a property value.
 let buildUntypedGetter (propertyInfo: PropertyInfo) : obj -> obj =
-  let method = propertyInfo.GetMethod
+  let method = propertyInfo.GetMethod |> nonNull
   let objExpr = Expression.Parameter(typeof<obj>, "o")
   let expr =
     Expression.Lambda<Func<obj, obj>>(
       Expression.Convert(
         Expression.Call(
-          Expression.Convert(objExpr, method.DeclaringType), method),
+          Expression.Convert(objExpr, method.DeclaringType |> nonNull), method),
           typeof<obj>),
       objExpr)
   let action = expr.Compile()
@@ -41,7 +41,7 @@ type private ElmEq<'T>() =
     )
 
   static member Eq x1 x2 =
-    gettersAndEq |> Array.forall (fun (get, eq) -> eq (get (box x1), get (box x2)))
+    gettersAndEq |> Array.forall (fun (get, eq) -> eq (get (x1 :> obj), get (x2 :> obj)))
 
 
 /// Memberwise equality where value-typed members and string members are
@@ -52,5 +52,5 @@ type private ElmEq<'T>() =
 /// normally immutable. For a direct reference equality check (not memberwise),
 /// see refEq (which should be used when passing a single non-string reference
 /// type from the model).
-let elmEq<'T> : 'T -> 'T -> bool =
+let elmEq<'T when 'T : not null> : 'T -> 'T -> bool =
   ElmEq<'T>.Eq

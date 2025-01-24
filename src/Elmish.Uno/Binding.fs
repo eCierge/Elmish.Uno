@@ -205,19 +205,19 @@ module Binding =
     /// <param name="getId">Unique identifier for each item in the list (for efficient updates).</param>
     /// <param name="get">Returns the items to bind to.</param>
     /// <param name="getGrouppingKey">Returns the key to group the items by.</param>
-    let create<'a, 'item, 'id, 'msg when 'id : equality> get itemEquals (getId : 'item -> 'id) : string -> Binding<'a, 'msg, ObservableCollection<'item>> =
+    let create<'a, 'item, 'id, 'msg when 'id : equality and 'id : not null> get itemEquals (getId : 'item -> 'id) : string -> Binding<'a, 'msg, ObservableCollection<'item>> =
       OneWaySeq.create itemEquals getId
       |> BindingData.mapModel get
       |> createBindingT
 
     /// Elemental instance of a one-way-seq grouped binding.
-    let createGrouped<'a, 'item, 'id, 'grouppingKey, 'msg when 'id : equality and 'grouppingKey : equality>
+    let createGrouped<'a, 'item, 'id, 'groupingKey, 'msg when 'id : equality and 'id : not null and 'groupingKey : equality and 'groupingKey : not null>
       (get : 'a -> 'item seq)
       itemEquals
       (getId : 'item -> 'id)
-      (getGrouppingKey : 'item -> 'grouppingKey)
-      (compareGrouppingKeys : 'grouppingKey -> 'grouppingKey -> int)
-      : string -> Binding<'a, 'msg, ObservableLookup<'grouppingKey, 'item>>
+      (getGrouppingKey : 'item -> 'groupingKey)
+      (compareGrouppingKeys : ('groupingKey -> 'groupingKey -> int) voption)
+      : string -> Binding<'a, 'msg, ObservableLookup<'groupingKey, 'item>>
       =
       OneWaySeqGrouped.create itemEquals getId getGrouppingKey compareGrouppingKeys
       |> BindingData.mapModel get
@@ -231,7 +231,7 @@ module Binding =
   module TwoWaySeqT =
 
     /// Elemental instance of a one-way-seq binding.
-    let create<'model, 'item, 'id, 'msg when 'id : equality>
+    let create<'model, 'item, 'id, 'msg when 'id : equality and 'id : not null>
       (get : 'model -> seq<'item>)
       (itemEquals: 'item -> 'item -> bool)
       (getId : 'item -> 'id)
@@ -360,14 +360,14 @@ module Binding =
     /// automatically converts between a missing value in the model and
     /// a <c>null</c> value in the view.
     let opt<'a, 'msg> : string -> Binding<'a option, 'msg> =
-      id<obj, 'msg>
+      id<objnull, 'msg>
       >> mapModel Option.box
 
     /// Creates a one-way binding to an optional value. The binding
     /// automatically converts between a missing value in the model and
     /// a <c>null</c> value in the view.
     let vopt<'a, 'msg> : string -> Binding<'a voption, 'msg> =
-      id<obj, 'msg>
+      id<objnull, 'msg>
       >> mapModel ValueOption.box
 
 
@@ -382,7 +382,7 @@ module Binding =
     /// automatically converts between a missing value in the model and
     /// a <c>null</c> value in the view.
     let vopt<'a> : string -> Binding<'a voption, 'a voption> =
-      id<obj>
+      id<objnull>
       >> mapModel ValueOption.box
       >> mapMsg ValueOption.unbox
 
@@ -390,7 +390,7 @@ module Binding =
     /// automatically converts between a missing value in the model and
     /// a <c>null</c> value in the view.
     let opt<'a> : string -> Binding<'a option, 'a option> =
-      id<obj>
+      id<objnull>
       >> mapModel Option.box
       >> mapMsg Option.unbox
 
@@ -497,13 +497,6 @@ module Binding =
 
 
     let internal createGrouped get itemEquals getId getGrouppingKey compareKeys =
-      let compareKeys =
-        if obj.ReferenceEquals(compareKeys, Unchecked.defaultof<_>) then
-          let comparer = Comparer<'key>.Default
-          let compareKeys x y = comparer.Compare (x, y)
-          compareKeys
-        else
-          compareKeys
       OneWaySeqGrouped.create itemEquals getId getGrouppingKey compareKeys
       |> BindingData.mapModel get
       |> createBinding
@@ -975,8 +968,9 @@ type Binding private () =
        itemEquals: 'b -> 'b -> bool,
        getId: 'b -> 'id,
        getGrouppingKey: 'b -> 'key,
-       [<Optional>] compareKeys: 'key -> 'key -> int)
+       [<Optional>] compareKeys: ('key -> 'key -> int) | null)
       : string -> Binding<'model, 'msg> =
+    let compareKeys = compareKeys |> ValueOption.ofObj
     Binding.OneWaySeq.createGrouped map itemEquals getId getGrouppingKey compareKeys
     >> Binding.addLazy equals
     >> Binding.mapModel get
@@ -1031,8 +1025,9 @@ type Binding private () =
        itemEquals: 'a -> 'a -> bool,
        getId: 'a -> 'id,
        getGrouppingKey: 'a -> 'key,
-       [<Optional>] compareKeys: 'key -> 'key -> int)
+       [<Optional>] compareKeys: ('key -> 'key -> int) | null)
       : string -> Binding<'model, 'msg> =
+    let compareKeys = compareKeys |> ValueOption.ofObj
     Binding.OneWaySeq.createGrouped id itemEquals getId getGrouppingKey compareKeys
     >> Binding.addLazy refEq
     >> Binding.mapModel get
@@ -1555,7 +1550,7 @@ type Binding private () =
   /// </summary>
   /// <param name="exec">Returns the message to dispatch.</param>
   static member cmdParam
-      (exec: obj -> 'model -> 'msg)
+      (exec: objnull -> 'model -> 'msg)
       : string -> Binding<'model, 'msg> =
     Binding.Cmd.createWithParam
       (fun p model -> exec p model |> ValueSome)
@@ -1569,8 +1564,8 @@ type Binding private () =
   /// <param name="exec">Returns the message to dispatch.</param>
   /// <param name="canExec">Indicates whether the command can execute.</param>
   static member cmdParamIf
-      (exec: obj -> 'model -> 'msg,
-       canExec: obj -> 'model -> bool)
+      (exec: objnull -> 'model -> 'msg,
+       canExec: objnull -> 'model -> bool)
       : string -> Binding<'model, 'msg> =
     Binding.Cmd.createWithParam
       (fun p m -> exec p m |> ValueSome)
@@ -1583,7 +1578,7 @@ type Binding private () =
   /// </summary>
   /// <param name="exec">Returns the message to dispatch.</param>
   static member cmdParamIf
-      (exec: obj -> 'model -> 'msg voption)
+      (exec: objnull -> 'model -> 'msg voption)
       : string -> Binding<'model, 'msg> =
     Binding.Cmd.createWithParam
       exec
@@ -1596,7 +1591,7 @@ type Binding private () =
   /// </summary>
   /// <param name="exec">Returns the message to dispatch.</param>
   static member cmdParamIf
-      (exec: obj -> 'model -> 'msg option)
+      (exec: objnull -> 'model -> 'msg option)
       : string -> Binding<'model, 'msg> =
     Binding.Cmd.createWithParam
       (fun p m -> exec p m |> ValueOption.ofOption)
@@ -1612,7 +1607,7 @@ type Binding private () =
   /// </summary>
   /// <param name="exec">Returns the message to dispatch.</param>
   static member cmdParamIf
-      (exec: obj -> 'model -> Result<'msg, 'ignored>)
+      (exec: objnull -> 'model -> Result<'msg, 'ignored>)
       : string -> Binding<'model, 'msg> =
     Binding.Cmd.createWithParam
       (fun p m -> exec p m |> ValueOption.ofOk)
@@ -2692,7 +2687,7 @@ module Extensions =
     /// </summary>
     /// <param name="exec">Returns the message to dispatch.</param>
     static member cmdParam
-        (exec: obj -> 'msg)
+        (exec: objnull -> 'msg)
         : string -> Binding<'model, 'msg> =
       Binding.Cmd.createWithParam
         (fun p _ -> exec p |> ValueSome)
@@ -2706,7 +2701,7 @@ module Extensions =
     /// </summary>
     /// <param name="exec">Returns the message to dispatch.</param>
     static member cmdParamIf
-        (exec: obj -> 'msg voption)
+        (exec: objnull -> 'msg voption)
         : string -> Binding<'model, 'msg> =
       Binding.Cmd.createWithParam
         (fun p _ -> exec p)
@@ -2719,7 +2714,7 @@ module Extensions =
     /// </summary>
     /// <param name="exec">Returns the message to dispatch.</param>
     static member cmdParamIf
-        (exec: obj -> 'msg option)
+        (exec: objnull -> 'msg option)
         : string -> Binding<'model, 'msg> =
       Binding.Cmd.createWithParam
         (fun p _ -> exec p |> ValueOption.ofOption)
@@ -2735,7 +2730,7 @@ module Extensions =
     /// </summary>
     /// <param name="exec">Returns the message to dispatch.</param>
     static member cmdParamIf
-        (exec: obj -> Result<'msg, 'ignored>)
+        (exec: objnull -> Result<'msg, 'ignored>)
         : string -> Binding<'model, 'msg> =
       Binding.Cmd.createWithParam
         (fun p _ -> exec p |> ValueOption.ofOk)
@@ -2749,8 +2744,8 @@ module Extensions =
     /// <param name="exec">Returns the message to dispatch.</param>
     /// <param name="canExec">Indicates whether the command can execute.</param>
     static member cmdParamIf
-        (exec: obj -> 'msg,
-         canExec: obj -> bool)
+        (exec: objnull -> 'msg,
+         canExec: objnull -> bool)
         : string -> Binding<'model, 'msg> =
       Binding.Cmd.createWithParam
         (fun p _ -> exec p |> ValueSome)
